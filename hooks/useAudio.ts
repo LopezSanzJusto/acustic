@@ -59,9 +59,18 @@ export function useAudio() {
 
   const playPointAudio = async (id: number) => {
     if (activeSoundId === id && isPlaying) return;
+    
     const sound = soundsLoaded.current[id];
+    
+    // VALIDACIÓN DE SEGURIDAD
     if (sound) {
       try {
+        const status = await sound.getStatusAsync();
+        if (!status.isLoaded) {
+          console.log(`⏳ Audio ${id} aún cargando...`);
+          return; 
+        }
+
         await stopAll(); 
         currentSoundRef.current = sound;
         setActiveSoundId(id);

@@ -20,11 +20,18 @@ export const useLocation = (simulateWeb = false) => {
       let interval: any; 
 
       const path: Coords[] = [
-        { latitude: 40.4160, longitude: -3.7050 }, 
-        { latitude: 40.4167, longitude: -3.7039 }, 
-        { latitude: 40.4169, longitude: -3.7037 }, 
-        { latitude: 40.4164, longitude: -3.7042 }, 
-        { latitude: 40.4175, longitude: -3.7020 }, 
+        { latitude: 40.4167, longitude: -3.7037 }, // PUNTO A
+        { latitude: 40.4164, longitude: -3.7035 }, // Repetimos para asegurar detección
+        
+        { latitude: 40.4173, longitude: -3.7031 }, // Punto intermedio (Camino a B)
+
+        { latitude: 40.41755, longitude: -3.7023 }, // PUNTO B
+        { latitude: 40.4175, longitude: -3.7017 }, // Repetimos para asegurar detección
+        
+        { latitude: 40.4170, longitude: -3.7035 }, // Punto intermedio (Camino a C)
+
+        { latitude: 40.41602, longitude: -3.70454 }, // PUNTO C
+        { latitude: 40.41607, longitude: -3.70448 }  // Repetimos para asegurar detección
       ];
 
       setLocation(path[0]);

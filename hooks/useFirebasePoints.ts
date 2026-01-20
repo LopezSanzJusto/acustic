@@ -22,7 +22,6 @@ export function useFirebasePoints() {
             name: data.name,
             latitude: data.latitude,
             longitude: data.longitude,
-            // Por ahora usamos el nombre del archivo, luego usaremos URL de Storage
             audio: data.audio 
           } as PointOfInterest);
         });
