@@ -2,84 +2,110 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Audio, AVPlaybackStatus } from "expo-av";
-import { useFirebasePoints } from "./useFirebasePoints"; // Importante: usar tus puntos de la nube
+import { PointOfInterest } from "../data/points";
 
-export function useAudio() {
-  const { points, loading: pointsLoading } = useFirebasePoints();
-  const soundsLoaded = useRef<Record<number, Audio.Sound>>({});
+type LoadedSounds = Record<number, Audio.Sound>;
+
+export function useAudio(points: PointOfInterest[]) {
+  const soundsLoaded = useRef<LoadedSounds>({});
+  const currentSoundRef = useRef<Audio.Sound | null>(null);
+
   const [activeSoundId, setActiveSoundId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPreloading, setIsPreloading] = useState(true);
-  const currentSoundRef = useRef<Audio.Sound | null>(null);
 
+  // 🎧 Precarga de audios
   useEffect(() => {
-    async function preloadRemoteAudios() {
-      if (points.length === 0) return;
+    if (points.length === 0) {
+      setIsPreloading(false);
+      return;
+    }
 
-      console.log("🌐 Descargando audios desde el servidor remoto...");
+    let isCancelled = false;
+
+    async function preloadAudios() {
+      setIsPreloading(true);
+
       for (const point of points) {
+        if (soundsLoaded.current[point.id]) continue;
+
         try {
-          // CLAVE: Usamos { uri: ... } para cargar desde la URL de GitHub/Internet
           const { sound } = await Audio.Sound.createAsync(
-            { uri: point.audio }, 
+            { uri: point.audio },
             { shouldPlay: false }
           );
-          
+
           sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
-            if (status.isLoaded && soundsLoaded.current[point.id] === currentSoundRef.current) {
+            if (
+              status.isLoaded &&
+              currentSoundRef.current === sound
+            ) {
               setIsPlaying(status.isPlaying);
             }
           });
 
           soundsLoaded.current[point.id] = sound;
-        } catch (e) {
-          console.error(`❌ Error cargando audio de ${point.name}:`, e);
+        } catch (error) {
+          console.error(`❌ Error cargando audio (${point.name})`, error);
         }
       }
-      setIsPreloading(false);
-    }
 
-    if (!pointsLoading) {
-      preloadRemoteAudios();
-    }
-  }, [points, pointsLoading]);
-
-  const stopAll = async () => {
-    for (const id in soundsLoaded.current) {
-      const s = soundsLoaded.current[id];
-      if (s) {
-        await s.stopAsync();
-        await s.setPositionAsync(0);
+      if (!isCancelled) {
+        setIsPreloading(false);
       }
     }
-    currentSoundRef.current = null;
-    setIsPlaying(false);
-    setActiveSoundId(null);
-  };
 
+    preloadAudios();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [points]);
+
+  // ▶️ Reproducir audio por ID
   const playPointAudio = async (id: number) => {
     if (activeSoundId === id && isPlaying) return;
-    
-    const sound = soundsLoaded.current[id];
-    
-    // VALIDACIÓN DE SEGURIDAD
-    if (sound) {
-      try {
-        const status = await sound.getStatusAsync();
-        if (!status.isLoaded) {
-          console.log(`⏳ Audio ${id} aún cargando...`);
-          return; 
-        }
 
-        await stopAll(); 
-        currentSoundRef.current = sound;
-        setActiveSoundId(id);
-        await sound.playAsync();
-      } catch (e) {
-        console.error("Error en reproducción remota:", e);
-      }
+    const sound = soundsLoaded.current[id];
+    if (!sound) return;
+
+    try {
+      await stopAll();
+      currentSoundRef.current = sound;
+      setActiveSoundId(id);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("❌ Error reproduciendo audio:", error);
     }
   };
 
-  return { playPointAudio, stopAll, isPlaying, isPreloading };
+  // ⏹️ Detener todo
+  const stopAll = async () => {
+    for (const sound of Object.values(soundsLoaded.current)) {
+      try {
+        await sound.stopAsync();
+        await sound.setPositionAsync(0);
+      } catch {}
+    }
+
+    currentSoundRef.current = null;
+    setActiveSoundId(null);
+    setIsPlaying(false);
+  };
+
+  // 🧹 Cleanup total
+  useEffect(() => {
+    return () => {
+      Object.values(soundsLoaded.current).forEach((sound) => {
+        sound.unloadAsync();
+      });
+    };
+  }, []);
+
+  return {
+    playPointAudio,
+    stopAll,
+    isPlaying,
+    isPreloading,
+  };
 }

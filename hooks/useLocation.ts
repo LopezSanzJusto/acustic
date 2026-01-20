@@ -20,8 +20,10 @@ export const useLocation = (simulateWeb = false) => {
       let interval: any; 
 
       const path: Coords[] = [
+        { latitude: 40.4173, longitude: -3.7031 }, // Punto inicial (fuera de todo)
+
         { latitude: 40.4167, longitude: -3.7037 }, // PUNTO A
-        { latitude: 40.4164, longitude: -3.7035 }, // Repetimos para asegurar detección
+        { latitude: 40.4167, longitude: -3.7035 }, // Repetimos para asegurar detección
         
         { latitude: 40.4173, longitude: -3.7031 }, // Punto intermedio (Camino a B)
 

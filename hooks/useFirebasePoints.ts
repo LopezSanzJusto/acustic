@@ -17,12 +17,12 @@ export function useFirebasePoints() {
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          pointsArray.push({
-            id: data.id,
-            name: data.name,
-            latitude: data.latitude,
-            longitude: data.longitude,
-            audio: data.audio 
+          pointsArray.push({ // Forzamos conversiones 
+            id: Number(data.id), 
+            name: String(data.name),
+            latitude: Number(data.latitude),
+            longitude: Number(data.longitude),
+            audio: String(data.audio) 
           } as PointOfInterest);
         });
 

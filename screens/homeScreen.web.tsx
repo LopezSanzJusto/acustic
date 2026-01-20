@@ -1,3 +1,5 @@
+// screens/homeScreen.web.tsx
+
 import React from "react";
 import { View, Text, StyleSheet, Linking, TouchableOpacity, ScrollView, Image } from "react-native";
 
