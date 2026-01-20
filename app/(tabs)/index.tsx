@@ -1,5 +1,5 @@
 import React from "react";
-import HomeScreen from "../../screens/homeScreen"; // Ajusta la ruta según dónde tengas HomeScreen
+import HomeScreen from "../../screens/homeScreen";
 
 export default function Index() {
   return <HomeScreen />;

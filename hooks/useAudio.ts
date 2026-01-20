@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Audio, AVPlaybackStatus } from "expo-av";
-import { POINTS } from "../data/points";
+import { useFirebasePoints } from "./useFirebasePoints"; // Importante: usar tus puntos de la nube
 
 export function useAudio() {
+  const { points, loading: pointsLoading } = useFirebasePoints();
   const soundsLoaded = useRef<Record<number, Audio.Sound>>({});
   const [activeSoundId, setActiveSoundId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -12,11 +13,17 @@ export function useAudio() {
   const currentSoundRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
-    async function preloadAll() {
-      console.log("📥 Precargando audios locales...");
-      for (const point of POINTS) {
+    async function preloadRemoteAudios() {
+      if (points.length === 0) return;
+
+      console.log("🌐 Descargando audios desde el servidor remoto...");
+      for (const point of points) {
         try {
-          const { sound } = await Audio.Sound.createAsync(point.audio);
+          // CLAVE: Usamos { uri: ... } para cargar desde la URL de GitHub/Internet
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: point.audio }, 
+            { shouldPlay: false }
+          );
           
           sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
             if (status.isLoaded && soundsLoaded.current[point.id] === currentSoundRef.current) {
@@ -26,17 +33,16 @@ export function useAudio() {
 
           soundsLoaded.current[point.id] = sound;
         } catch (e) {
-          console.error(`❌ Error cargando localmente ${point.name}:`, e);
+          console.error(`❌ Error cargando audio de ${point.name}:`, e);
         }
       }
       setIsPreloading(false);
     }
-    preloadAll();
 
-    return () => {
-      Object.values(soundsLoaded.current).forEach(s => s.unloadAsync());
-    };
-  }, []);
+    if (!pointsLoading) {
+      preloadRemoteAudios();
+    }
+  }, [points, pointsLoading]);
 
   const stopAll = async () => {
     for (const id in soundsLoaded.current) {
@@ -61,7 +67,7 @@ export function useAudio() {
         setActiveSoundId(id);
         await sound.playAsync();
       } catch (e) {
-        console.error("Error playPointAudio:", e);
+        console.error("Error en reproducción remota:", e);
       }
     }
   };
