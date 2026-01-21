@@ -1,78 +1,95 @@
 // screens/homeScreen.native.tsx
 
 import React, { useEffect, useMemo } from "react";
-import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
-import { useAudio } from "../hooks/useAudio";
+import { View, StyleSheet } from "react-native";
 import { useLocation } from "../hooks/useLocation";
 import { useFirebasePoints } from "../hooks/useFirebasePoints";
+import { useAudio } from "../hooks/useAudio";
 import { isWithinRadius } from "../services/proximityService";
 import { MapDisplay } from "../components/mapDisplay";
-import { InfoPanel } from "../components/infoPanel";
-import { PointOfInterest } from '../data/points';
+import { AudioMiniPlayer } from "../components/audioMiniPlayer";
+import { PointOfInterest } from "../data/points";
 
 const RADIUS = 30;
 
 export default function HomeScreen() {
   const { location } = useLocation(true);
   const { points, loading: pointsLoading } = useFirebasePoints();
-  const { playPointAudio, stopAll, isPlaying, isPreloading } = useAudio(points);
 
+  const {
+    activePoint,
+    isPlaying,
+    isPreloading,
+    positionMillis,
+    durationMillis,
+    setActivePointIndex,
+    togglePlayPause,
+    playNext,
+    playPrevious,
+    seekTo,
+    skipBy,
+  } = useAudio(points);
 
-  const activePoint = useMemo(() => {
+  /* =========================
+   * 📍 Punto activo por GPS
+   * ========================= */
+  const gpsActivePoint = useMemo(() => {
     if (!location || points.length === 0) return null;
-    
-    const found = points.find((p: PointOfInterest) =>
-      isWithinRadius(location, { latitude: p.latitude, longitude: p.longitude }, RADIUS)
-    );
 
-    return found ? found : null;
+    return (
+      points.find((p: PointOfInterest) =>
+        isWithinRadius(
+          location,
+          { latitude: p.latitude, longitude: p.longitude },
+          RADIUS
+        )
+      ) || null
+    );
   }, [location, points]);
 
-  // 🔥 SOLUCIÓN AL PUNTO A: 
-  // Añadimos isPreloading y pointsLoading a las dependencias.
+  /* =========================
+   * 🔁 Sincronizar GPS → Audio
+   * ========================= */
   useEffect(() => {
-    const handleAudio = async () => {
-      // Si el sistema está cargando, esperamos. 
-      // Cuando isPreloading pase a false, este efecto se disparará de nuevo automáticamente.
-      if (isPreloading || pointsLoading) return;
+    if (isPreloading || pointsLoading) return;
 
-      if (activePoint) {
-        await playPointAudio(activePoint.id);
-      } else {
-        await stopAll();
-      }
-    };
+    // 🚫 Hemos salido de cualquier punto
+    if (!gpsActivePoint) {
+      setActivePointIndex(null);
+      return;
+    }
 
-    handleAudio();
-  }, [activePoint?.id, isPreloading, pointsLoading]); 
-
-  if (pointsLoading || isPreloading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0066CC" />
-        <Text style={styles.loadingText}>Sincronizando sistema...</Text>
-      </View>
-    );
-  }
+    // ✅ Hemos entrado en un punto
+    const index = points.findIndex(p => p.id === gpsActivePoint.id);
+    if (index !== -1) {
+      setActivePointIndex(index);
+    }
+  }, [gpsActivePoint?.id, isPreloading, pointsLoading]);
 
   return (
     <View style={styles.container}>
-      <View style={{ height: "75%" }}>
+      <View style={{ flex: 1, position: "relative" }}>
         <MapDisplay location={location} points={points} radius={RADIUS} />
+
+        {activePoint && (
+          <AudioMiniPlayer
+            activePoint={activePoint}
+            isPlaying={isPlaying}
+            positionMillis={positionMillis}
+            durationMillis={durationMillis}
+            onPlayPause={togglePlayPause}
+            onNext={playNext}
+            onPrevious={playPrevious}
+            onSeek={seekTo}
+            onSkip={skipBy}
+          />
+        )}
       </View>
-      {/* Pasamos 'points' también para poder calcular distancias dentro */}
-      <InfoPanel 
-        activePoint={activePoint} 
-        isPlaying={isPlaying} 
-        location={location}
-        points={points} 
-      />
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8F9FA" },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 10, color: "#666" }
 });

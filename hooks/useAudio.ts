@@ -1,7 +1,5 @@
-// hooks/useAudio.ts
-
 import { useEffect, useRef, useState } from "react";
-import { Audio, AVPlaybackStatus } from "expo-av";
+import { Audio } from "expo-av";
 import { PointOfInterest } from "../data/points";
 
 type LoadedSounds = Record<number, Audio.Sound>;
@@ -10,76 +8,133 @@ export function useAudio(points: PointOfInterest[]) {
   const soundsLoaded = useRef<LoadedSounds>({});
   const currentSoundRef = useRef<Audio.Sound | null>(null);
 
-  const [activeSoundId, setActiveSoundId] = useState<number | null>(null);
+  const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPreloading, setIsPreloading] = useState(true);
 
-  // 🎧 Precarga de audios
+  const [positionMillis, setPositionMillis] = useState(0);
+  const [durationMillis, setDurationMillis] = useState(0);
+
+  const activePoint =
+    activePointIndex !== null ? points[activePointIndex] : null;
+
+  /* =========================
+   * 🎧 PRELOAD AUDIOS
+   * ========================= */
   useEffect(() => {
-    if (points.length === 0) {
-      setIsPreloading(false);
-      return;
-    }
+    let cancelled = false;
 
-    let isCancelled = false;
-
-    async function preloadAudios() {
+    const preload = async () => {
       setIsPreloading(true);
+      const loaded: LoadedSounds = {};
 
       for (const point of points) {
-        if (soundsLoaded.current[point.id]) continue;
-
         try {
           const { sound } = await Audio.Sound.createAsync(
             { uri: point.audio },
             { shouldPlay: false }
           );
-
-          sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
-            if (
-              status.isLoaded &&
-              currentSoundRef.current === sound
-            ) {
-              setIsPlaying(status.isPlaying);
-            }
-          });
-
-          soundsLoaded.current[point.id] = sound;
-        } catch (error) {
-          console.error(`❌ Error cargando audio (${point.name})`, error);
+          loaded[point.id] = sound;
+        } catch (e) {
+          console.warn("Error cargando audio:", point.id);
         }
       }
 
-      if (!isCancelled) {
+      if (!cancelled) {
+        soundsLoaded.current = loaded;
         setIsPreloading(false);
       }
+    };
+
+    if (points.length > 0) {
+      preload();
+    } else {
+      setIsPreloading(false);
     }
 
-    preloadAudios();
-
     return () => {
-      isCancelled = true;
+      cancelled = true;
+      Object.values(soundsLoaded.current).forEach((s) => s.unloadAsync());
+      soundsLoaded.current = {};
     };
   }, [points]);
 
-  // ▶️ Reproducir audio por ID
-  const playPointAudio = async (id: number) => {
-    if (activeSoundId === id && isPlaying) return;
+  /* =========================
+   * ▶️ CAMBIO DE PUNTO
+   * ========================= */
+  useEffect(() => {
+    if (activePointIndex === null) {
+      stopAll();
+      setPositionMillis(0);
+      setDurationMillis(0);
+      return;
+    }
 
-    const sound = soundsLoaded.current[id];
+    const point = points[activePointIndex];
+    const sound = soundsLoaded.current[point.id];
     if (!sound) return;
 
-    try {
+    const play = async () => {
       await stopAll();
       currentSoundRef.current = sound;
-      setActiveSoundId(id);
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.isLoaded) return;
+
+        setIsPlaying(status.isPlaying);
+        setPositionMillis(status.positionMillis ?? 0);
+        setDurationMillis(status.durationMillis ?? 0);
+      });
+
       await sound.playAsync();
-    } catch (error) {
-      console.error("❌ Error reproduciendo audio:", error);
-    }
+    };
+
+    play();
+  }, [activePointIndex]);
+
+  /* =========================
+   * ⏯️ CONTROLES
+   * ========================= */
+  const togglePlayPause = async () => {
+    const sound = currentSoundRef.current;
+    if (!sound) return;
+
+    const status = await sound.getStatusAsync();
+    if (!status.isLoaded) return;
+
+    status.isPlaying ? await sound.pauseAsync() : await sound.playAsync();
   };
 
-  // ⏹️ Detener todo
+  const seekTo = async (millis: number) => {
+    const sound = currentSoundRef.current;
+    if (!sound) return;
+    await sound.setPositionAsync(millis);
+  };
+
+  const skipBy = async (millis: number) => {
+    const sound = currentSoundRef.current;
+    if (!sound) return;
+
+    const newPos = Math.max(
+      0,
+      Math.min(positionMillis + millis, durationMillis)
+    );
+
+    await sound.setPositionAsync(newPos);
+  };
+
+  const playNext = () => {
+    if (activePointIndex === null || points.length === 0) return;
+    setActivePointIndex((activePointIndex + 1) % points.length);
+  };
+
+  const playPrevious = () => {
+    if (activePointIndex === null || points.length === 0) return;
+    setActivePointIndex(
+      (activePointIndex - 1 + points.length) % points.length
+    );
+  };
+
   const stopAll = async () => {
     for (const sound of Object.values(soundsLoaded.current)) {
       try {
@@ -87,25 +142,21 @@ export function useAudio(points: PointOfInterest[]) {
         await sound.setPositionAsync(0);
       } catch {}
     }
-
     currentSoundRef.current = null;
-    setActiveSoundId(null);
     setIsPlaying(false);
   };
 
-  // 🧹 Cleanup total
-  useEffect(() => {
-    return () => {
-      Object.values(soundsLoaded.current).forEach((sound) => {
-        sound.unloadAsync();
-      });
-    };
-  }, []);
-
   return {
-    playPointAudio,
-    stopAll,
+    activePoint,
     isPlaying,
     isPreloading,
+    positionMillis,
+    durationMillis,
+    setActivePointIndex,
+    togglePlayPause,
+    playNext,
+    playPrevious,
+    seekTo,
+    skipBy,
   };
 }
