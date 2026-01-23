@@ -1,6 +1,5 @@
-import React from "react";
-import HomeScreen from "../../screens/homeScreen";
+import ExploreScreen from '../../screens/exploreScreen';
 
 export default function Index() {
-  return <HomeScreen />;
+  return <ExploreScreen />;
 }
