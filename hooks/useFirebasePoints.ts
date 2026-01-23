@@ -1,41 +1,47 @@
-// hooks/useFirebasePoints.ts
-
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore'; 
 import { db } from '../services/firebaseConfig';
 import { PointOfInterest } from '../data/points';
 
-export function useFirebasePoints() {
+export function useFirebasePoints(tourId: string) { 
   const [points, setPoints] = useState<PointOfInterest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPoints() {
+      if (!tourId) return; 
+
       try {
-        const querySnapshot = await getDocs(collection(db, "points"));
+        // Accedemos a la ruta: tours -> {tourId} -> points
+        const pointsRef = collection(db, "tours", tourId, "points");
+        // Ordenamos por el campo 'order' que configuraste en Firestore
+        const q = query(pointsRef, orderBy("order", "asc")); 
+        
+        const querySnapshot = await getDocs(q);
         const pointsArray: PointOfInterest[] = [];
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          pointsArray.push({ // Forzamos conversiones 
-            id: Number(data.id), 
+          pointsArray.push({
+            id: doc.id, 
             name: String(data.name),
             latitude: Number(data.latitude),
             longitude: Number(data.longitude),
-            audio: String(data.audio) 
-          } as PointOfInterest);
+            audio: String(data.audioUrl), // Mapeamos audioUrl de Firestore a 'audio'
+            image: String(data.imageUrl)
+          } as unknown as PointOfInterest);
         });
 
         setPoints(pointsArray);
       } catch (error) {
-        console.error("Error cargando puntos desde Firebase:", error);
+        console.error("Error cargando puntos:", error);
       } finally {
         setLoading(false);
       }
     }
 
     fetchPoints();
-  }, []);
+  }, [tourId]); 
 
   return { points, loading };
 }

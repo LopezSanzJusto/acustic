@@ -1,64 +1,74 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Para los iconos de duración, km, etc.
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-interface TourCardProps {
-  tour: {
-    title: string;
-    city: string;
-    country: string;
-    price: string; // "4.95€" o "Gratis"
-    duration: string;
-    distance: string;
-    audioCount: number;
-    rating: number;
-    reviews: number;
-    image: string;
-    category: string;
+const { width } = Dimensions.get('window');
+const CARD_MARGIN = 15;
+const IMG_WIDTH = width - (CARD_MARGIN * 2);
+
+export const TourCard = ({ tour, onPress }: any) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Usamos el array de Firestore o el fallback de la imagen única
+  const images = (tour.imageUrls && Array.isArray(tour.imageUrls)) ? tour.imageUrls : [tour.image];
+
+  const handleScroll = (event: any) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const index = Math.round(scrollPosition / IMG_WIDTH);
+    setActiveIndex(index);
   };
-  onPress: () => void;
-}
 
-export const TourCard = ({ tour, onPress }: TourCardProps) => {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
-      {/* Sección de Imagen */}
+    <View style={styles.card}>
+      {/* SECCIÓN DE IMAGEN: Independiente para permitir el scroll */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: tour.image }} style={styles.image} />
+        <FlatList
+          data={images}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          snapToAlignment="center"
+          snapToInterval={IMG_WIDTH}
+          decelerationRate="fast"
+          scrollEventThrottle={16}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ item }) => (
+            <Pressable onPress={onPress}>
+              <Image source={{ uri: item }} style={styles.image} />
+            </Pressable>
+          )}
+        />
         
-        {/* Etiqueta de Precio [cite: 35] */}
-        <View style={[styles.badge, tour.price === 'Gratis' ? styles.freeBadge : styles.priceBadge]}>
-          <Text style={styles.badgeText}>{tour.price}</Text>
+        {/* Indicadores de puntos (Dots) */}
+        <View style={styles.sliderDots}>
+          {images.map((_: any, i: number) => (
+            <View 
+              key={i} 
+              style={[styles.dot, activeIndex === i ? styles.activeDot : styles.inactiveDot]} 
+            />
+          ))}
         </View>
 
-        {/* Botón Intro Overlay */}
-        <TouchableOpacity style={styles.introButton}>
-          <Ionicons name="play-circle" size={18} color="#FFF" />
-          <Text style={styles.introText}>Intro</Text>
-        </TouchableOpacity>
-
-        {/* Indicador de Slider (Puntos) */}
-        <View style={styles.sliderDots}>
-          {[1, 2, 3, 4].map((_, i) => (
-            <View key={i} style={[styles.dot, i === 0 && styles.activeDot]} />
-          ))}
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{tour.price === 0 ? "Gratis" : `${tour.price}€`}</Text>
         </View>
       </View>
 
-      {/* Sección de Información */}
-      <View style={styles.infoContainer}>
+      {/* SECCIÓN DE INFO: Con el evento onPress */}
+      <TouchableOpacity style={styles.infoContainer} onPress={onPress} activeOpacity={0.8}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>{tour.title}</Text>
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={14} color="#FFD700" />
-            <Text style={styles.ratingText}>{tour.rating} ({tour.reviews})</Text>
+            <Text style={styles.ratingText}>{tour.rating} (18)</Text>
           </View>
         </View>
 
         <View style={styles.detailsRow}>
           <View style={styles.detailItem}>
             <Ionicons name="location-sharp" size={14} color="#FF4D4D" />
-            <Text style={styles.detailText}>{tour.city}, {tour.country}</Text>
+            <Text style={styles.detailText}>{tour.city}, {tour.country || 'España'}</Text>
           </View>
           
           <View style={styles.statsRow}>
@@ -72,71 +82,27 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
             </View>
             <View style={styles.detailItem}>
               <Ionicons name="musical-notes-outline" size={14} color="#666" />
-              <Text style={styles.detailText}>{tour.audioCount}</Text>
+              <Text style={styles.detailText}>{tour.numPoints || 0}</Text>
             </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    overflow: 'hidden',
-    marginHorizontal: 15,
-  },
-  imageContainer: {
-    height: 180,
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  badge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderBottomRightRadius: 15,
-  },
-  priceBadge: { backgroundColor: '#FFA500' },
-  freeBadge: { backgroundColor: '#32CD32' },
+  card: { backgroundColor: '#FFF', borderRadius: 20, marginBottom: 20, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, overflow: 'hidden', marginHorizontal: CARD_MARGIN },
+  imageContainer: { height: 200, position: 'relative' },
+  image: { width: IMG_WIDTH, height: 200, resizeMode: 'cover' },
+  badge: { position: 'absolute', top: 0, left: 0, paddingHorizontal: 15, paddingVertical: 5, borderBottomRightRadius: 15, backgroundColor: '#FFA500' },
   badgeText: { color: '#FFF', fontWeight: 'bold' },
-  introButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    backgroundColor: 'rgba(106, 90, 205, 0.8)', // Color púrpura del diseño
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  introText: { color: '#FFF', fontSize: 12, marginLeft: 4 },
-  sliderDots: {
-    position: 'absolute',
-    bottom: 10,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 5,
-  },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.5)' },
-  activeDot: { backgroundColor: '#FFF', width: 12 },
+  sliderDots: { position: 'absolute', bottom: 15, width: '100%', flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  dot: { height: 6, borderRadius: 3 },
+  activeDot: { backgroundColor: '#FFF', width: 16 },
+  inactiveDot: { backgroundColor: 'rgba(255,255,255,0.5)', width: 6 },
   infoContainer: { padding: 15 },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  titleRow: { flexDirection: 'row', justifyContent: 'space-between' },
   title: { fontSize: 16, fontWeight: 'bold', color: '#4B0082' },
   ratingRow: { flexDirection: 'row', alignItems: 'center' },
   ratingText: { fontSize: 12, marginLeft: 3, color: '#666' },
