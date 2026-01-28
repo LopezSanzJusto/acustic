@@ -1,8 +1,10 @@
+// hooks/useAudio.ts
+
 import { useEffect, useRef, useState } from "react";
 import { Audio } from "expo-av";
 import { PointOfInterest } from "../data/points";
 
-type LoadedSounds = Record<number, Audio.Sound>;
+type LoadedSounds = Record<string, Audio.Sound>;
 
 export function useAudio(points: PointOfInterest[]) {
   const soundsLoaded = useRef<LoadedSounds>({});

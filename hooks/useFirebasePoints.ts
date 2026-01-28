@@ -1,3 +1,5 @@
+// hooks/useFirebasePoints.ts
+
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore'; 
 import { db } from '../services/firebaseConfig';

@@ -1,3 +1,5 @@
+// screens/exploreScreen.tsx
+
 import React from 'react';
 import { View, Text, FlatList, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { TourCard } from '../components/tourCard';

@@ -1,6 +1,6 @@
 // app/active-tour/[id].tsx
 import React from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreenContent from '../../screens/homeScreen.native'; // Reutilizamos tu lógica
@@ -11,6 +11,7 @@ export default function ActiveTourPage() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
       {/* Botón para cerrar la ruta y volver al detalle */}
       <TouchableOpacity 
         style={styles.closeButton} 

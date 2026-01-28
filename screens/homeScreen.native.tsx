@@ -1,3 +1,5 @@
+// screens/homeScreen.native.tsx
+
 import React, { useEffect, useMemo } from "react";
 import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
 import { useLocation } from "../hooks/useLocation";
@@ -17,7 +19,7 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ tourId }: HomeScreenProps) {
   // Simulación de movimiento para pruebas o ubicación real [cite: 28]
-  const { location } = useLocation(true); 
+  const { location } = useLocation(false); 
   
   // ✅ El hook ahora consume el tourId que viene desde la navegación
   const { points, loading: pointsLoading } = useFirebasePoints(tourId);
