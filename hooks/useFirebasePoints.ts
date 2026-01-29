@@ -30,7 +30,8 @@ export function useFirebasePoints(tourId: string) {
             latitude: Number(data.latitude),
             longitude: Number(data.longitude),
             audio: String(data.audioUrl), // Mapeamos audioUrl de Firestore a 'audio'
-            image: String(data.imageUrl)
+            image: String(data.imageUrl),
+            order: Number(data.order),
           } as unknown as PointOfInterest);
         });
 
