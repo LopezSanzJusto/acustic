@@ -19,7 +19,7 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ tourId }: HomeScreenProps) {
   // Simulación de movimiento para pruebas o ubicación real [cite: 28]
-  const { location } = useLocation(false); 
+  const { location } = useLocation(true); 
   
   // ✅ El hook ahora consume el tourId que viene desde la navegación
   const { points, loading: pointsLoading } = useFirebasePoints(tourId);
