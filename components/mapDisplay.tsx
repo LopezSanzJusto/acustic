@@ -5,16 +5,10 @@ import { StyleSheet, View, Text } from "react-native";
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions"; 
 import { PointOfInterest } from "../data/points";
+import { COLORS } from "../utils/theme";
 
 // ✅ TU API KEY
-const GOOGLE_MAPS_APIKEY = "AIzaSyCvA68C5hB-6FPF0kun4vsluEHkgCCs0NU"; 
-
-// COLORES DEL DISEÑO
-const THEME = {
-  routeColor: "#00D2A0", // Turquesa
-  pinColor: "#2D2D2D",   // Negro/Gris oscuro
-  textColor: "#FFFFFF"   // Blanco
-};
+const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY || ""; 
 
 interface MapDisplayProps {
   location: { latitude: number; longitude: number } | null;
@@ -64,7 +58,7 @@ export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
             apikey={GOOGLE_MAPS_APIKEY}
             mode="WALKING"
             strokeWidth={5}
-            strokeColor={THEME.routeColor}
+            strokeColor={COLORS.accent}
             optimizeWaypoints={false}
           />
         )}

@@ -2,16 +2,12 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { COMMON_STYLES } from '../../utils/theme';
 
 export default function TripsScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Mis Audioguías en progreso...</Text>
+    <View style={COMMON_STYLES.centerContainer}>
+      <Text style={COMMON_STYLES.titleText}>Mis Audioguías en progreso...</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8F9FA' },
-  text: { fontSize: 18, fontWeight: 'bold', color: '#4B0082' }
-});
