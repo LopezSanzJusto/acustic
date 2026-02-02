@@ -1,13 +1,14 @@
 // components/mapDisplay.tsx
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions"; 
 import { PointOfInterest } from "../data/points";
-import { COLORS } from "../utils/theme"; // Importamos tu tema
+import { COLORS } from "../utils/theme"; 
+// ✅ Importamos nuestros nuevos hooks de lógica visual
+import { useSortedPoints, useRouteDirections } from "../hooks/useMapLogic";
 
-// Recuerda: en producción usa process.env
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY || ""; 
 
 interface MapDisplayProps {
@@ -18,20 +19,11 @@ interface MapDisplayProps {
 
 export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
   
-  const sortedPoints = useMemo(() => {
-    return [...points].sort((a, b) => (a.order || 0) - (b.order || 0));
-  }, [points]);
+  // 1. Lógica de datos delegada a hooks
+  const sortedPoints = useSortedPoints(points);
+  const directionData = useRouteDirections(sortedPoints);
 
-  const directionData = useMemo(() => {
-    if (sortedPoints.length < 2) return null;
-    const origin = sortedPoints[0];
-    const destination = sortedPoints[sortedPoints.length - 1];
-    const waypoints = sortedPoints.slice(1, -1).map(p => ({
-      latitude: p.latitude, longitude: p.longitude
-    }));
-    return { origin, destination, waypoints };
-  }, [sortedPoints]);
-
+  // 2. Renderizado puro
   return (
     <View style={styles.mapContainer}>
       <MapView
@@ -39,6 +31,7 @@ export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
         style={styles.map}
         showsUserLocation={false} 
         showsMyLocationButton={true}
+        // Centrado inicial o seguimiento dinámico
         region={location ? {
             latitude: location.latitude,
             longitude: location.longitude,
@@ -52,7 +45,7 @@ export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
         }}
       >
         
-        {/* === RUTA === */}
+        {/* === RUTA (Línea) === */}
         {directionData && (
           <MapViewDirections
             origin={{ latitude: directionData.origin.latitude, longitude: directionData.origin.longitude }}
@@ -61,15 +54,14 @@ export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
             apikey={GOOGLE_MAPS_APIKEY}
             mode="WALKING"
             strokeWidth={4}
-            // ✅ CAMBIO 1: Color de la línea de ruta (Morado)
             strokeColor={COLORS.primary} 
             optimizeWaypoints={false}
           />
         )}
 
-        {/* === USUARIO (Simulación) === */}
+        {/* === USUARIO === */}
         {location && (
-            <Marker coordinate={location} title="Yo (Simulación)" zIndex={999}>
+            <Marker coordinate={location} title="Yo" zIndex={999}>
                 <View style={styles.userMarker}>
                     <Text style={{fontSize: 20}}>🚶‍♂️</Text>
                 </View>
@@ -79,17 +71,16 @@ export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
         {/* === PUNTOS DE INTERÉS === */}
         {sortedPoints.map((p) => (
           <React.Fragment key={p.id}>
-            {/* ✅ CAMBIO 2: Círculos (Radio de activación) */}
+            {/* Zona de activación (Geofence visual) */}
             <Circle
               center={{ latitude: p.latitude, longitude: p.longitude }}
               radius={radius}
-              // Morado (#4B0082) con 15% de opacidad: rgba(75, 0, 130, 0.15)
-              fillColor="rgba(75, 0, 130, 0.15)"
-              // Borde morado con 50% de opacidad
-              strokeColor="rgba(75, 0, 130, 0.5)"
+              fillColor={COLORS.primaryLight}
+              strokeColor={COLORS.primaryBorder}
               zIndex={1}
             />
 
+            {/* Pin del lugar */}
             <Marker
               coordinate={{ latitude: p.latitude, longitude: p.longitude }}
               anchor={{ x: 0.5, y: 0.5 }}
@@ -115,11 +106,10 @@ const styles = StyleSheet.create({
   map: { width: "100%", height: "100%" },
   
   userMarker: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.white,
     padding: 5,
     borderRadius: 20,
     borderWidth: 2,
-    // Podríamos poner el borde del usuario también morado si quieres
     borderColor: COLORS.primary, 
     elevation: 10,
     shadowColor: '#000',
@@ -131,7 +121,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 18,
-    backgroundColor: '#FFF',
+    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -145,14 +135,13 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 14,
-    // ✅ CAMBIO 3: El punto negro central ahora es morado
     backgroundColor: COLORS.primary, 
     justifyContent: 'center',
     alignItems: 'center',
   },
   
   markerText: {
-    color: '#FFF',
+    color: COLORS.white,
     fontSize: 12,
     fontWeight: '700',
   },

@@ -2,14 +2,33 @@
 import { StyleSheet } from 'react-native';
 
 export const COLORS = {
-  primary: '#4B0082',    // Tu púrpura principal
-  background: '#F8F9FA', // Tu fondo gris claro
-  text: '#1A1A1A',       // Tu negro suave
-  muted: '#666666',      // Gris para textos secundarios
+  // Brand
+  primary: '#4B0082',        // Púrpura principal
+  primaryLight: 'rgba(75, 0, 130, 0.15)', // Para radios en mapas
+  primaryBorder: 'rgba(75, 0, 130, 0.5)', // Para bordes en mapas
+  
+  // UI Basics
+  background: '#FFFFFF',     // Fondo general (Antes a veces #F8F9FA, unificado a blanco o gris muy claro)
+  backgroundAlt: '#F8F9FA',  // Fondo alternativo (para cards o pantallas grises)
+  surface: '#FFFFFF',        // Superficie de tarjetas
+  inputBackground: '#F0F0F8',// Fondo del buscador
+  
+  // Text
+  text: '#1A1A1A',           // Texto principal
+  textDark: '#0D2C33',       // Texto/Fondo oscuro para categorías activas
+  muted: '#666666',          // Texto secundario
+  placeholder: '#999999',    // Placeholders
   white: '#FFFFFF',
-  accent: '#00D2A0',     // Turquesa para rutas
-  error: '#FF4D4D',      // Rojo para errores/ubicación
-  gold: '#FFD700'        // Estrellas
+
+  // UI Elements
+  border: '#E0E0E0',         // Líneas divisorias y bordes
+  overlay: 'rgba(0,0,0,0.5)',// Fondos oscuros para botones flotantes
+
+  // Functional
+  accent: '#00D2A0',         // Turquesa
+  error: '#FF4D4D',          // Rojo (Pines ubicación, errores)
+  gold: '#FFD700',           // Estrellas
+  badge: '#FFA500',          // Badges (Naranja)
 };
 
 export const COMMON_STYLES = StyleSheet.create({
@@ -24,13 +43,21 @@ export const COMMON_STYLES = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.primary
   },
-  // Añadimos este para tus botones de "cerrar" o "volver" que se repiten
+  // Botón flotante estándar (reutilizable)
   floatingButton: {
     position: 'absolute',
-    top: 50,
     zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.overlay,
     borderRadius: 25,
-    padding: 8
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3
   }
 });

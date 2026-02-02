@@ -1,9 +1,11 @@
 // app/active-tour/[id].tsx
+
 import React from 'react';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import HomeScreenContent from '../../screens/homeScreen.native'; // Reutilizamos tu lógica
+import { View, StyleSheet } from 'react-native';
+import HomeScreenContent from '../../screens/activeRouteScreen'; 
+// ✅ Importamos el nuevo componente
+import { FloatingButton } from '../../components/floatingButton';
 
 export default function ActiveTourPage() {
   const { id } = useLocalSearchParams();
@@ -12,13 +14,14 @@ export default function ActiveTourPage() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* Botón para cerrar la ruta y volver al detalle */}
-      <TouchableOpacity 
-        style={styles.closeButton} 
+      
+      {/* ✅ USO DEL COMPONENTE: Botón Cerrar (X) */}
+      <FloatingButton 
+        icon="close" 
+        size={28} // Podemos hacerlo un poco más grande si queremos
         onPress={() => router.back()}
-      >
-        <Ionicons name="close" size={28} color="#FFF" />
-      </TouchableOpacity>
+        style={{ top: 50, right: 20 }} // A la derecha
+      />
 
       {/* Renderizamos tu componente de Mapa pasando el ID dinámico */}
       <HomeScreenContent tourId={id as string} />
@@ -28,13 +31,5 @@ export default function ActiveTourPage() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  closeButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 25,
-    padding: 8
-  }
+  // 🗑️ ELIMINADO: closeButton (ya no se usa)
 });

@@ -1,3 +1,3 @@
 // screens/homeScreen.tsx
-import HomeScreen from './homeScreen.native'; // Por defecto apunta al nativo para Tipado
+import HomeScreen from './activeRouteScreen'; // Por defecto apunta al nativo para Tipado
 export default HomeScreen;

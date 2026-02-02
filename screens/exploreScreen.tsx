@@ -6,18 +6,18 @@ import { TourCard } from '../components/tourCard';
 import { useFirebaseTours } from '../hooks/useFirebaseTours';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../utils/theme'; // ✅ Importamos el tema actualizado
 
 export default function ExploreScreen() {
   const router = useRouter();
-  const { tours, loading } = useFirebaseTours(); // Datos reales de Firestore 
+  const { tours, loading } = useFirebaseTours(); 
 
-  // Categorías del MVP 1.0 basadas en el anteproyecto [cite: 14, 26, 30]
   const categories = ["Todos", "Historia", "Arte", "Gastronomía", "Cultura"];
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4B0082" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Cargando audioguías...</Text>
       </View>
     );
@@ -25,23 +25,23 @@ export default function ExploreScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 1. Buscador con autocompletar (Funcionalidad clave del MVP 1.0) [cite: 13, 18, 28] */}
+      {/* Buscador */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#999" />
+          <Ionicons name="search" size={20} color={COLORS.placeholder} />
           <TextInput 
             placeholder="Encuentra tu siguiente destino.." 
             style={styles.searchInput}
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.placeholder}
           />
         </View>
       </View>
 
-      {/* 2. Filtros de Categorías para rutas geolocalizadas [cite: 14, 26, 30] */}
+      {/* Categorías */}
       <View style={styles.categoriesWrapper}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
           <TouchableOpacity style={styles.filterButton}>
-            <Text>🌐 Idioma</Text>
+            <Text style={{ color: COLORS.text }}>🌐 Idioma</Text>
           </TouchableOpacity>
           {categories.map((cat, index) => (
             <TouchableOpacity 
@@ -56,7 +56,7 @@ export default function ExploreScreen() {
         </ScrollView>
       </View>
 
-      {/* 3. Catálogo de Audioguías integradas con Firebase y Mapbox [cite: 8, 25, 29] */}
+      {/* Lista */}
       <FlatList
         data={tours}
         keyExtractor={(item) => item.id}
@@ -67,7 +67,6 @@ export default function ExploreScreen() {
         renderItem={({ item }) => (
           <TourCard 
             tour={item} 
-            // ✅ Solución definitiva al error de TypeScript usando 'as any'
             onPress={() => {
               router.push({
                 pathname: "/tour/[id]",
@@ -84,7 +83,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#FFFFFF', 
+    backgroundColor: COLORS.background, 
     paddingTop: 50 
   },
   loadingContainer: { 
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
   },
   loadingText: { 
     marginTop: 10, 
-    color: '#4B0082', 
+    color: COLORS.primary, 
     fontWeight: '600' 
   },
   searchContainer: { 
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F0F8',
+    backgroundColor: COLORS.inputBackground, // ✅ Usando tema
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 15,
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     marginLeft: 10, 
     fontSize: 16, 
-    color: '#333' 
+    color: COLORS.text 
   },
   categoriesWrapper: {
     marginBottom: 10,
@@ -129,27 +128,27 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#DDD',
-    backgroundColor: '#FFF',
+    borderColor: COLORS.border, // ✅ Usando tema
+    backgroundColor: COLORS.surface,
   },
   categoryCard: {
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: COLORS.border, // ✅ Usando tema
   },
   activeCategoryCard: {
-    backgroundColor: '#0D2C33', // Color oscuro del diseño
-    borderColor: '#0D2C33',
+    backgroundColor: COLORS.textDark, // ✅ Usando tema
+    borderColor: COLORS.textDark,
   },
   categoryText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.muted,
   },
   activeCategoryText: {
-    color: '#FFF',
+    color: COLORS.white,
     fontWeight: 'bold',
   },
   sectionTitle: { 
@@ -157,7 +156,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     marginHorizontal: 20, 
     marginBottom: 20, 
-    color: '#2D2D5A' 
+    color: COLORS.textDark // ✅ Usando tema
   },
   listContent: { 
     paddingBottom: 100 
