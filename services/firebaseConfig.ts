@@ -1,6 +1,16 @@
 // services/firebaseConfig.ts
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+
+// ✅ 1. Importamos la función normal
+import { initializeAuth } from "firebase/auth";
+
+// ✅ 2. Silenciamos el falso error de TypeScript con @ts-ignore
+// @ts-ignore
+import { getReactNativePersistence } from "firebase/auth"; 
+
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -14,3 +24,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
+// ✅ 3. Inicializamos (ahora sí funcionará en el móvil)
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
