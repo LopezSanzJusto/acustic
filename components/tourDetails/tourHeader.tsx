@@ -1,20 +1,33 @@
+// components/tourDetails/tourHeader.tsx
+
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import { FloatingButton } from '../floatingButton';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import { FloatingButton } from '../floatingButton'; // Asegúrate de que la ruta sea correcta según tu estructura
+// ✅ Importamos el Slider
+import { ImageSlider } from '../imageSlider';
 
 interface TourHeaderProps {
-  imageUrl: string;
+  images: string[];
   onBack: () => void;
 }
 
-export const TourHeader = ({ imageUrl, onBack }: TourHeaderProps) => {
+const { width } = Dimensions.get('window');
+
+export const TourHeader = ({ images, onBack }: TourHeaderProps) => {
   return (
     <View style={styles.imageHeader}>
-      <Image source={{ uri: imageUrl }} style={styles.headerImage} />
+      {/* ✅ Slider a pantalla completa */}
+      <ImageSlider 
+        images={images} 
+        height={320} 
+        width={width} 
+      />
+      
+      {/* Botón flotante con zIndex alto */}
       <FloatingButton
         icon="arrow-back"
         onPress={onBack}
-        style={{ top: 50, left: 20 }}
+        style={{ top: 50, left: 20, zIndex: 100 }}
       />
     </View>
   );
@@ -22,5 +35,4 @@ export const TourHeader = ({ imageUrl, onBack }: TourHeaderProps) => {
 
 const styles = StyleSheet.create({
   imageHeader: { height: 320, position: 'relative' },
-  headerImage: { width: '100%', height: '100%', resizeMode: 'cover' },
 });

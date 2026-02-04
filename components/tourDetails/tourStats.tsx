@@ -1,33 +1,62 @@
+// components/tourDetails/tourStats.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 
 interface TourStatsProps {
-  duration: string;
-  distance: string;
-  numPoints: number;
+  listens: number;
+  rating: number;
+  reviews: number;
 }
 
-const StatItem = ({ icon, text }: { icon: any, text: string }) => (
-  <View style={styles.statItem}>
-    <Ionicons name={icon} size={24} color={COLORS.primary} />
-    <Text style={styles.statText}>{text}</Text>
-  </View>
-);
-
-export const TourStats = ({ duration, distance, numPoints }: TourStatsProps) => {
+export const TourStats = ({ listens, rating, reviews }: TourStatsProps) => {
   return (
-    <View style={styles.statsRow}>
-      <StatItem icon="time-outline" text={duration || "N/A"} />
-      <StatItem icon="walk-outline" text={distance || "N/A"} />
-      <StatItem icon="musical-notes-outline" text={`${numPoints || 0} Puntos`} />
+    <View style={styles.card}>
+      {/* Columna 1: Escuchas */}
+      <View style={styles.statCol}>
+        <Text style={styles.statNumber}>{listens}</Text>
+        <Text style={styles.statLabel}>Escuchas</Text>
+      </View>
+
+      <View style={styles.divider} />
+
+      {/* Columna 2: Rating */}
+      <View style={styles.statCol}>
+        <Text style={styles.statNumber}>{rating}</Text>
+        <View style={{ flexDirection: 'row' }}>
+          {[1,2,3,4,5].map(i => (
+            <Ionicons key={i} name={i <= Math.round(rating) ? "star" : "star-outline"} size={12} color={COLORS.primary} />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      {/* Columna 3: Opiniones */}
+      <View style={styles.statCol}>
+        <Text style={styles.statNumber}>{reviews}</Text>
+        <Text style={styles.statLabel}>Opiniones</Text>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 20, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.border, marginBottom: 25 },
-  statItem: { alignItems: 'center', flex: 1 },
-  statText: { fontSize: 14, color: COLORS.text, marginTop: 6, fontWeight: '500' },
+  card: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    paddingVertical: 15,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 20,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    shadowColor: "#000", shadowOffset: {width:0, height:2}, shadowOpacity:0.05, shadowRadius:5, elevation:2
+  },
+  statCol: { alignItems: 'center', flex: 1 },
+  statNumber: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 4 },
+  statLabel: { fontSize: 12, color: COLORS.muted },
+  divider: { width: 1, height: '60%', backgroundColor: COLORS.border }
 });

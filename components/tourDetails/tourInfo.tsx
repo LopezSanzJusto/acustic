@@ -1,3 +1,4 @@
+// components/tourDetails/tourInfo.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,44 +6,56 @@ import { COLORS } from '../../utils/theme';
 
 interface TourInfoProps {
   title: string;
-  category: string;
   city: string;
   country: string;
+  duration: string;
+  distance: string;
+  numPoints: number;
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }
 
 export const TourInfo = ({ 
-  title, category, city, country, isFavorite, onToggleFavorite 
+  title, city, country, duration, distance, numPoints, isFavorite, onToggleFavorite 
 }: TourInfoProps) => {
   return (
-    <View>
-      <Text style={styles.category}>{category?.toUpperCase() || 'TURISMO'}</Text>
-      
-      <View style={styles.titleRow}>
+    <View style={styles.container}>
+      {/* Título y Corazón */}
+      <View style={styles.headerRow}>
         <Text style={styles.title}>{title}</Text>
-        <TouchableOpacity onPress={onToggleFavorite} activeOpacity={0.7} style={styles.favoriteButton}>
-          <Ionicons
-            name={isFavorite ? "heart" : "heart-outline"}
-            size={32}
-            color={isFavorite ? COLORS.error : COLORS.placeholder}
-          />
+        <TouchableOpacity onPress={onToggleFavorite}>
+          <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={28} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.locationRow}>
-        <Ionicons name="location-sharp" size={16} color={COLORS.error} />
-        <Text style={styles.location}>{city}, {country || 'España'}</Text>
+      {/* Fila de Iconos Pequeños (Ubicación, Tiempo, Distancia, Puntos) */}
+      <View style={styles.metaRow}>
+        <View style={styles.metaItem}>
+            <Ionicons name="location-sharp" size={14} color={COLORS.error} />
+            <Text style={styles.metaText}>{city}, {country}</Text>
+        </View>
+        <View style={styles.metaItem}>
+            <Ionicons name="time-outline" size={14} color={COLORS.primary} />
+            <Text style={styles.metaText}>{duration}</Text>
+        </View>
+        <View style={styles.metaItem}>
+            <Ionicons name="walk-outline" size={14} color={COLORS.accent} />
+            <Text style={styles.metaText}>{distance}</Text>
+        </View>
+        <View style={styles.metaItem}>
+            <Ionicons name="map-outline" size={14} color={COLORS.gold} />
+            <Text style={styles.metaText}>{numPoints}</Text>
+        </View>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  category: { color: COLORS.primary, fontWeight: 'bold', fontSize: 13, marginBottom: 5, letterSpacing: 1 },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-  title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, flex: 1, marginRight: 10 },
-  favoriteButton: { padding: 5, marginTop: -5 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 25 },
-  location: { color: COLORS.muted, marginLeft: 5, fontSize: 16 },
+  container: { marginBottom: 15 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
+  title: { fontSize: 26, fontWeight: 'bold', color: COLORS.textDark, flex: 1, marginRight: 10 },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { color: COLORS.textDark, fontSize: 13, fontWeight: '500' }
 });

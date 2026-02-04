@@ -1,35 +1,46 @@
 // app/tour/[id].tsx
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
-import { useFavorites } from '../../hooks/useFavorites';
+import { Ionicons } from '@expo/vector-icons';
 
-// ✅ Importamos los componentes modulares
+// Hooks
+import { useFavorites } from '../../hooks/useFavorites';
+import { useFirebasePoints } from '../../hooks/useFirebasePoints';
+
+// Componentes Modulares
 import { TourHeader } from '../../components/tourDetails/tourHeader';
 import { TourInfo } from '../../components/tourDetails/tourInfo';
 import { TourStats } from '../../components/tourDetails/tourStats';
 import { TourFooter } from '../../components/tourDetails/tourFooter';
+import { TourIntroAudio } from '../../components/tourDetails/tourIntroAudio';
+import { TourPointList } from '../../components/tourDetails/tourPointList';
+import { TourReviews } from '../../components/tourDetails/tourReviews';
 
 export default function TourDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Hook de lógica de negocio (Favoritos)
+  // Hooks de datos
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
+  const { points, loading: pointsLoading } = useFirebasePoints(id as string);
 
-  // Calculamos la imagen principal
-  const mainImage = useMemo(() => {
-    if (!tour) return null;
-    return (tour.imageUrls && tour.imageUrls.length > 0) ? tour.imageUrls[0] : tour.image;
+  // ✅ Calculamos el ARRAY de imágenes para el Slider
+  const tourImages = useMemo(() => {
+    if (!tour) return [];
+    if (tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0) {
+      return tour.imageUrls;
+    }
+    return tour.image ? [tour.image] : [];
   }, [tour]);
 
-  // Carga de datos
   useEffect(() => {
     async function fetchTourDetails() {
       if (!id) return;
@@ -48,7 +59,7 @@ export default function TourDetailScreen() {
     fetchTourDetails();
   }, [id]);
 
-  if (loading) return (
+  if (loading || pointsLoading) return (
     <View style={COMMON_STYLES.centerContainer}>
       <ActivityIndicator size="large" color={COLORS.primary} />
     </View>
@@ -64,49 +75,89 @@ export default function TourDetailScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        
-        {/* 1. Cabecera con Imagen */}
-        <TourHeader 
-          imageUrl={mainImage} 
-          onBack={() => router.back()} 
-        />
-
-        {/* 2. Contenido Principal */}
-        <View style={styles.content}>
-          <TourInfo 
-            title={tour.title}
-            category={tour.category}
-            city={tour.city}
-            country={tour.country}
-            isFavorite={isFavorite}
-            onToggleFavorite={toggleFavorite}
+      <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+          
+          {/* 1. Cabecera con Slider (Pasamos el array images) */}
+          <TourHeader 
+            images={tourImages} 
+            onBack={() => router.back()} 
           />
 
-          <TourStats 
-            duration={tour.duration}
-            distance={tour.distance}
-            numPoints={tour.numPoints}
-          />
+          <View style={styles.content}>
             
-          <Text style={styles.descriptionTitle}>Sobre esta ruta</Text>
-          <Text style={styles.description}>{tour.description}</Text>
-        </View>
+            {/* 2. Info Principal */}
+            <TourInfo 
+              title={tour.title}
+              city={tour.city}
+              country={tour.country}
+              duration={tour.duration}
+              distance={tour.distance}
+              numPoints={tour.numPoints}
+              isFavorite={isFavorite}
+              onToggleFavorite={toggleFavorite}
+            />
 
-        {/* 3. Footer con Precio y Botón */}
+            {/* 3. Estadísticas */}
+            <TourStats 
+              listens={tour.listens || 0}
+              rating={tour.rating || 0}
+              reviews={tour.reviews || 0}
+            />
+              
+            {/* 4. Descripción */}
+            <Text style={styles.description}>{tour.description}</Text>
+
+            {/* 5. Botón Previsualización */}
+            <TouchableOpacity style={styles.previewButton}>
+               <Ionicons name="headset" size={20} color="white" style={{ marginRight: 8 }} />
+               <Text style={styles.previewText}>Previsualización de la ruta</Text>
+            </TouchableOpacity>
+
+            {/* 6. Mapa (Estático) */}
+            <Text style={styles.sectionTitle}>Mapa del tour</Text>
+            <View style={styles.mapPreview}>
+               <Image 
+                 source={{ uri: 'https://i.imgur.com/7bQ5Z5A.png' }} // Placeholder
+                 style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
+               />
+            </View>
+
+            {/* 7. Audio Intro (Usamos la primera imagen como thumbnail) */}
+            <TourIntroAudio 
+              title={tour.title} 
+              image={tourImages[0]} 
+            />
+
+            {/* 8. Lista de Puntos */}
+            <TourPointList points={points} />
+
+            {/* 9. Reviews */}
+            <TourReviews />
+
+          </View>
+        </ScrollView>
+
+        {/* Footer Pegajoso */}
         <TourFooter 
           price={tour.price} 
           onStart={() => router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any)}
         />
-
-      </ScrollView>
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  content: { padding: 20 },
-  descriptionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: COLORS.text },
-  description: { fontSize: 16, color: COLORS.muted, lineHeight: 24 },
+  content: { padding: 20, paddingTop: 10 },
+  description: { fontSize: 15, color: COLORS.muted, lineHeight: 24, marginBottom: 20 },
+  previewButton: {
+    backgroundColor: '#8B5CF6', 
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    paddingVertical: 14, borderRadius: 12, marginBottom: 30,
+    shadowColor: '#8B5CF6', shadowOffset: { width:0, height:4 }, shadowOpacity:0.3, shadowRadius:5
+  },
+  previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },
+  mapPreview: { height: 180, borderRadius: 20, overflow: 'hidden', backgroundColor: '#eee', marginBottom: 10 },
 });
