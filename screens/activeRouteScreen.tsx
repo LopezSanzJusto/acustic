@@ -10,7 +10,7 @@ import { MapDisplay } from "../components/mapDisplay";
 import { AudioMiniPlayer } from "../components/audioMiniPlayer";
 import { COLORS } from "../utils/theme";
 
-const RADIUS = 30; // Radio de detección en metros
+const RADIUS = 15; // Radio de detección en metros
 
 interface ActiveRouteScreenProps {
   tourId: string;

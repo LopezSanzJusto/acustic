@@ -1,7 +1,7 @@
 // app/tour/[id].tsx
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
@@ -21,6 +21,9 @@ import { TourIntroAudio } from '../../components/tourDetails/tourIntroAudio';
 import { TourPointList } from '../../components/tourDetails/tourPointList';
 import { TourReviews } from '../../components/tourDetails/tourReviews';
 
+// ✅ IMPORTANTE: Importamos el componente del mapa pequeño
+import { TourMapPreview } from '../../components/tourDetails/tourMapPreview';
+
 export default function TourDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -32,7 +35,7 @@ export default function TourDetailScreen() {
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
 
-  // ✅ Calculamos el ARRAY de imágenes para el Slider
+  // Calculamos el ARRAY de imágenes para el Slider
   const tourImages = useMemo(() => {
     if (!tour) return [];
     if (tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0) {
@@ -78,7 +81,7 @@ export default function TourDetailScreen() {
       <View style={{ flex: 1, backgroundColor: COLORS.background }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           
-          {/* 1. Cabecera con Slider (Pasamos el array images) */}
+          {/* 1. Cabecera con Slider */}
           <TourHeader 
             images={tourImages} 
             onBack={() => router.back()} 
@@ -114,16 +117,16 @@ export default function TourDetailScreen() {
                <Text style={styles.previewText}>Previsualización de la ruta</Text>
             </TouchableOpacity>
 
-            {/* 6. Mapa (Estático) */}
+            {/* 6. Mapa del tour (AHORA REAL E INTERACTIVO AL CLIC) */}
             <Text style={styles.sectionTitle}>Mapa del tour</Text>
-            <View style={styles.mapPreview}>
-               <Image 
-                 source={{ uri: 'https://i.imgur.com/7bQ5Z5A.png' }} // Placeholder
-                 style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
-               />
-            </View>
+            
+            {/* ✅ CAMBIO IMPLEMENTADO: Usamos TourMapPreview en lugar de Image */}
+            <TourMapPreview 
+               points={points} 
+               onPress={() => router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any)}
+            />
 
-            {/* 7. Audio Intro (Usamos la primera imagen como thumbnail) */}
+            {/* 7. Audio Intro */}
             <TourIntroAudio 
               title={tour.title} 
               image={tourImages[0]} 
@@ -159,5 +162,5 @@ const styles = StyleSheet.create({
   },
   previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },
-  mapPreview: { height: 180, borderRadius: 20, overflow: 'hidden', backgroundColor: '#eee', marginBottom: 10 },
+  // Eliminé mapPreview ya que el componente TourMapPreview maneja sus propios estilos
 });

@@ -1,90 +1,121 @@
 // components/mapDisplay.tsx
 
-import React from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions"; 
+import MapViewDirections from "react-native-maps-directions";
 import { PointOfInterest } from "../data/points";
-import { COLORS } from "../utils/theme"; 
-// ✅ Importamos nuestros nuevos hooks de lógica visual
+import { COLORS } from "../utils/theme";
 import { useSortedPoints, useRouteDirections } from "../hooks/useMapLogic";
 
-const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY || ""; 
+const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY || "";
 
 interface MapDisplayProps {
   location: { latitude: number; longitude: number } | null;
   points: PointOfInterest[];
-  radius: number;
+  radius?: number;
+  showGeofence?: boolean;
 }
 
-export const MapDisplay = ({ location, points, radius }: MapDisplayProps) => {
+export const MapDisplay = ({ 
+  location, 
+  points, 
+  radius = 15, // 1️⃣ CAMBIO: Bajamos el radio por defecto de 30 a 15 (más estético)
+  showGeofence = true 
+}: MapDisplayProps) => {
   
-  // 1. Lógica de datos delegada a hooks
+  const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
   const directionData = useRouteDirections(sortedPoints);
+  
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
 
-  // 2. Renderizado puro
+  // Zoom Inicial
+  const initialRegion = useMemo(() => {
+    if (sortedPoints.length > 0) {
+      return {
+        latitude: sortedPoints[0].latitude,
+        longitude: sortedPoints[0].longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      };
+    }
+    return undefined;
+  }, [sortedPoints]);
+
+  useEffect(() => {
+    setTracksViewChanges(true);
+    const timeout = setTimeout(() => {
+      setTracksViewChanges(false);
+    }, 500); 
+    return () => clearTimeout(timeout);
+  }, [points]);
+
+  const handleMapLayout = () => {
+    if (sortedPoints.length > 1 && mapRef.current) {
+      mapRef.current.fitToCoordinates(sortedPoints, {
+        // 2️⃣ CAMBIO: Aumentamos el padding para que los círculos no se corten
+        // top/bottom más grandes para salvar el header y el footer
+        edgePadding: { top: 120, right: 80, bottom: 120, left: 80 },
+        animated: false,
+      });
+    }
+  };
+
   return (
     <View style={styles.mapContainer}>
       <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
+        initialRegion={initialRegion}
         showsUserLocation={false} 
-        showsMyLocationButton={true}
-        // Centrado inicial o seguimiento dinámico
-        region={location ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-        } : {
-            latitude: 40.413,
-            longitude: -3.709,
-            latitudeDelta: 0.012,
-            longitudeDelta: 0.012,
-        }}
+        showsMyLocationButton={false} 
+        onLayout={handleMapLayout}
       >
         
-        {/* === RUTA (Línea) === */}
         {directionData && (
           <MapViewDirections
-            origin={{ latitude: directionData.origin.latitude, longitude: directionData.origin.longitude }}
-            destination={{ latitude: directionData.destination.latitude, longitude: directionData.destination.longitude }}
+            origin={directionData.origin}
+            destination={directionData.destination}
             waypoints={directionData.waypoints}
             apikey={GOOGLE_MAPS_APIKEY}
             mode="WALKING"
             strokeWidth={4}
-            strokeColor={COLORS.primary} 
+            strokeColor={COLORS.primary}
             optimizeWaypoints={false}
           />
         )}
 
-        {/* === USUARIO === */}
         {location && (
-            <Marker coordinate={location} title="Yo" zIndex={999}>
-                <View style={styles.userMarker}>
-                    <Text style={{fontSize: 20}}>🚶‍♂️</Text>
+            <Marker 
+                coordinate={location}
+                anchor={{ x: 0.5, y: 0.5 }}
+                zIndex={999}
+            >
+                <View style={styles.userMarkerContainer}>
+                    <View style={styles.userMarkerDot} />
                 </View>
             </Marker>
         )}
 
-        {/* === PUNTOS DE INTERÉS === */}
         {sortedPoints.map((p) => (
           <React.Fragment key={p.id}>
-            {/* Zona de activación (Geofence visual) */}
-            <Circle
-              center={{ latitude: p.latitude, longitude: p.longitude }}
-              radius={radius}
-              fillColor={COLORS.primaryLight}
-              strokeColor={COLORS.primaryBorder}
-              zIndex={1}
-            />
+            {showGeofence && (
+                <Circle
+                  center={{ latitude: p.latitude, longitude: p.longitude }}
+                  radius={radius}
+                  fillColor={COLORS.primaryLight}
+                  strokeColor={COLORS.primaryBorder}
+                  zIndex={1}
+                />
+            )}
 
-            {/* Pin del lugar */}
             <Marker
               coordinate={{ latitude: p.latitude, longitude: p.longitude }}
               anchor={{ x: 0.5, y: 0.5 }}
               zIndex={2}
+              tracksViewChanges={tracksViewChanges}
             >
               <View style={styles.markerOuter}>
                 <View style={styles.markerInner}>
@@ -105,44 +136,33 @@ const styles = StyleSheet.create({
   mapContainer: { height: "100%", width: "100%" },
   map: { width: "100%", height: "100%" },
   
-  userMarker: {
-    backgroundColor: COLORS.white,
-    padding: 5,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: COLORS.primary, 
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 }
-  },
-
   markerOuter: {
-    width: 26,
-    height: 26,
-    borderRadius: 18,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    width: 30, height: 30, borderRadius: 15, backgroundColor: COLORS.white,
+    justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4, shadowRadius: 4, elevation: 6,
+  },
+  markerInner: {
+    width: 24, height: 24, borderRadius: 12, backgroundColor: COLORS.primary,
+    justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1.5, borderColor: COLORS.white 
+  },
+  markerText: { color: COLORS.white, fontSize: 13, fontWeight: '800' },
+
+  userMarkerContainer: {
+    width: 24, height: 24, 
+    justifyContent: 'center', alignItems: 'center',
+  },
+  userMarkerDot: {
+    width: 20, height: 20, 
+    borderRadius: 10, 
+    backgroundColor: '#3B82F6',
+    borderWidth: 3, 
+    borderColor: 'white',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 5,
-  },
-  
-  markerInner: {
-    width: 20,
-    height: 20,
-    borderRadius: 14,
-    backgroundColor: COLORS.primary, 
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  
-  markerText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: '700',
-  },
+    elevation: 5
+  }
 });
