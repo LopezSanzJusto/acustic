@@ -1,11 +1,11 @@
 // components/tourCard.tsx
 
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../utils/theme';
 // ✅ AÑADIDO: Nuestro nuevo hook
-import { useFavorites } from '../hooks/useFavorites'; 
+import { useFavorites } from '../hooks/useFavorites';
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 15;

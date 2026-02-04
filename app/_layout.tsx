@@ -1,59 +1,49 @@
-// app/_layout.tsx
-
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter, useSegments } from 'expo-router'; // ✅ AÑADIDO: useRouter y useSegments
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-import { useEffect, useState } from 'react'; // ✅ AÑADIDO: Hooks de React
-import { View, ActivityIndicator, StyleSheet } from 'react-native'; // ✅ AÑADIDO: Componentes UI
-
-// ✅ AÑADIDO: Importaciones de Firebase
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
-import { COLORS } from '../utils/theme'; 
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { COLORS } from '../utils/theme';
+import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { useColorScheme } from '@/hooks/use-color-scheme'; // Si no usas este hook, puedes quitar esta línea y el ThemeProvider
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
-  // --- 🔒 NUEVO: ESTADOS DE AUTENTICACIÓN ---
+  
+  // 1. Estados de Autenticación
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-
+  
   const router = useRouter();
   const segments = useSegments();
 
-  // 1. Escuchar los cambios de sesión en Firebase
+  // 2. Escuchar a Firebase (Se ejecuta una sola vez al arrancar)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (initializing) setInitializing(false);
     });
+    return unsubscribe;
+  }, []);
 
-    return unsubscribe; 
-  }, [initializing]);
-
-  // 2. Tomar decisiones de navegación (El "Portero")
+  // 3. El Portero (Lógica de Protección)
   useEffect(() => {
     if (initializing) return;
 
-    // ✅ CORRECCIÓN 1: Convertimos segments[0] a String genérico para que TS no se queje
-    const inAuthGroup = String(segments[0]) === 'auth';
+    // Verificamos si el usuario está intentando entrar en la zona de 'auth' (login/registro)
+    const inAuthGroup = segments[0] === 'auth';
 
-    if (!user && !inAuthGroup) {
-      // ✅ CORRECCIÓN 2: Forzamos el tipo con "as any" mientras Expo indexa el nuevo archivo
-      router.replace('/auth/login' as any);
-    } else if (user && inAuthGroup) {
+    if (user && inAuthGroup) {
+      // CASO A: Usuario Logueado intenta ver Login -> Lo mandamos a la App (Tabs)
       router.replace('/(tabs)' as any);
+    } else if (!user && !inAuthGroup) {
+      // CASO B: Usuario NO Logueado intenta ver la App -> Lo mandamos al Login
+      router.replace('/auth/login' as any);
     }
   }, [user, initializing, segments]);
 
-  // 3. Pantalla de Carga Inicial (mientras Firebase comprueba)
+  // 4. Pantalla de Carga (El "Escudo")
+  // Importante: Mostramos esto mientras Firebase inicializa O mientras decidimos dónde mandar al usuario.
   if (initializing) {
     return (
       <View style={styles.loadingContainer}>
@@ -62,21 +52,26 @@ export default function RootLayout() {
     );
   }
 
-  // --- 📱 TU CÓDIGO ORIGINAL (ahora protegido) ---
+  // 5. Renderizado de la App
+  // Solo llegamos aquí si el usuario está en el sitio correcto
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* Pantallas Principales */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* ✅ AÑADIDO: Pantalla de Login sin cabecera nativa */}
-        <Stack.Screen name="auth/login" options={{ headerShown: false }} /> 
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        
+        {/* Pantallas de Autenticación */}
+        <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+        
+        {/* Otras Pantallas */}
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
+        <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
       </Stack>
-      <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
 
-// ✅ AÑADIDO: Estilos para la pantalla de carga
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,

@@ -1,20 +1,18 @@
+// app/tour/[id].tsx
+
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
-import { Ionicons } from '@expo/vector-icons';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
-import { FloatingButton } from '../../components/floatingButton';
 import { useFavorites } from '../../hooks/useFavorites';
 
-// Mini-componente para las estadísticas (Tiempo, Distancia, Puntos)
-const StatItem = ({ icon, text }: { icon: any, text: string }) => (
-  <View style={styles.statItem}>
-    <Ionicons name={icon} size={24} color={COLORS.primary} />
-    <Text style={styles.statText}>{text}</Text>
-  </View>
-);
+// ✅ Importamos los componentes modulares
+import { TourHeader } from '../../components/tourDetails/tourHeader';
+import { TourInfo } from '../../components/tourDetails/tourInfo';
+import { TourStats } from '../../components/tourDetails/tourStats';
+import { TourFooter } from '../../components/tourDetails/tourFooter';
 
 export default function TourDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -22,14 +20,16 @@ export default function TourDetailScreen() {
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Inicializamos el hook de favoritos con el ID de la ruta
+  // Hook de lógica de negocio (Favoritos)
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
 
+  // Calculamos la imagen principal
   const mainImage = useMemo(() => {
     if (!tour) return null;
     return (tour.imageUrls && tour.imageUrls.length > 0) ? tour.imageUrls[0] : tour.image;
   }, [tour]);
 
+  // Carga de datos
   useEffect(() => {
     async function fetchTourDetails() {
       if (!id) return;
@@ -63,63 +63,42 @@ export default function TourDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
+      
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
-        {/* Cabecera */}
-        <View style={styles.imageHeader}>
-          <Image source={{ uri: mainImage }} style={styles.headerImage} />
-          <FloatingButton 
-            icon="arrow-back" 
-            onPress={() => router.back()}
-            style={{ top: 50, left: 20 }}
-          />
-        </View>
+        {/* 1. Cabecera con Imagen */}
+        <TourHeader 
+          imageUrl={mainImage} 
+          onBack={() => router.back()} 
+        />
 
-        {/* Contenido */}
+        {/* 2. Contenido Principal */}
         <View style={styles.content}>
-            <Text style={styles.category}>{tour.category?.toUpperCase() || 'TURISMO'}</Text>
+          <TourInfo 
+            title={tour.title}
+            category={tour.category}
+            city={tour.city}
+            country={tour.country}
+            isFavorite={isFavorite}
+            onToggleFavorite={toggleFavorite}
+          />
+
+          <TourStats 
+            duration={tour.duration}
+            distance={tour.distance}
+            numPoints={tour.numPoints}
+          />
             
-            {/* ✅ Fila del Título + Botón de Favorito */}
-            <View style={styles.titleRow}>
-              <Text style={styles.title}>{tour.title}</Text>
-              <TouchableOpacity onPress={toggleFavorite} activeOpacity={0.7} style={styles.favoriteButton}>
-                <Ionicons 
-                  name={isFavorite ? "heart" : "heart-outline"} 
-                  size={32} 
-                  color={isFavorite ? COLORS.error : COLORS.placeholder} 
-                />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.locationRow}>
-                <Ionicons name="location-sharp" size={16} color={COLORS.error} />
-                <Text style={styles.location}>{tour.city}, {tour.country || 'España'}</Text>
-            </View>
-
-            {/* ✅ Fila de Estadísticas completada */}
-            <View style={styles.statsRow}>
-              <StatItem icon="time-outline" text={tour.duration || "N/A"} />
-              <StatItem icon="walk-outline" text={tour.distance || "N/A"} />
-              <StatItem icon="musical-notes-outline" text={`${tour.numPoints || 0} Puntos`} />
-            </View>
-             
-            <Text style={styles.descriptionTitle}>Sobre esta ruta</Text>
-            <Text style={styles.description}>{tour.description}</Text>
+          <Text style={styles.descriptionTitle}>Sobre esta ruta</Text>
+          <Text style={styles.description}>{tour.description}</Text>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-           <View>
-            <Text style={styles.priceLabel}>Precio total</Text>
-            <Text style={styles.price}>{tour.price === 0 ? "Gratis" : `${tour.price}€`}</Text>
-           </View>
-           <TouchableOpacity 
-            style={styles.ctaButton}
-            onPress={() => router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any)}
-           >
-            <Text style={styles.ctaText}>Comenzar Ruta</Text>
-           </TouchableOpacity>
-        </View>
+        {/* 3. Footer con Precio y Botón */}
+        <TourFooter 
+          price={tour.price} 
+          onStart={() => router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any)}
+        />
+
       </ScrollView>
     </>
   );
@@ -127,30 +106,7 @@ export default function TourDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  imageHeader: { height: 320, position: 'relative' },
-  headerImage: { width: '100%', height: '100%', resizeMode: 'cover'},
   content: { padding: 20 },
-  category: { color: COLORS.primary, fontWeight: 'bold', fontSize: 13, marginBottom: 5, letterSpacing: 1 },
-  
-  // ✅ Nuevo estilo para alinear el título y el corazón
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-  title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, flex: 1, marginRight: 10 },
-  favoriteButton: { padding: 5, marginTop: -5 }, // Pequeño ajuste visual para alinearlo con el texto
-
-  locationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 25 },
-  location: { color: COLORS.muted, marginLeft: 5, fontSize: 16 },
-  
-  // Estilos de las estadísticas
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 20, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.border, marginBottom: 25 },
-  statItem: { alignItems: 'center', flex: 1 },
-  statText: { fontSize: 14, color: COLORS.text, marginTop: 6, fontWeight: '500' },
-  
   descriptionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: COLORS.text },
   description: { fontSize: 16, color: COLORS.muted, lineHeight: 24 },
-  
-  footer: { padding: 25, borderTopWidth: 1, borderColor: COLORS.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.white, marginBottom: 20 },
-  priceLabel: { color: COLORS.placeholder, fontSize: 13, marginBottom: 2 },
-  price: { fontSize: 24, fontWeight: 'bold', color: COLORS.text },
-  ctaButton: { backgroundColor: COLORS.primary, paddingHorizontal: 35, paddingVertical: 16, borderRadius: 18, shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 8 },
-  ctaText: { color: COLORS.white, fontWeight: 'bold', fontSize: 17 }
 });
