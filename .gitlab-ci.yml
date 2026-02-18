@@ -1,0 +1,39 @@
+stages:
+  - test
+
+include:
+  # 1. SAST (Static Application Security Testing)
+  # Analiza tu código fuente (Java, Kotlin, Swift, JS, etc.) buscando vulnerabilidades.
+  - component: gitlab.com/components/sast/sast@main
+    inputs:
+      # Excluimos carpetas que no son código fuente real para ahorrar tiempo
+      excluded_paths: "docs, **/*.md, test, spec"
+
+  # 2. Secret Detection
+  # Busca claves de API, contraseñas y certificados olvidados en el código.
+  - component: gitlab.com/components/secret-detection/secret-detection@main
+
+  # 3. SCA (Dependency Scanning)
+  # Analiza tus librerías (Gradle, Maven, npm, pip, CocoaPods, Nuget).
+  # Nota: GitLab usa una plantilla estándar para esto que se adapta al lenguaje.
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+
+  # 4. IaC (Infrastructure as Code) - OPCIONAL
+  # Déjalo solo si en este repositorio también guardas scripts de Terraform,
+  # Ansible o CloudFormation para el backend de la app. Si no, puedes borrarlo.
+  - template: Jobs/SAST-IaC.gitlab-ci.yml
+
+# --- CONFIGURACIONES ADICIONALES ---
+
+# Configuración para que Secret Detection mire toda la historia del repositorio
+# (útil si subiste una clave hace 3 meses y luego la borraste, esto te avisará igual)
+secret_detection:
+  variables:
+    SECRET_DETECTION_HISTORIC_SCAN: "true"
+
+# Configuración de SAST
+# A veces es necesario aumentar la profundidad de búsqueda en proyectos móviles grandes
+sast:
+  variables:
+    SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, **/*.md"
+    SEARCH_MAX_DEPTH: 20
