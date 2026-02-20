@@ -10,14 +10,17 @@ interface TourInfoProps {
   country: string;
   duration: string;
   distance: string;
-  numPoints: number;
+  points: any[];
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }
 
 export const TourInfo = ({ 
-  title, city, country, duration, distance, numPoints, isFavorite, onToggleFavorite 
+  title, city, country, duration, distance, points, isFavorite, onToggleFavorite 
 }: TourInfoProps) => {
+  
+  const numPoints = points?.length || 0;
+
   return (
     <View style={styles.container}>
       {/* Título y Corazón */}

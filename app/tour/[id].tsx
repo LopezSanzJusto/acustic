@@ -20,8 +20,6 @@ import { TourFooter } from '../../components/tourDetails/tourFooter';
 import { TourIntroAudio } from '../../components/tourDetails/tourIntroAudio';
 import { TourPointList } from '../../components/tourDetails/tourPointList';
 import { TourReviews } from '../../components/tourDetails/tourReviews';
-
-// ✅ IMPORTANTE: Importamos el componente del mapa pequeño
 import { TourMapPreview } from '../../components/tourDetails/tourMapPreview';
 
 export default function TourDetailScreen() {
@@ -30,6 +28,9 @@ export default function TourDetailScreen() {
   
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  // ✅ ESTADO PARA LA DISTANCIA CALCULADA
+  const [calculatedDistance, setCalculatedDistance] = useState<string>("Calculando...");
 
   // Hooks de datos
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
@@ -95,8 +96,10 @@ export default function TourDetailScreen() {
               city={tour.city}
               country={tour.country}
               duration={tour.duration}
-              distance={tour.distance}
-              numPoints={tour.numPoints}
+              // ✅ Pasamos la distancia calculada (o un respaldo)
+              distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")}
+              // ✅ Usamos los puntos del hook directamente
+              points={points}
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
             />
@@ -117,12 +120,13 @@ export default function TourDetailScreen() {
                <Text style={styles.previewText}>Previsualización de la ruta</Text>
             </TouchableOpacity>
 
-            {/* 6. Mapa del tour (AHORA REAL E INTERACTIVO AL CLIC) */}
+            {/* 6. Mapa del tour */}
             <Text style={styles.sectionTitle}>Mapa del tour</Text>
             
-            {/* ✅ CAMBIO IMPLEMENTADO: Usamos TourMapPreview en lugar de Image */}
             <TourMapPreview 
                points={points} 
+               // ✅ Recibimos la distancia y actualizamos el estado
+               onRouteCalculated={(dist) => setCalculatedDistance(dist)}
                onPress={() => router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any)}
             />
 
@@ -162,5 +166,4 @@ const styles = StyleSheet.create({
   },
   previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },
-  // Eliminé mapPreview ya que el componente TourMapPreview maneja sus propios estilos
-});
+});             

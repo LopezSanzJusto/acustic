@@ -15,13 +15,15 @@ interface MapDisplayProps {
   points: PointOfInterest[];
   radius?: number;
   showGeofence?: boolean;
+  onRouteCalculated?: (distanceText: string) => void; // ✅ Prop añadida
 }
 
 export const MapDisplay = ({ 
   location, 
   points, 
-  radius = 15, // 1️⃣ CAMBIO: Bajamos el radio por defecto de 30 a 15 (más estético)
-  showGeofence = true 
+  radius = 15, 
+  showGeofence = true,
+  onRouteCalculated // ✅ Recibimos la prop
 }: MapDisplayProps) => {
   
   const mapRef = useRef<MapView>(null);
@@ -54,8 +56,6 @@ export const MapDisplay = ({
   const handleMapLayout = () => {
     if (sortedPoints.length > 1 && mapRef.current) {
       mapRef.current.fitToCoordinates(sortedPoints, {
-        // 2️⃣ CAMBIO: Aumentamos el padding para que los círculos no se corten
-        // top/bottom más grandes para salvar el header y el footer
         edgePadding: { top: 120, right: 80, bottom: 120, left: 80 },
         animated: false,
       });
@@ -84,6 +84,13 @@ export const MapDisplay = ({
             strokeWidth={4}
             strokeColor={COLORS.primary}
             optimizeWaypoints={false}
+            onReady={(result) => {
+              // ✅ Aquí extraemos la distancia y se la pasamos al padre
+              if (onRouteCalculated) {
+                const distanceText = `${result.distance.toFixed(2)} km`;
+                onRouteCalculated(distanceText);
+              }
+            }}
           />
         )}
 

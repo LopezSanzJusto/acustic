@@ -1,17 +1,17 @@
 // components/tourDetails/tourMapPreview.tsx
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { PointOfInterest } from '../../data/points';
 import { MapDisplay } from '../mapDisplay';
-import { COLORS } from '../../utils/theme';
 
 interface TourMapPreviewProps {
   points: PointOfInterest[];
   onPress: () => void;
+  onRouteCalculated?: (distanceText: string) => void; // ✅ Prop añadida
 }
 
-export const TourMapPreview = ({ points, onPress }: TourMapPreviewProps) => {
+export const TourMapPreview = ({ points, onPress, onRouteCalculated }: TourMapPreviewProps) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.touchable}>
@@ -21,6 +21,7 @@ export const TourMapPreview = ({ points, onPress }: TourMapPreviewProps) => {
             location={null} 
             points={points} 
             showGeofence={false} // Ocultamos círculos
+            onRouteCalculated={onRouteCalculated} // ✅ Pasamos la prop al mapa
           />
         </View>
         
@@ -36,4 +37,4 @@ const styles = StyleSheet.create({
   touchable: { flex: 1 },
   mapWrapper: { flex: 1 },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'transparent' } // Truco para asegurar captura de toques
-});
+}); 
