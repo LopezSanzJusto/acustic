@@ -5,9 +5,11 @@ include:
   # 1. SAST (Static Application Security Testing)
   # Usamos el componente y le pasamos las exclusiones AQUÍ DIRECTAMENTE.
   - component: gitlab.com/components/sast/sast@main
+  - component: gitlab.com/components/sast/iac-sast@main
     inputs:
       excluded_paths: "docs, **/*.md, test, spec, tmp"
-      search_max_depth: 20
+      GITLAB_ADVANCED_SAST_ANALYZER: "true"
+      # search_max_depth: 20
 
   # 2. Secret Detection
   - component: gitlab.com/components/secret-detection/secret-detection@main
