@@ -1,29 +1,29 @@
 stages:
   - test
 
+# --- VARIABLES GLOBALES ---
+variables:
+  # 1. Habilitamos Advanced SAST para el código fuente (Ultimate)
+  GITLAB_ADVANCED_SAST_ENABLED: "true"
+  
+  # 2. Podemos poner el escaneo histórico de secretos aquí arriba
+  SECRET_DETECTION_HISTORIC_SCAN: "true"
+
 include:
-  # 1. SAST (Static Application Security Testing)
-  # Usamos el componente y le pasamos las exclusiones AQUÍ DIRECTAMENTE.
+  # 1. SAST (Static Application Security Testing para el código)
   - component: gitlab.com/components/sast/sast@main
-  - component: gitlab.com/components/sast/iac-sast@main
     inputs:
       excluded_paths: "docs, **/*.md, test, spec, tmp"
-      GITLAB_ADVANCED_SAST_ANALYZER: "true"
-      # search_max_depth: 20
 
-  # 2. Secret Detection
+  # 2. IaC SAST (Para escanear Dockerfiles, Terraform, etc.)
+  - component: gitlab.com/components/sast/iac-sast@main
+    # Si este escáner de infraestructura también necesita ignorar esas rutas, 
+    # le pasamos SOLO los inputs que reconoce:
+    inputs:
+      excluded_paths: "docs, **/*.md, test, spec, tmp"
+
+  # 3. Secret Detection
   - component: gitlab.com/components/secret-detection/secret-detection@main
 
-  # 3. SCA (Dependency Scanning)
+  # 4. SCA (Dependency Scanning - Este sigue usando template, está perfecto)
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
-
-# --- CONFIGURACIONES ADICIONALES ---
-
-# Secret Detection sí permite esta configuración global para el historial
-secret_detection:
-  variables:
-    SECRET_DETECTION_HISTORIC_SCAN: "true"
-
-# ¡IMPORTANTE! 
-# He borrado el bloque 'sast:' que había aquí abajo porque causaba el error.
-# La configuración de SAST ahora está arriba, dentro del 'component'.
