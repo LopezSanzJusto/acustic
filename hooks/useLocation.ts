@@ -10,29 +10,53 @@ type Coords = {
 
 // ✅ TU RUTA HARDCODEADA (Añade o modifica puntos aquí según necesites)
 const SIMULATED_PATH: Coords[] = [
-  // --- INICIO: LA LATINA ---
-  { latitude: 40.4120, longitude: -3.7105 }, // 0. Neutro
-  { latitude: 40.4115, longitude: -3.7093 }, // 1. Plaza de la Cebada (ENTRADA)
-  { latitude: 40.4116, longitude: -3.7094 }, // 2. Plaza de la Cebada (DENTRO)
-  
-  { latitude: 40.4110, longitude: -3.7120 }, // 3. Caminando...
-  
-  { latitude: 40.4103, longitude: -3.7144 }, // 4. San Francisco (ENTRADA)
-  { latitude: 40.4104, longitude: -3.7145 }, // 5. San Francisco (DENTRO)
-  
-  // --- TRAYECTO HACIA VISTILLAS ---
-  { latitude: 40.4115, longitude: -3.7135 }, // 6. Caminando hacia el norte...
-  { latitude: 40.4125, longitude: -3.7140 }, // 7. Casi llegando...
+  // ---------------------------------------------------------
+  // ORDEN 1: Monumento a Beatriz Galindo (CORREGIDO)
+  // Ubicación real: Plaza de la Puerta de los Moros
+  // ---------------------------------------------------------
+  { latitude: 40.4111, longitude: -3.7115 }, // Aproximación
+  { latitude: 40.4112, longitude: -3.7116 }, // 1. EXACTO (Ajustado a La Latina real)
 
-  // --- NUEVO PUNTO: JARDINES DE LAS VISTILLAS ---
-  { latitude: 40.41310, longitude: -3.71415 }, // 8. Vistillas (ENTRADA - Borde del radio)
-  { latitude: 40.41315, longitude: -3.71420 }, // 9. Vistillas (CENTRO EXACTO - ¡Debería sonar!)
+  // ---------------------------------------------------------
+  // ORDEN 2: Mayrit Alcázar Madrid
+  // ---------------------------------------------------------
+  { latitude: 40.4140, longitude: -3.7080 }, // Caminando hacia Ópera...
+  { latitude: 40.416228, longitude: -3.706381 }, // 2. EXACTO 
 
-  // --- VUELTA ---
-  { latitude: 40.4128, longitude: -3.7088 }, // 10. Cava Baja (ENTRADA)
-  { latitude: 40.4129, longitude: -3.7089 }, // 11. Cava Baja (DENTRO)
-  
-  { latitude: 40.4135, longitude: -3.7075 }  // 12. Fin
+  // ---------------------------------------------------------
+  // ORDEN 3: Calle Toledo
+  // ---------------------------------------------------------
+  { latitude: 40.4130, longitude: -3.7075 }, // Bajando...
+  { latitude: 40.4116, longitude: -3.7078 }, // 3. EXACTO
+
+  // ---------------------------------------------------------
+  // ORDEN 4: Plaza de la Paja
+  // ---------------------------------------------------------
+  { latitude: 40.4125, longitude: -3.7100 }, // Caminando...
+  { latitude: 40.41293, longitude: -3.71163 }, // 4. EXACTO
+
+  // ---------------------------------------------------------
+  // ORDEN 5: San Andrés
+  // ---------------------------------------------------------
+  { latitude: 40.41198, longitude: -3.71101 }, // 5. EXACTO
+
+  // ---------------------------------------------------------
+  // ORDEN 6: Mercado de la Cebada
+  // ---------------------------------------------------------
+  { latitude: 40.4115, longitude: -3.7093 },   // 6. EXACTO
+
+  // ---------------------------------------------------------
+  // ORDEN 7: Ribera de Curtidores
+  // ---------------------------------------------------------
+  { latitude: 40.4080, longitude: -3.7075 }, // Bajando...
+  { latitude: 40.4058, longitude: -3.7071 },   // 7. EXACTO
+
+  // ---------------------------------------------------------
+  // ORDEN 8: Rastro
+  // ---------------------------------------------------------
+  { latitude: 40.4086, longitude: -3.7073 },   // 8. EXACTO
+
+  { latitude: 40.4095, longitude: -3.7070 }    // Fin
 ];
 
 export const useLocation = (simulate = false) => {

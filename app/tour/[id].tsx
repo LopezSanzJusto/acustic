@@ -166,4 +166,4 @@ const styles = StyleSheet.create({
   },
   previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },
-});             
+});
