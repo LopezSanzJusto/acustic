@@ -11,7 +11,7 @@ type Coords = {
 // ✅ TU RUTA HARDCODEADA (Añade o modifica puntos aquí según necesites)
 const SIMULATED_PATH: Coords[] = [
   // ---------------------------------------------------------
-  // ORDEN 1: Monumento a Beatriz Galindo (CORREGIDO)
+  // ORDEN 1: Monumento a Beatriz Galindo 
   // Ubicación real: Plaza de la Puerta de los Moros
   // ---------------------------------------------------------
   { latitude: 40.4111, longitude: -3.7115 }, // Aproximación
