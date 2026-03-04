@@ -1,23 +1,64 @@
 // components/tourCard.tsx
-
-import React from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../utils/theme';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { useFavorites } from '../hooks/useFavorites';
-// ✅ Importamos el Slider
+import { db } from '../services/firebaseConfig';
+import { getDistanceInMeters } from '../utils/geo';
+import { COLORS } from '../utils/theme';
 import { ImageSlider } from './imageSlider';
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 15;
-// Calculamos el ancho real de la tarjeta para que el slider encaje perfecto
 const CARD_WIDTH = width - (CARD_MARGIN * 2);
 
 export const TourCard = ({ tour, onPress }: any) => {
-  // Hook de favoritos
   const { isFavorite, toggleFavorite } = useFavorites(tour.id);
+  
+  const [realPointsCount, setRealPointsCount] = useState(0);
+  const [preciseDistance, setPreciseDistance] = useState<string>("0.00");
+  const [calculatedTime, setCalculatedTime] = useState<string>("0h 0m");
 
-  // Preparamos el array de imágenes
+  useEffect(() => {
+    async function getRealData() {
+      if (!tour.id) return;
+      try {
+        const pointsRef = collection(db, "tours", tour.id, "points");
+        const q = query(pointsRef, orderBy("order", "asc"));
+        const snapshot = await getDocs(q);
+        const pointsArray = snapshot.docs.map(doc => doc.data());
+        
+        setRealPointsCount(pointsArray.length);
+
+        if (pointsArray.length > 1) {
+          let totalMeters = 0;
+          for (let i = 0; i < pointsArray.length - 1; i++) {
+            const p1 = pointsArray[i];
+            const p2 = pointsArray[i + 1];
+            if (p1.latitude && p1.longitude && p2.latitude && p2.longitude) {
+              totalMeters += getDistanceInMeters(p1.latitude, p1.longitude, p2.latitude, p2.longitude);
+            }
+          }
+          
+          const kms = totalMeters / 1000;
+          setPreciseDistance(kms.toFixed(2));
+
+          const totalMinutes = (kms / 4.5) * 60;
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = Math.round(totalMinutes % 60);
+          setCalculatedTime(`${hours}h ${minutes}m`);
+        } else {
+          setPreciseDistance(tour.distance || "0.00");
+          setCalculatedTime(tour.duration || "N/A");
+        }
+      } catch (e) {
+        console.log("Error al procesar datos reales:", e);
+      }
+    }
+    getRealData();
+  }, [tour.id]);
+
   const images = (tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0) 
     ? tour.imageUrls 
     : [tour.image];
@@ -25,58 +66,56 @@ export const TourCard = ({ tour, onPress }: any) => {
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
-        {/* ✅ USAMOS EL SLIDER */}
-        <ImageSlider 
-          images={images} 
-          width={CARD_WIDTH} 
-          height={200} 
-          onPress={onPress} 
-        />
+        <ImageSlider images={images} width={CARD_WIDTH} height={200} onPress={onPress} />
         
-        {/* Badge de Precio */}
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{tour.price === 0 ? "Gratis" : `${tour.price}€`}</Text>
         </View>
 
-        {/* Botón Favorito */}
-        <TouchableOpacity 
-          style={styles.favoriteButton} 
-          onPress={toggleFavorite}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.favoriteButton} onPress={toggleFavorite} activeOpacity={0.7}>
           <Ionicons 
             name={isFavorite ? "heart" : "heart-outline"} 
-            size={22} 
+            size={26} 
             color={isFavorite ? COLORS.error : COLORS.white} 
           />
         </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.infoContainer} onPress={onPress} activeOpacity={0.8}>
-        <Text style={styles.title}>{tour.title}</Text>
-        <Text style={styles.detailText}>{tour.city}</Text>
+        <Text style={styles.title} numberOfLines={1}>{tour.title}</Text>
+        
+        <View style={styles.metaRow}>
+          <View style={styles.metaItem}>
+            <Ionicons name="location-sharp" size={14} color={COLORS.error} />
+            <Text style={styles.metaText}>{tour.city}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="time-outline" size={14} color={COLORS.primary} />
+            <Text style={styles.metaText}>{calculatedTime}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="walk-outline" size={14} color={COLORS.accent} />
+            <Text style={styles.metaText}>{preciseDistance} km</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="map-outline" size={14} color={COLORS.gold} />
+            <Text style={styles.metaText}>{realPointsCount}</Text>
+          </View>
+        </View>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: COLORS.surface, borderRadius: 20, marginBottom: 20, elevation: 5, marginHorizontal: CARD_MARGIN, overflow: 'hidden' },
+  card: { backgroundColor: COLORS.surface, borderRadius: 20, marginBottom: 20, elevation: 5, marginHorizontal: CARD_WIDTH ? CARD_MARGIN : 15, overflow: 'hidden' },
   imageContainer: { height: 200, position: 'relative' },
   badge: { position: 'absolute', top: 0, left: 0, paddingHorizontal: 15, paddingVertical: 5, borderBottomRightRadius: 15, backgroundColor: COLORS.badge, zIndex: 10 },
   badgeText: { color: COLORS.white, fontWeight: 'bold' },
   infoContainer: { padding: 15 },
-  title: { fontSize: 16, fontWeight: 'bold', color: COLORS.primary },
-  detailText: { fontSize: 12, color: COLORS.muted, marginTop: 4 },
-  favoriteButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    padding: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10 // Importante para estar sobre el slider
-  }
+  title: { fontSize: 16, fontWeight: 'bold', color: COLORS.primary, marginBottom: 8 },
+  favoriteButton: { position: 'absolute', top: 10, right: 10, padding: 8, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 15, alignItems: 'center' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { color: COLORS.textDark, fontSize: 13, fontWeight: '500' }
 });
