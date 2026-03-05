@@ -27,7 +27,7 @@ export const ImageSlider = ({ images, height, width = screenWidth, onPress }: Im
   };
 
   return (
-    <View style={{ width, height }}>
+    <View style={{ width, height, position: 'relative' }}>
       <FlatList
         data={validImages}
         horizontal
@@ -46,18 +46,21 @@ export const ImageSlider = ({ images, height, width = screenWidth, onPress }: Im
         )}
       />
 
-      {/* Indicadores (Puntitos) */}
+      {/* Indicadores (Puntitos con Sombreado de Fondo Colectivo) */}
       {validImages.length > 1 && (
-        <View style={styles.pagination}>
-          {validImages.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                i === activeIndex ? styles.activeDot : styles.inactiveDot
-              ]}
-            />
-          ))}
+        <View style={styles.paginationContainer}>
+          {/* ✨ Esta es la View mágica que crea el fondo translúcido detrás de todos */}
+          <View style={styles.dotsWrapper}>
+            {validImages.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  i === activeIndex ? styles.activeDot : styles.inactiveDot
+                ]}
+              />
+            ))}
+          </View>
         </View>
       )}
     </View>
@@ -65,25 +68,36 @@ export const ImageSlider = ({ images, height, width = screenWidth, onPress }: Im
 };
 
 const styles = StyleSheet.create({
-  pagination: {
+  // ✨ Contenedor principal que se posiciona absolutamente al fondo
+  paginationContainer: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 12, // Margen inferior
     width: '100%',
-    flexDirection: 'row',
+    alignItems: 'center', // Centrar horizontalmente el óvalo
     justifyContent: 'center',
+  },
+  // ✨ Óvalo translúcido que envuelve todos los puntos
+  dotsWrapper: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)', // Negro súper suave/translúcido
+    paddingVertical: 5, // Espacio arriba/abajo dentro del óvalo
+    paddingHorizontal: 9, // Espacio izquierda/derecha dentro del óvalo
+    borderRadius: 15, // Muy redondeado (píldora)
     alignItems: 'center',
-    gap: 6
+    justifyContent: 'center',
+    gap: 7, // Separación entre puntos
   },
+  // ✨ El puntito base (eliminamos sombras individuales para mejor rendimiento y limpieza)
   dot: {
-    height: 6,
-    borderRadius: 3,
+    width: 7,  // Círculo perfecto
+    height: 7, // Círculo perfecto
+    borderRadius: 3.5, // Mitad exacta para que sea círculo
   },
+  // ✨ Estilos de color para el activo/inactivo
   activeDot: {
-    backgroundColor: COLORS.white,
-    width: 20,
+    backgroundColor: COLORS.white, // Blanco puro (resaltado por el fondo negro)
   },
   inactiveDot: {
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    width: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)', // Blanco semi-transparente
   }
 });

@@ -29,14 +29,11 @@ export default function TourDetailScreen() {
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // ✅ ESTADO PARA LA DISTANCIA CALCULADA
   const [calculatedDistance, setCalculatedDistance] = useState<string>("Calculando...");
 
-  // Hooks de datos
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
 
-  // Calculamos el ARRAY de imágenes para el Slider
   const tourImages = useMemo(() => {
     if (!tour) return [];
     if (tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0) {
@@ -82,7 +79,7 @@ export default function TourDetailScreen() {
       <View style={{ flex: 1, backgroundColor: COLORS.background }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           
-          {/* 1. Cabecera con Slider */}
+          {/* 1. FOTOS: Cabecera con Slider */}
           <TourHeader 
             images={tourImages} 
             onBack={() => router.back()} 
@@ -90,57 +87,48 @@ export default function TourDetailScreen() {
 
           <View style={styles.content}>
             
-            {/* 2. Info Principal */}
+            {/* Info y Estadísticas (Se quedan arriba para dar contexto al título) */}
             <TourInfo 
               title={tour.title}
               city={tour.city}
               country={tour.country}
               duration={tour.duration}
-              // ✅ Pasamos la distancia calculada (o un respaldo)
               distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")}
-              // ✅ Usamos los puntos del hook directamente
               points={points}
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
             />
-
-            {/* 3. Estadísticas */}
             <TourStats 
               listens={tour.listens || 0}
               rating={tour.rating || 0}
               reviews={tour.reviews || 0}
             />
               
-            {/* 4. Descripción */}
-            <Text style={styles.description}>{tour.description}</Text>
-
-            {/* 5. Botón Previsualización */}
-            <TouchableOpacity style={styles.previewButton}>
-               <Ionicons name="headset" size={20} color="white" style={{ marginRight: 8 }} />
-               <Text style={styles.previewText}>Previsualización de la ruta</Text>
-            </TouchableOpacity>
-
-            {/* 6. Mapa del tour */}
-            <Text style={styles.sectionTitle}>Mapa del tour</Text>
-            
-            <TourMapPreview 
-               points={points} 
-               // ✅ Recibimos la distancia y actualizamos el estado
-               onRouteCalculated={(dist) => setCalculatedDistance(dist)}
-               onPress={() => router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any)}
-            />
-
-            {/* 7. Audio Intro */}
+            {/* 2. INTRODUCCIÓN: Movido justo debajo de las estadísticas */}
             <TourIntroAudio 
               title={tour.title} 
               image={tourImages[0]} 
               audioUrl={tour.introAudioUrl}
             />
 
-            {/* 8. Lista de Puntos */}
+            {/* Botón Previsualización (Lo mantengo encima del mapa, su lugar lógico) */}
+            <TouchableOpacity style={styles.previewButton}>
+               <Ionicons name="headset" size={20} color="white" style={{ marginRight: 8 }} />
+               <Text style={styles.previewText}>Previsualización de la ruta</Text>
+            </TouchableOpacity>
+
+            {/* 3. MAPA: Mapa del tour */}
+            <Text style={styles.sectionTitle}>Mapa del tour</Text>
+            <TourMapPreview 
+               points={points} 
+               onRouteCalculated={(dist) => setCalculatedDistance(dist)}
+               onPress={() => router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any)}
+            />
+
+            {/* 4. PERSONALIZA: Lista de Puntos */}
             <TourPointList points={points} />
 
-            {/* 9. Reviews */}
+            {/* 5. VALÓRANOS: Reviews */}
             <TourReviews />
 
           </View>
@@ -158,12 +146,12 @@ export default function TourDetailScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 10 },
-  description: { fontSize: 15, color: COLORS.muted, lineHeight: 24, marginBottom: 20 },
   previewButton: {
     backgroundColor: '#8B5CF6', 
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
     paddingVertical: 14, borderRadius: 12, marginBottom: 30,
-    shadowColor: '#8B5CF6', shadowOffset: { width:0, height:4 }, shadowOpacity:0.3, shadowRadius:5
+    shadowColor: '#8B5CF6', shadowOffset: { width:0, height:4 }, shadowOpacity:0.3, shadowRadius:5,
+    marginTop: 20 // Un poco de aire desde la intro
   },
   previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },

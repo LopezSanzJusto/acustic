@@ -1,7 +1,7 @@
 // components/tourCard.tsx
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { useFavorites } from '../hooks/useFavorites';
 import { db } from '../services/firebaseConfig';
@@ -13,7 +13,19 @@ const { width } = Dimensions.get('window');
 const CARD_MARGIN = 15;
 const CARD_WIDTH = width - (CARD_MARGIN * 2);
 
-export const TourCard = ({ tour, onPress }: any) => {
+interface TourCardProps {
+  tour: any; 
+  onPress: () => void;
+  isIntroPlaying?: boolean;
+  onToggleIntro?: (audioUrl: string, tourId: string) => void;
+}
+
+export const TourCard = ({ 
+  tour, 
+  onPress, 
+  isIntroPlaying = false,
+  onToggleIntro 
+}: TourCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites(tour.id);
   
   const [realPointsCount, setRealPointsCount] = useState(0);
@@ -63,6 +75,12 @@ export const TourCard = ({ tour, onPress }: any) => {
     ? tour.imageUrls 
     : [tour.image];
 
+  const handleToggleIntro = () => {
+    if (onToggleIntro && tour.introAudioUrl) {
+      onToggleIntro(tour.introAudioUrl, tour.id);
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
@@ -72,13 +90,35 @@ export const TourCard = ({ tour, onPress }: any) => {
           <Text style={styles.badgeText}>{tour.price === 0 ? "Gratis" : `${tour.price}€`}</Text>
         </View>
 
-        <TouchableOpacity style={styles.favoriteButton} onPress={toggleFavorite} activeOpacity={0.7}>
-          <Ionicons 
-            name={isFavorite ? "heart" : "heart-outline"} 
-            size={26} 
-            color={isFavorite ? COLORS.error : COLORS.white} 
-          />
-        </TouchableOpacity>
+        {/* Contenedor para botones flotantes (Intro + Favorito) */}
+        <View style={styles.floatingButtonsContainer}>
+          {/* Botón de Intro (Auriculares/Pause) */}
+          {tour.introAudioUrl && (
+            <TouchableOpacity 
+              // ✨ Aplica estilo base + estilo de reproducción si está activo
+              style={[styles.floatingButtonCircle, isIntroPlaying && styles.introPlayingBg]} 
+              onPress={handleToggleIntro} 
+              activeOpacity={0.8}
+            >
+              <Ionicons 
+                name={isIntroPlaying ? "pause" : "headset"} 
+                size={22} 
+                // ✨ Color icono: Blanco si reproduce, Primario si parado
+                color={isIntroPlaying ? COLORS.white : COLORS.primary} 
+              />
+            </TouchableOpacity>
+          )}
+
+          {/* Botón Favorito (Corazón) */}
+          <TouchableOpacity style={styles.floatingButtonCircle} onPress={toggleFavorite} activeOpacity={0.8}>
+            <Ionicons 
+              name={isFavorite ? "heart" : "heart-outline"} 
+              size={24} 
+              // ✨ Color icono: Rojo si fav, Primario si no
+              color={isFavorite ? COLORS.error : COLORS.primary} 
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <TouchableOpacity style={styles.infoContainer} onPress={onPress} activeOpacity={0.8}>
@@ -108,13 +148,37 @@ export const TourCard = ({ tour, onPress }: any) => {
 };
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: COLORS.surface, borderRadius: 20, marginBottom: 20, elevation: 5, marginHorizontal: CARD_WIDTH ? CARD_MARGIN : 15, overflow: 'hidden' },
+  card: { backgroundColor: COLORS.surface, borderRadius: 20, marginBottom: 20, elevation: 5, marginHorizontal: 15, overflow: 'hidden' },
   imageContainer: { height: 200, position: 'relative' },
   badge: { position: 'absolute', top: 0, left: 0, paddingHorizontal: 15, paddingVertical: 5, borderBottomRightRadius: 15, backgroundColor: COLORS.badge, zIndex: 10 },
   badgeText: { color: COLORS.white, fontWeight: 'bold' },
   infoContainer: { padding: 15 },
   title: { fontSize: 16, fontWeight: 'bold', color: COLORS.primary, marginBottom: 8 },
-  favoriteButton: { position: 'absolute', top: 10, right: 10, padding: 8, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+  
+  // Contenedor superior derecho
+  floatingButtonsContainer: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    flexDirection: 'row',
+    gap: 10,
+    zIndex: 10,
+  },
+  // ✨ ESTILO CORREGIDO: Círculo blanco translúcido SIN sombras
+  floatingButtonCircle: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)', // Blanco translúcido limpio
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // 🗑️ ELIMINADO: shadowColor, shadowOffset, shadowOpacity, shadowRadius, elevation
+  },
+  // ✨ Estilo cuando la intro está reproduciéndose (Fondo Morado)
+  introPlayingBg: {
+    backgroundColor: COLORS.primary, 
+  },
+
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 15, alignItems: 'center' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { color: COLORS.textDark, fontSize: 13, fontWeight: '500' }
