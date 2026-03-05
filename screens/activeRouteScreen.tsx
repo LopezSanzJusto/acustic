@@ -33,11 +33,13 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     playNext,
     playPrevious,
     seekTo,
-    skipBy,
-  } = useAudio(points);
+    // ✨ EXTRAEMOS LAS NUEVAS FUNCIONES DE VELOCIDAD
+    playbackRate,
+    toggleSpeed
+  } = useAudio(points); 
+  // 🗑️ Hemos borrado 'skipBy' de aquí porque ya no lo usamos en el nuevo reproductor
 
   // 3. Capa de Lógica de Negocio (Sincronización GPS -> Audio)
-  // ✅ Toda la complejidad se ha movido aquí
   useGeoAudioSync({
     location,
     points,
@@ -74,11 +76,15 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
             isPlaying={isPlaying}
             positionMillis={positionMillis}
             durationMillis={durationMillis}
+            // ✨ PASAMOS LAS NUEVAS PROPIEDADES AL COMPONENTE
+            playbackRate={playbackRate}
+            onToggleSpeed={toggleSpeed}
+            // ----------------------------------------------
             onPlayPause={togglePlayPause}
             onNext={playNext}
             onPrevious={playPrevious}
             onSeek={seekTo}
-            onSkip={skipBy}
+            // 🗑️ onSkip={skipBy} eliminado porque ya no existe en el componente hijo
           />
         )}
       </View>

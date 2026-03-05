@@ -16,6 +16,9 @@ export function useAudio(points: PointOfInterest[]) {
 
   const [positionMillis, setPositionMillis] = useState(0);
   const [durationMillis, setDurationMillis] = useState(0);
+  
+  // ✨ ESTADO DE VELOCIDAD
+  const [playbackRate, setPlaybackRate] = useState(1.0);
 
   const activePoint =
     activePointIndex !== null ? points[activePointIndex] : null;
@@ -32,8 +35,9 @@ export function useAudio(points: PointOfInterest[]) {
 
       for (const point of points) {
         try {
+          // Asegúrate de que apunte a la propiedad correcta de tu audio, ej: point.audio o point.audioUrl
           const { sound } = await Audio.Sound.createAsync(
-            { uri: point.audio },
+            { uri: point.audio }, 
             { shouldPlay: false }
           );
           loaded[point.id] = sound;
@@ -80,6 +84,9 @@ export function useAudio(points: PointOfInterest[]) {
       await stopAll();
       currentSoundRef.current = sound;
 
+      // ✨ Aplicar la velocidad guardada al nuevo audio
+      await sound.setRateAsync(playbackRate, true);
+
       sound.setOnPlaybackStatusUpdate((status) => {
         if (!status.isLoaded) return;
 
@@ -125,6 +132,27 @@ export function useAudio(points: PointOfInterest[]) {
     await sound.setPositionAsync(newPos);
   };
 
+  // ✨ FUNCIÓN PARA CAMBIAR VELOCIDAD
+  const toggleSpeed = async () => {
+    const sound = currentSoundRef.current;
+    
+    // Nuevo ciclo de velocidades: 1.0 -> 1.25 -> 1.5 -> 2.0 -> 1.0
+    let newRate = 1.0;
+    if (playbackRate === 1.0) newRate = 1.25;
+    else if (playbackRate === 1.25) newRate = 1.5;
+    else if (playbackRate === 1.5) newRate = 2.0;
+
+    setPlaybackRate(newRate);
+    
+    if (sound) {
+      try {
+        await sound.setRateAsync(newRate, true);
+      } catch (error) {
+        console.error("Error cambiando velocidad:", error);
+      }
+    }
+  };
+
   const playNext = () => {
     if (activePointIndex === null || points.length === 0) return;
     setActivePointIndex((activePointIndex + 1) % points.length);
@@ -154,11 +182,13 @@ export function useAudio(points: PointOfInterest[]) {
     isPreloading,
     positionMillis,
     durationMillis,
+    playbackRate, // ✨ Exponemos el estado
     setActivePointIndex,
     togglePlayPause,
     playNext,
     playPrevious,
     seekTo,
     skipBy,
+    toggleSpeed, // ✨ Exponemos la función
   };
 }
