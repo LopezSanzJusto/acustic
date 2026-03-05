@@ -134,6 +134,7 @@ export default function TourDetailScreen() {
             <TourIntroAudio 
               title={tour.title} 
               image={tourImages[0]} 
+              audioUrl={tour.introAudioUrl}
             />
 
             {/* 8. Lista de Puntos */}

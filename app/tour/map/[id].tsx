@@ -10,7 +10,6 @@ import { MapDisplay } from '../../../components/mapDisplay';
 import { TourFooter } from '../../../components/tourDetails/tourFooter';
 import { FloatingButton } from '../../../components/floatingButton';
 import { COLORS, COMMON_STYLES } from '../../../utils/theme';
-
 // ✅ IMPORTANTE: Para manejar el notch y la barra inferior
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
