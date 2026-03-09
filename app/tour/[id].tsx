@@ -82,6 +82,9 @@ export default function TourDetailScreen() {
           {/* 1. FOTOS: Cabecera con Slider */}
           <TourHeader 
             images={tourImages} 
+            title={tour.title} // ✨ Nuevo
+            isFavorite={isFavorite} // ✨ Nuevo
+            onToggleFavorite={toggleFavorite} // ✨ Nuevo
             onBack={() => router.back()} 
           />
 

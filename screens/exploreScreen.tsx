@@ -14,7 +14,8 @@ export default function ExploreScreen() {
   const router = useRouter();
   const { tours, loading } = useFirebaseTours(); 
 
-  const categories = ["Todos", "Historia", "Arte", "Gastronomía", "Cultura"];
+  // He añadido los emojis para que se parezca más a tu Figma
+  const categories = ["Todos", "🕊️ Historia", "🖼️ Arte", "🍴 Gastronomía", "🏛️ Cultura"];
 
   // ✨ INTRO: Estados para controlar qué intro está sonando globalmente en esta lista
   const [playingTourId, setPlayingTourId] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export default function ExploreScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color="#5636D3" />
         <Text style={styles.loadingText}>Cargando audioguías...</Text>
       </View>
     );
@@ -50,11 +51,14 @@ export default function ExploreScreen() {
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color={COLORS.placeholder} />
+          {/* ✨ Icono de lupa dentro de un círculo morado */}
+          <View style={styles.searchIconContainer}>
+            <Ionicons name="search" size={16} color="#FFFFFF" />
+          </View>
           <TextInput 
-            placeholder="Encuentra tu siguiente destino.." 
+            placeholder="¿Dónde quieres caminar hoy?" 
             style={styles.searchInput}
-            placeholderTextColor={COLORS.placeholder}
+            placeholderTextColor="#A894FF" // Morado clarito para el placeholder
           />
         </View>
       </View>
@@ -62,9 +66,10 @@ export default function ExploreScreen() {
       {/* Categorías */}
       <View style={styles.categoriesWrapper}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
-          <TouchableOpacity style={styles.filterButton}>
-            <Text style={{ color: COLORS.text }}>🌐 Idioma</Text>
+          <TouchableOpacity style={styles.categoryCard}>
+            <Text style={styles.categoryText}>🌐 Idioma</Text>
           </TouchableOpacity>
+          
           {categories.map((cat, index) => (
             <TouchableOpacity 
               key={index} 
@@ -83,7 +88,8 @@ export default function ExploreScreen() {
         data={tours}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={() => (
-          <Text style={styles.sectionTitle}>Audioguías más escuchadas</Text>
+          // ✨ Título actualizado para coincidir con el Figma
+          <Text style={styles.sectionTitle}>Audioguías más próximas</Text>
         )}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
@@ -109,29 +115,68 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, paddingTop: 50 },
+  container: { flex: 1, backgroundColor: '#F8F9FA', paddingTop: 50 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 10, color: COLORS.primary, fontWeight: '600' },
+  loadingText: { marginTop: 10, color: '#5636D3', fontWeight: '600' },
+  
+  // ✨ Estilos del buscador
   searchContainer: { paddingHorizontal: 20, marginBottom: 15 },
   searchBar: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: COLORS.inputBackground, paddingHorizontal: 15,
-    paddingVertical: 12, borderRadius: 15,
+    flexDirection: 'row', 
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF', // Fondo blanco
+    borderWidth: 1.5,
+    borderColor: '#B09FFF', // Borde morado claro
+    paddingHorizontal: 10,
+    paddingVertical: 8, 
+    borderRadius: 25, // Forma de píldora
   },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 16, color: COLORS.text },
-  categoriesWrapper: { marginBottom: 10 },
-  categoriesContainer: { paddingHorizontal: 20, gap: 10, alignItems: 'center', paddingBottom: 10 },
-  filterButton: {
-    paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20,
-    borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.surface,
+  searchIconContainer: {
+    backgroundColor: '#8A72F6', // Círculo morado
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  searchInput: { 
+    flex: 1, 
+    marginLeft: 10, 
+    fontSize: 15, 
+    color: '#5636D3' 
+  },
+  
+  // ✨ Estilos de las categorías
+  categoriesWrapper: { marginBottom: 15 },
+  categoriesContainer: { paddingHorizontal: 20, gap: 10, alignItems: 'center', paddingBottom: 5 },
   categoryCard: {
-    paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20,
-    backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border,
+    paddingHorizontal: 16, 
+    paddingVertical: 8, 
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF', 
+    borderWidth: 1, 
+    borderColor: '#E0E0E0', // Borde gris claro para los inactivos
   },
-  activeCategoryCard: { backgroundColor: COLORS.textDark, borderColor: COLORS.textDark },
-  categoryText: { fontSize: 14, color: COLORS.muted },
-  activeCategoryText: { color: COLORS.white, fontWeight: 'bold' },
-  sectionTitle: { fontSize: 22, fontWeight: 'bold', marginHorizontal: 20, marginBottom: 20, color: COLORS.textDark },
+  activeCategoryCard: { 
+    backgroundColor: '#5636D3', // Fondo morado para el activo ("Todos")
+    borderColor: '#5636D3',
+  },
+  categoryText: { 
+    fontSize: 14, 
+    color: '#888888' // Texto gris para los inactivos
+  },
+  activeCategoryText: { 
+    color: '#FFFFFF', 
+    fontWeight: 'bold' 
+  },
+  
+  // ✨ Estilo del título
+  sectionTitle: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    marginHorizontal: 20, 
+    marginBottom: 20, 
+    color: '#5636D3' // Letra morada como en Figma
+  },
   listContent: { paddingBottom: 100 }
 });

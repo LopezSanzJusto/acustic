@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 export const COLORS = {
   // Brand
-  primary: '#4B0082',        // Púrpura principal
+  primary: '#4E4FA5E5',        // Púrpura principal
   primaryLight: 'rgba(75, 0, 130, 0.15)', // Para radios en mapas
   primaryBorder: 'rgba(75, 0, 130, 0.5)', // Para bordes en mapas
   

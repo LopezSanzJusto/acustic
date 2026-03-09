@@ -90,35 +90,44 @@ export const TourCard = ({
           <Text style={styles.badgeText}>{tour.price === 0 ? "Gratis" : `${tour.price}€`}</Text>
         </View>
 
-        {/* Contenedor para botones flotantes (Intro + Favorito) */}
-        <View style={styles.floatingButtonsContainer}>
-          {/* Botón de Intro (Auriculares/Pause) */}
-          {tour.introAudioUrl && (
-            <TouchableOpacity 
-              // ✨ Aplica estilo base + estilo de reproducción si está activo
-              style={[styles.floatingButtonCircle, isIntroPlaying && styles.introPlayingBg]} 
-              onPress={handleToggleIntro} 
-              activeOpacity={0.8}
-            >
-              <Ionicons 
-                name={isIntroPlaying ? "pause" : "headset"} 
-                size={22} 
-                // ✨ Color icono: Blanco si reproduce, Primario si parado
-                color={isIntroPlaying ? COLORS.white : COLORS.primary} 
-              />
-            </TouchableOpacity>
-          )}
+        {/* Botón Favorito (Corazón) - Arriba a la derecha sin fondo */}
+        <TouchableOpacity 
+          style={[
+            styles.heartButton, 
+            { 
+              // Si NO es favorito, fondo morado sólido. Si ES favorito, fondo transparente
+              backgroundColor: isFavorite ? 'transparent' : COLORS.primary,
+              // Si NO es favorito, no lleva borde extra. Si ES favorito, no lleva borde.
+              borderWidth: 0, 
+            }
+          ]} 
+          onPress={toggleFavorite} 
+          activeOpacity={0.8}
+        >
+          <Ionicons 
+            // Siempre usamos el icono relleno ("heart"), pero cambiamos el color
+            name="heart" 
+            size={isFavorite ? 28 : 20} // Un poco más grande cuando no tiene círculo
+            // Si NO es favorito, corazon blanco. Si ES favorito, corazon morado.
+            color={isFavorite ? COLORS.primary : COLORS.white} 
+          />
+        </TouchableOpacity>
 
-          {/* Botón Favorito (Corazón) */}
-          <TouchableOpacity style={styles.floatingButtonCircle} onPress={toggleFavorite} activeOpacity={0.8}>
+        {/* Botón de Intro (Play/Pause) - Abajo a la derecha */}
+        {tour.introAudioUrl && (
+          <TouchableOpacity 
+            style={[styles.introButton, isIntroPlaying && styles.introPlayingBg]} 
+            onPress={handleToggleIntro} 
+            activeOpacity={0.8}
+          >
             <Ionicons 
-              name={isFavorite ? "heart" : "heart-outline"} 
-              size={24} 
-              // ✨ Color icono: Rojo si fav, Primario si no
-              color={isFavorite ? COLORS.error : COLORS.primary} 
+              name={isIntroPlaying ? "pause-circle" : "play-circle"} 
+              size={22} 
+              color={COLORS.gold} // El diseño de Figma tiene un acento amarillento/naranja, uso gold
             />
+            <Text style={styles.introButtonText}>Intro</Text>
           </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       <TouchableOpacity style={styles.infoContainer} onPress={onPress} activeOpacity={0.8}>
@@ -155,28 +164,40 @@ const styles = StyleSheet.create({
   infoContainer: { padding: 15 },
   title: { fontSize: 16, fontWeight: 'bold', color: COLORS.primary, marginBottom: 8 },
   
-  // Contenedor superior derecho
-  floatingButtonsContainer: {
+  // ✨ Botón del Corazón (Arriba derecha, sin fondo)
+  heartButton: {
     position: 'absolute',
     top: 12,
     right: 12,
-    flexDirection: 'row',
-    gap: 10,
     zIndex: 10,
-  },
-  // ✨ ESTILO CORREGIDO: Círculo blanco translúcido SIN sombras
-  floatingButtonCircle: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)', // Blanco translúcido limpio
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    // 🗑️ ELIMINADO: shadowColor, shadowOffset, shadowOpacity, shadowRadius, elevation
   },
-  // ✨ Estilo cuando la intro está reproduciéndose (Fondo Morado)
+
+  // ✨ Botón de Intro (Abajo derecha, estilo píldora como en Figma)
+  introButton: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#8C77EDCC', // Color morado translúcido similar a COLORS.primary
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    zIndex: 10,
+    gap: 4,
+  },
   introPlayingBg: {
-    backgroundColor: COLORS.primary, 
+    backgroundColor: COLORS.primary, // Color sólido si se está reproduciendo
+  },
+  introButtonText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 15, alignItems: 'center' },
