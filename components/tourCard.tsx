@@ -1,9 +1,13 @@
 // components/tourCard.tsx
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+
+// Hooks
 import { useFavorites } from '../hooks/useFavorites';
+import { useSingleAudio } from '../hooks/useSingleAudio'; // ✨ Importamos tu hook de audio
+
 import { db } from '../services/firebaseConfig';
 import { getDistanceInMeters } from '../utils/geo';
 import { COLORS } from '../utils/theme';
@@ -16,17 +20,14 @@ const CARD_WIDTH = width - (CARD_MARGIN * 2);
 interface TourCardProps {
   tour: any; 
   onPress: () => void;
-  isIntroPlaying?: boolean;
-  onToggleIntro?: (audioUrl: string, tourId: string) => void;
+  // ✨ Ya no necesitamos isIntroPlaying ni onToggleIntro como props, la tarjeta se gestiona sola
 }
 
-export const TourCard = ({ 
-  tour, 
-  onPress, 
-  isIntroPlaying = false,
-  onToggleIntro 
-}: TourCardProps) => {
+export const TourCard = ({ tour, onPress }: TourCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites(tour.id);
+  
+  // ✨ Hook de audio instanciado directamente en la tarjeta (Lazy Loading)
+  const { isPlaying, isLoading, togglePlayPause } = useSingleAudio(tour.introAudioUrl);
   
   const [realPointsCount, setRealPointsCount] = useState(0);
   const [preciseDistance, setPreciseDistance] = useState<string>("0.00");
@@ -75,12 +76,6 @@ export const TourCard = ({
     ? tour.imageUrls 
     : [tour.image];
 
-  const handleToggleIntro = () => {
-    if (onToggleIntro && tour.introAudioUrl) {
-      onToggleIntro(tour.introAudioUrl, tour.id);
-    }
-  };
-
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
@@ -95,9 +90,7 @@ export const TourCard = ({
           style={[
             styles.heartButton, 
             { 
-              // Si NO es favorito, fondo morado sólido. Si ES favorito, fondo transparente
               backgroundColor: isFavorite ? 'transparent' : COLORS.primary,
-              // Si NO es favorito, no lleva borde extra. Si ES favorito, no lleva borde.
               borderWidth: 0, 
             }
           ]} 
@@ -105,27 +98,32 @@ export const TourCard = ({
           activeOpacity={0.8}
         >
           <Ionicons 
-            // Siempre usamos el icono relleno ("heart"), pero cambiamos el color
             name="heart" 
-            size={isFavorite ? 28 : 20} // Un poco más grande cuando no tiene círculo
-            // Si NO es favorito, corazon blanco. Si ES favorito, corazon morado.
+            size={isFavorite ? 28 : 20} 
             color={isFavorite ? COLORS.primary : COLORS.white} 
           />
         </TouchableOpacity>
 
-        {/* Botón de Intro (Play/Pause) - Abajo a la derecha */}
+        {/* ✨ Botón de Intro (Play/Pause) - Abajo a la derecha */}
         {tour.introAudioUrl && (
           <TouchableOpacity 
-            style={[styles.introButton, isIntroPlaying && styles.introPlayingBg]} 
-            onPress={handleToggleIntro} 
+            style={[styles.introButton, isPlaying && styles.introPlayingBg]} 
+            onPress={togglePlayPause} 
             activeOpacity={0.8}
+            disabled={isLoading} // Bloqueamos el botón mientras se descarga de Firebase
           >
-            <Ionicons 
-              name={isIntroPlaying ? "pause-circle" : "play-circle"} 
-              size={22} 
-              color={COLORS.gold} // El diseño de Figma tiene un acento amarillento/naranja, uso gold
-            />
-            <Text style={styles.introButtonText}>Intro</Text>
+            {isLoading ? (
+              <ActivityIndicator size="small" color={COLORS.gold} />
+            ) : (
+              <>
+                <Ionicons 
+                  name={isPlaying ? "pause-circle" : "play-circle"} 
+                  size={22} 
+                  color={COLORS.gold} 
+                />
+                <Text style={styles.introButtonText}>Intro</Text>
+              </>
+            )}
           </TouchableOpacity>
         )}
       </View>
@@ -164,7 +162,6 @@ const styles = StyleSheet.create({
   infoContainer: { padding: 15 },
   title: { fontSize: 16, fontWeight: 'bold', color: COLORS.primary, marginBottom: 8 },
   
-  // ✨ Botón del Corazón (Arriba derecha, sin fondo)
   heartButton: {
     position: 'absolute',
     top: 12,
@@ -177,14 +174,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // ✨ Botón de Intro (Abajo derecha, estilo píldora como en Figma)
   introButton: {
     position: 'absolute',
     bottom: 12,
     right: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#8C77EDCC', // Color morado translúcido similar a COLORS.primary
+    backgroundColor: '#8C77EDCC', 
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
@@ -192,7 +188,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   introPlayingBg: {
-    backgroundColor: COLORS.primary, // Color sólido si se está reproduciendo
+    backgroundColor: COLORS.primary, 
   },
   introButtonText: {
     color: COLORS.white,
