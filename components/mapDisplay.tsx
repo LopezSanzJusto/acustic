@@ -24,6 +24,8 @@ interface MapDisplayProps {
   onRouteCalculated?: (distanceText: string) => void;
   markerType?: "image" | "number"; 
   dashedRoute?: boolean;
+  // ✨ NUEVO: Prop para avisar al padre de que se tocó un punto
+  onMarkerPress?: (pointId: string) => void; 
 }
 
 export const MapDisplay = ({
@@ -34,6 +36,7 @@ export const MapDisplay = ({
   onRouteCalculated,
   markerType = "image", 
   dashedRoute = false, 
+  onMarkerPress, // ✨ Lo extraemos de las props
 }: MapDisplayProps) => {
   const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
@@ -143,6 +146,12 @@ export const MapDisplay = ({
               anchor={{ x: 0.5, y: 0.5 }}
               zIndex={2}
               tracksViewChanges={true} 
+              // ✨ NUEVO: Evento onPress para detectar cuando tocan el marcador
+              onPress={() => {
+                if (onMarkerPress) {
+                  onMarkerPress(p.id);
+                }
+              }}
             >
               <View style={styles.markerWrapper} collapsable={false}>
                 
@@ -254,5 +263,26 @@ const styles = StyleSheet.create({
     width: 45, height: 45, borderRadius: 22.5,
     backgroundColor: COLORS.white,
     justifyContent: "center", alignItems: "center",
+  },
+  
+  userMarkerContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  userMarkerDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#3B82F6",
+    borderWidth: 3,
+    borderColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
 });

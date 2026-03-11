@@ -1,6 +1,6 @@
 // screens/activeRouteScreen.tsx
 
-import React from "react";
+import React, { useCallback } from "react"; // ✨ Importamos useCallback
 import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
 import { useLocation } from "../hooks/useLocation";
 import { useFirebasePoints } from "../hooks/useFirebasePoints";
@@ -48,6 +48,17 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     setActivePointIndex
   });
 
+  // ✨ NUEVO: Función optimizada para manejar el toque en el mapa
+  const handleMarkerPress = useCallback((pointId: string) => {
+    // Buscamos el índice del punto en el array usando su ID
+    const pointIndex = points.findIndex((p) => p.id === pointId);
+    
+    // Si lo encontramos, le decimos al reproductor de audio que salte a él
+    if (pointIndex !== -1) {
+      setActivePointIndex(pointIndex);
+    }
+  }, [points, setActivePointIndex]);
+
   // 4. Renderizado condicional de carga
   if (pointsLoading) {
     return (
@@ -70,9 +81,10 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
           location={location} 
           points={points} 
           radius={RADIUS}
-          showGeofence={true} // Dejamos el círculo del radio visible para que veas cuándo salta el audio
-          markerType="number" // Muestra los números y el botón START naranja
-          dashedRoute={true}  // Muestra la línea morada y blanca de carretera
+          showGeofence={true} 
+          markerType="number" 
+          dashedRoute={true}  
+          onMarkerPress={handleMarkerPress} // ✨ PASAMOS EL EVENTO AL MAPA
         />
 
         {/* Reproductor (Solo aparece si hay un punto activo) */}
