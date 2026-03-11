@@ -24,6 +24,16 @@ export function useAudio(points: PointOfInterest[]) {
     activePointIndex !== null ? points[activePointIndex] : null;
 
   /* =========================
+   * 🆕 NUEVO: SELECCIÓN POR DEFECTO
+   * ========================= */
+  // Selecciona el primer audio por defecto cuando los puntos terminan de cargar
+  useEffect(() => {
+    if (points && points.length > 0 && activePointIndex === null) {
+      setActivePointIndex(0);
+    }
+  }, [points, activePointIndex]);
+
+  /* =========================
    * 🎧 PRELOAD AUDIOS
    * ========================= */
   useEffect(() => {

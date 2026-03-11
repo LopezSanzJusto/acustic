@@ -46,9 +46,9 @@ export const useGeoAudioSync = ({
     // Si todavía estamos cargando datos o audios, no hacemos nada
     if (isPreloading || pointsLoading) return;
 
-    // Caso A: Hemos salido de cualquier zona activa
+    // Caso A: Si no estamos en la zona de ningún punto, NO hacemos nada.
+    // Esto evita que el reproductor se oculte o cambie a null.
     if (!gpsActivePoint) {
-      setActivePointIndex(null);
       return;
     }
 
