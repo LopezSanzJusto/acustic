@@ -1,182 +1,317 @@
 // screens/exploreScreen.tsx
 
-import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TextInput, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  ActivityIndicator 
+} from 'react-native';
 import { TourCard } from '../components/tourCard';
 import { useFirebaseTours } from '../hooks/useFirebaseTours';
+import { useCitySearch } from '../hooks/useCitySearch'; 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../utils/theme'; 
-// ✨ INTRO: Importamos tu hook de audio para una sola pista
-import { useSingleAudio } from '../hooks/useSingleAudio'; 
+import { COLORS } from '../utils/theme';
 
 export default function ExploreScreen() {
   const router = useRouter();
+  
+  // 1. Estados para Firebase y el Buscador
   const { tours, loading } = useFirebaseTours(); 
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // 2. Usamos el hook de búsqueda
+  const { results: searchResults, loadingSearch } = useCitySearch(searchQuery);
 
-  // He añadido los emojis para que se parezca más a tu Figma
-  const categories = ["Todos", "🕊️ Historia", "🖼️ Arte", "🍴 Gastronomía", "🏛️ Cultura"];
+  const categories = ["Todos", "Historia", "Arte", "Gastronomía", "Cultura"];
 
-  // ✨ INTRO: Estados para controlar qué intro está sonando globalmente en esta lista
-  const [playingTourId, setPlayingTourId] = useState<string | null>(null);
-  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | undefined>(undefined);
-
-  // ✨ INTRO: Inicializamos el hook de audio de forma global para la pantalla
-  const { isPlaying, togglePlayPause } = useSingleAudio(currentAudioUrl);
-
-  // ✨ INTRO: Función que se ejecuta cuando el usuario toca el botón de auriculares en cualquier tarjeta
-  const handleToggleIntro = async (audioUrl: string, tourId: string) => {
-    // Si toca el mismo tour que ya está sonando, simplemente pausamos/reanudamos
-    if (playingTourId === tourId) {
-      await togglePlayPause();
-    } else {
-      // Si toca un tour diferente, actualizamos los estados. 
-      // El hook useSingleAudio detectará el cambio de URL y cargará el nuevo audio automáticamente.
-      setPlayingTourId(tourId);
-      setCurrentAudioUrl(audioUrl);
-    }
-  };
+  // 3. Optimizamos la extracción de ciudades y países de nuestra BD
+  const availableLocationsInDB = useMemo(() => {
+    // Mapeamos los tours para extraer ciudad y país normalizados
+    return tours.map(t => ({
+      id: t.id,
+      city: t.city ? t.city.toLowerCase().trim() : '',
+      country: t.country ? t.country.toLowerCase().trim() : ''
+    }));
+  }, [tours]);
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5636D3" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Cargando audioguías...</Text>
       </View>
     );
   }
+
+  // Renderizado condicional: ¿Estamos buscando o explorando?
+  const isSearching = searchQuery.length > 0;
 
   return (
     <View style={styles.container}>
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          {/* ✨ Icono de lupa dentro de un círculo morado */}
-          <View style={styles.searchIconContainer}>
-            <Ionicons name="search" size={16} color="#FFFFFF" />
-          </View>
+          <Ionicons name="search" size={20} color={COLORS.placeholder} />
           <TextInput 
-            placeholder="¿Dónde quieres caminar hoy?" 
+            value={searchQuery}
+            onChangeText={setSearchQuery} // Actualiza el estado al escribir
+            placeholder="Encuentra tu siguiente destino.." 
             style={styles.searchInput}
-            placeholderTextColor="#A894FF" // Morado clarito para el placeholder
+            placeholderTextColor={COLORS.placeholder}
+            autoCorrect={false}
           />
+          {/* Botón para limpiar la búsqueda rápidamente */}
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color={COLORS.placeholder} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
-      {/* Categorías */}
-      <View style={styles.categoriesWrapper}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
-          <TouchableOpacity style={styles.categoryCard}>
-            <Text style={styles.categoryText}>🌐 Idioma</Text>
-          </TouchableOpacity>
-          
-          {categories.map((cat, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={[styles.categoryCard, cat === "Todos" && styles.activeCategoryCard]}
-            >
-              <Text style={[styles.categoryText, cat === "Todos" && styles.activeCategoryText]}>
-                {cat}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+      {/* Renderizado Condicional: Si estamos buscando, mostramos la lista de ciudades */}
+      {isSearching ? (
+        <View style={styles.searchResultsContainer}>
+          {loadingSearch ? (
+            <ActivityIndicator size="small" color={COLORS.primary} style={{ marginTop: 20 }} />
+          ) : (
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item) => item.id}
+              keyboardShouldPersistTaps="handled" // Permite pulsar resultados sin que el teclado lo bloquee
+              renderItem={({ item }) => {
+                // Normalizamos los datos de la API para compararlos
+                const apiCity = item.name.toLowerCase().trim();
+                const apiCountry = item.country.toLowerCase().trim();
 
-      {/* Lista */}
-      <FlatList
-        data={tours}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={() => (
-          // ✨ Título actualizado para coincidir con el Figma
-          <Text style={styles.sectionTitle}>Audioguías más próximas</Text>
-        )}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <TourCard 
-            tour={item} 
-            onPress={() => {
-              // Si el usuario entra al detalle del tour, probablemente deberíamos parar la intro (opcional)
-              if (isPlaying) togglePlayPause();
-              
-              router.push({
-                pathname: "/tour/[id]",
-                params: { id: item.id }
-              } as any); 
-            }} 
-            // ✨ INTRO: Pasamos las nuevas propiedades a la tarjeta
-            isIntroPlaying={playingTourId === item.id && isPlaying}
-            onToggleIntro={handleToggleIntro}
+                // Buscamos si hay un "match" exacto en nuestra base de datos (Ciudad + País)
+                const matchingTour = availableLocationsInDB.find(
+                  (loc) => loc.city === apiCity
+                  // Descomenta la siguiente línea si quieres ser estricto también con el país:
+                  // && loc.country === apiCountry 
+                );
+
+                const hasAudioGuide = !!matchingTour;
+
+                return (
+                  <TouchableOpacity 
+                    style={styles.searchResultItem}
+                    activeOpacity={hasAudioGuide ? 0.2 : 1} // Si no hay guía, que no haga efecto de pulsado
+                    onPress={() => {
+                      if (hasAudioGuide) {
+                        // Viajamos a la pantalla del tour usando el ID que encontramos
+                        router.push({ 
+                          pathname: "/tour/[id]", 
+                          params: { id: matchingTour.id } 
+                        } as any);
+                      }
+                      // Si no tiene guía, no hace nada al pulsar
+                    }}
+                  >
+                    <View style={styles.searchResultTextContainer}>
+                      <Ionicons name="location-outline" size={20} color={COLORS.text} style={{ marginRight: 10 }} />
+                      <Text style={styles.searchResultCity}>{item.name}</Text>
+                      <Text style={styles.searchResultCountry}>, {item.country}</Text>
+                    </View>
+                    
+                    {/* La Marquita: Si tiene audioguía, mostramos el icono */}
+                    {hasAudioGuide && (
+                      <View style={styles.audioBadge}>
+                        <Ionicons name="headset" size={16} color={COLORS.white} />
+                        <Text style={styles.audioBadgeText}>Audioguía</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+              ListEmptyComponent={() => (
+                searchQuery.length >= 3 && !loadingSearch ? (
+                   <Text style={styles.noResultsText}>No se encontraron ciudades.</Text>
+                ) : null
+              )}
+            />
+          )}
+        </View>
+      ) : (
+        /* Vista normal de Explorar (Categorías y Tours) - Se oculta al buscar */
+        <>
+          <View style={styles.categoriesWrapper}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
+              <TouchableOpacity style={styles.filterButton}>
+                <Text style={{ color: COLORS.text }}>🌐 Idioma</Text>
+              </TouchableOpacity>
+              {categories.map((cat, index) => (
+                <TouchableOpacity 
+                  key={index} 
+                  style={[styles.categoryCard, cat === "Todos" && styles.activeCategoryCard]}
+                >
+                  <Text style={[styles.categoryText, cat === "Todos" && styles.activeCategoryText]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          <FlatList
+            data={tours}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={() => (
+              <Text style={styles.sectionTitle}>Audioguías más escuchadas</Text>
+            )}
+            contentContainerStyle={styles.listContent}
+            renderItem={({ item }) => (
+              <TourCard 
+                tour={item} 
+                onPress={() => {
+                  router.push({
+                    pathname: "/tour/[id]",
+                    params: { id: item.id }
+                  } as any); 
+                }} 
+              />
+            )}
           />
-        )}
-      />
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FA', paddingTop: 50 },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 10, color: '#5636D3', fontWeight: '600' },
-  
-  // ✨ Estilos del buscador
-  searchContainer: { paddingHorizontal: 20, marginBottom: 15 },
-  searchBar: {
-    flexDirection: 'row', 
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF', // Fondo blanco
-    borderWidth: 1.5,
-    borderColor: '#B09FFF', // Borde morado claro
-    paddingHorizontal: 10,
-    paddingVertical: 8, 
-    borderRadius: 25, // Forma de píldora
+  container: { 
+    flex: 1, 
+    backgroundColor: COLORS.background, 
+    paddingTop: 50 
   },
-  searchIconContainer: {
-    backgroundColor: '#8A72F6', // Círculo morado
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  loadingContainer: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  loadingText: { 
+    marginTop: 10, 
+    color: COLORS.primary, 
+    fontWeight: '600' 
+  },
+  searchContainer: { 
+    paddingHorizontal: 20, 
+    marginBottom: 15,
+    zIndex: 1 
+  },
+  searchBar: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: COLORS.inputBackground, 
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 15,
   },
   searchInput: { 
     flex: 1, 
     marginLeft: 10, 
-    fontSize: 15, 
-    color: '#5636D3' 
+    fontSize: 16, 
+    color: COLORS.text 
   },
   
-  // ✨ Estilos de las categorías
-  categoriesWrapper: { marginBottom: 15 },
-  categoriesContainer: { paddingHorizontal: 20, gap: 10, alignItems: 'center', paddingBottom: 5 },
-  categoryCard: {
-    paddingHorizontal: 16, 
-    paddingVertical: 8, 
+  searchResultsContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  searchResultTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  searchResultCity: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  searchResultCountry: {
+    fontSize: 16,
+    color: COLORS.muted,
+  },
+  audioBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  audioBadgeText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  noResultsText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: COLORS.muted,
+    fontSize: 14,
+  },
+
+  categoriesWrapper: {
+    marginBottom: 10,
+  },
+  categoriesContainer: {
+    paddingHorizontal: 20,
+    gap: 10,
+    alignItems: 'center',
+    paddingBottom: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#FFFFFF', 
-    borderWidth: 1, 
-    borderColor: '#E0E0E0', // Borde gris claro para los inactivos
+    borderWidth: 1,
+    borderColor: COLORS.border, 
+    backgroundColor: COLORS.surface,
   },
-  activeCategoryCard: { 
-    backgroundColor: '#5636D3', // Fondo morado para el activo ("Todos")
-    borderColor: '#5636D3',
+  categoryCard: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border, 
   },
-  categoryText: { 
-    fontSize: 14, 
-    color: '#888888' // Texto gris para los inactivos
+  activeCategoryCard: {
+    backgroundColor: COLORS.textDark, 
+    borderColor: COLORS.textDark,
   },
-  activeCategoryText: { 
-    color: '#FFFFFF', 
-    fontWeight: 'bold' 
+  categoryText: {
+    fontSize: 14,
+    color: COLORS.muted,
   },
-  
-  // ✨ Estilo del título
+  activeCategoryText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+  },
   sectionTitle: { 
-    fontSize: 20, 
+    fontSize: 22, 
     fontWeight: 'bold', 
     marginHorizontal: 20, 
     marginBottom: 20, 
-    color: '#5636D3' // Letra morada como en Figma
+    color: COLORS.textDark 
   },
-  listContent: { paddingBottom: 100 }
+  listContent: { 
+    paddingBottom: 100 
+  }
 });
