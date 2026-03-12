@@ -1,12 +1,11 @@
 // app/tour/[id].tsx
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
-import { Ionicons } from '@expo/vector-icons';
 
 // Hooks
 import { useFavorites } from '../../hooks/useFavorites';
@@ -22,6 +21,7 @@ import { TourIntroAudio } from '../../components/tourDetails/tourIntroAudio';
 import { TourPointList } from '../../components/tourDetails/tourPointList';
 import { TourReviews } from '../../components/tourDetails/tourReviews';
 import { TourMapPreview } from '../../components/tourDetails/tourMapPreview';
+import { TourAudioPreview } from '../../components/tourDetails/tourAudioPreview'; // ✨ Importamos el nuevo componente
 
 export default function TourDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -140,11 +140,8 @@ export default function TourDetailScreen() {
               audioUrl={tour.introAudioUrl}
             />
 
-            {/* Botón Previsualización */}
-            <TouchableOpacity style={styles.previewButton}>
-               <Ionicons name="headset" size={20} color="white" style={{ marginRight: 8 }} />
-               <Text style={styles.previewText}>Previsualización de la ruta</Text>
-            </TouchableOpacity>
+            {/* ✨ NUEVO COMPONENTE: Previsualización de audios */}
+            <TourAudioPreview points={points} price={tour.price || 0} />
 
             {/* 3. MAPA: Mapa del tour */}
             <Text style={styles.sectionTitle}>Mapa del tour</Text>
@@ -176,13 +173,5 @@ export default function TourDetailScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 10 },
-  previewButton: {
-    backgroundColor: '#8B5CF6', 
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    paddingVertical: 14, borderRadius: 12, marginBottom: 30,
-    shadowColor: '#8B5CF6', shadowOffset: { width:0, height:4 }, shadowOpacity:0.3, shadowRadius:5,
-    marginTop: 20
-  },
-  previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },
 });

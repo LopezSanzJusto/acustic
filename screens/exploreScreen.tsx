@@ -43,7 +43,7 @@ export default function ExploreScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color="#8C77ED" />
         <Text style={styles.loadingText}>Cargando audioguías...</Text>
       </View>
     );
@@ -57,16 +57,16 @@ export default function ExploreScreen() {
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color={COLORS.placeholder} />
+          {/* ✨ Icono morado de Figma */}
+          <Ionicons name="search" size={20} color="#8C77ED" />
           <TextInput 
             value={searchQuery}
-            onChangeText={setSearchQuery} // Actualiza el estado al escribir
-            placeholder="Encuentra tu siguiente destino.." 
+            onChangeText={setSearchQuery}
+            placeholder="¿Dónde quieres caminar hoy?" 
             style={styles.searchInput}
             placeholderTextColor={COLORS.placeholder}
             autoCorrect={false}
           />
-          {/* Botón para limpiar la búsqueda rápidamente */}
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
               <Ionicons name="close-circle" size={20} color={COLORS.placeholder} />
@@ -79,22 +79,18 @@ export default function ExploreScreen() {
       {isSearching ? (
         <View style={styles.searchResultsContainer}>
           {loadingSearch ? (
-            <ActivityIndicator size="small" color={COLORS.primary} style={{ marginTop: 20 }} />
+            <ActivityIndicator size="small" color="#8C77ED" style={{ marginTop: 20 }} />
           ) : (
             <FlatList
               data={searchResults}
               keyExtractor={(item) => item.id}
-              keyboardShouldPersistTaps="handled" // Permite pulsar resultados sin que el teclado lo bloquee
+              keyboardShouldPersistTaps="handled" 
               renderItem={({ item }) => {
-                // Normalizamos los datos de la API para compararlos
                 const apiCity = item.name.toLowerCase().trim();
                 const apiCountry = item.country.toLowerCase().trim();
 
-                // Buscamos si hay un "match" exacto en nuestra base de datos (Ciudad + País)
                 const matchingTour = availableLocationsInDB.find(
                   (loc) => loc.city === apiCity
-                  // Descomenta la siguiente línea si quieres ser estricto también con el país:
-                  // && loc.country === apiCountry 
                 );
 
                 const hasAudioGuide = !!matchingTour;
@@ -102,16 +98,14 @@ export default function ExploreScreen() {
                 return (
                   <TouchableOpacity 
                     style={styles.searchResultItem}
-                    activeOpacity={hasAudioGuide ? 0.2 : 1} // Si no hay guía, que no haga efecto de pulsado
+                    activeOpacity={hasAudioGuide ? 0.2 : 1}
                     onPress={() => {
                       if (hasAudioGuide) {
-                        // Viajamos a la pantalla del tour usando el ID que encontramos
                         router.push({ 
                           pathname: "/tour/[id]", 
                           params: { id: matchingTour.id } 
                         } as any);
                       }
-                      // Si no tiene guía, no hace nada al pulsar
                     }}
                   >
                     <View style={styles.searchResultTextContainer}>
@@ -120,7 +114,6 @@ export default function ExploreScreen() {
                       <Text style={styles.searchResultCountry}>, {item.country}</Text>
                     </View>
                     
-                    {/* La Marquita: Si tiene audioguía, mostramos el icono */}
                     {hasAudioGuide && (
                       <View style={styles.audioBadge}>
                         <Ionicons name="headset" size={16} color={COLORS.white} />
@@ -139,12 +132,12 @@ export default function ExploreScreen() {
           )}
         </View>
       ) : (
-        /* Vista normal de Explorar (Categorías y Tours) - Se oculta al buscar */
+        /* Vista normal de Explorar */
         <>
           <View style={styles.categoriesWrapper}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
               <TouchableOpacity style={styles.filterButton}>
-                <Text style={{ color: COLORS.text }}>🌐 Idioma</Text>
+                <Text style={{ color: COLORS.text, fontWeight: '500' }}>🌐 Idioma</Text>
               </TouchableOpacity>
               {categories.map((cat, index) => (
                 <TouchableOpacity 
@@ -163,7 +156,7 @@ export default function ExploreScreen() {
             data={tours}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={() => (
-              <Text style={styles.sectionTitle}>Audioguías más escuchadas</Text>
+              <Text style={styles.sectionTitle}>Audioguías cerca de ti</Text>
             )}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
@@ -197,21 +190,29 @@ const styles = StyleSheet.create({
   },
   loadingText: { 
     marginTop: 10, 
-    color: COLORS.primary, 
+    color: '#8C77ED', 
     fontWeight: '600' 
   },
   searchContainer: { 
     paddingHorizontal: 20, 
-    marginBottom: 15,
+    marginBottom: 20, // Un poco más de margen inferior para respirar
     zIndex: 1 
   },
+  // ✨ Buscador estilo Cuadrangular (Squircle) con sombra sutil
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.inputBackground, 
+    backgroundColor: '#FFFFFF', // Blanco puro
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 15,
+    paddingVertical: 14, // Ligeramente más alto
+    borderRadius: 12, // Forma cuadrangular
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 3, // Sombra en Android
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
   searchInput: { 
     flex: 1, 
@@ -249,10 +250,10 @@ const styles = StyleSheet.create({
   audioBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#8C77ED', // Morado Figma
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 8, // Cuadrangular pequeño
   },
   audioBadgeText: {
     color: COLORS.white,
@@ -268,47 +269,53 @@ const styles = StyleSheet.create({
   },
 
   categoriesWrapper: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   categoriesContainer: {
     paddingHorizontal: 20,
-    gap: 10,
+    gap: 12,
     alignItems: 'center',
-    paddingBottom: 10,
+    paddingBottom: 5,
   },
+  // ✨ Botón de Filtro (Idioma) - Cuadrangular
   filterButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10, // Squircle
     borderWidth: 1,
-    borderColor: COLORS.border, 
-    backgroundColor: COLORS.surface,
+    borderColor: '#EAEAEA', 
+    backgroundColor: '#FFFFFF',
   },
+  // ✨ Categorías - Cuadrangular
   categoryCard: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: COLORS.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10, // Squircle
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: COLORS.border, 
+    borderColor: '#EAEAEA', 
   },
+  // ✨ Categoría Activa - Morado Figma
   activeCategoryCard: {
-    backgroundColor: COLORS.textDark, 
-    borderColor: COLORS.textDark,
+    backgroundColor: '#8C77ED', 
+    borderColor: '#8C77ED',
   },
   categoryText: {
     fontSize: 14,
-    color: COLORS.muted,
+    color: COLORS.text,
+    fontWeight: '500',
   },
   activeCategoryText: {
     color: COLORS.white,
     fontWeight: 'bold',
   },
+  // ✨ Título "Audioguías cerca de ti"
   sectionTitle: { 
     fontSize: 22, 
     fontWeight: 'bold', 
     marginHorizontal: 20, 
-    marginBottom: 20, 
+    marginBottom: 16, 
+    marginTop: 10,
     color: COLORS.textDark 
   },
   listContent: { 

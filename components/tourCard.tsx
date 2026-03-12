@@ -85,26 +85,21 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
           <Text style={styles.badgeText}>{tour.price === 0 ? "Gratis" : `${tour.price}€`}</Text>
         </View>
 
-        {/* Botón Favorito (Corazón) - Arriba a la derecha sin fondo */}
+        {/* ✨ NUEVO: Botón Favorito (Cuadrangular, Fill/Stroke y Morado Figma) */}
         <TouchableOpacity 
-          style={[
-            styles.heartButton, 
-            { 
-              backgroundColor: isFavorite ? 'transparent' : COLORS.primary,
-              borderWidth: 0, 
-            }
-          ]} 
+          style={styles.favoriteButton} 
           onPress={toggleFavorite} 
           activeOpacity={0.8}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Mejora de usabilidad
         >
           <Ionicons 
-            name="heart" 
-            size={isFavorite ? 28 : 20} 
-            color={isFavorite ? COLORS.primary : COLORS.white} 
+            name={isFavorite ? "heart" : "heart-outline"} 
+            size={24} 
+            color="#8C77ED" // Color morado basado en tu diseño de Figma
           />
         </TouchableOpacity>
 
-        {/* ✨ Botón de Intro (Play/Pause) - Abajo a la derecha */}
+        {/* Botón de Intro (Play/Pause) - Abajo a la derecha */}
         {tour.introAudioUrl && (
           <TouchableOpacity 
             style={[styles.introButton, isPlaying && styles.introPlayingBg]} 
@@ -162,16 +157,24 @@ const styles = StyleSheet.create({
   infoContainer: { padding: 15 },
   title: { fontSize: 16, fontWeight: 'bold', color: COLORS.primary, marginBottom: 8 },
   
-  heartButton: {
+  // ✨ NUEVOS ESTILOS DEL BOTÓN FAVORITO
+  favoriteButton: {
     position: 'absolute',
     top: 12,
     right: 12,
     zIndex: 10,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 10, // Esto da la forma cuadrangular suavizada
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Fondo blanco casi sólido para destacar el corazón
     alignItems: 'center',
     justifyContent: 'center',
+    // Sombra sutil para mejorar el contraste sobre fotos claras
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 4,
   },
 
   introButton: {
