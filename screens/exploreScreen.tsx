@@ -18,27 +18,62 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/theme';
 
+// ✨ NUEVO: Función para limpiar tildes, acentos y mayúsculas
+const normalizeText = (text?: string) => {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .trim()
+    .normalize("NFD") // Separa las letras de sus acentos
+    .replace(/[\u0300-\u036f]/g, ""); // Borra los acentos
+};
+
 export default function ExploreScreen() {
   const router = useRouter();
   
-  // 1. Estados para Firebase y el Buscador
   const { tours, loading } = useFirebaseTours(); 
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 2. Usamos el hook de búsqueda
+  // Guardamos tanto la ciudad como el país para un filtrado exacto (normalizados)
+  const [selectedLocation, setSelectedLocation] = useState<{city: string, country: string} | null>(null);
+  
   const { results: searchResults, loadingSearch } = useCitySearch(searchQuery);
 
   const categories = ["Todos", "Historia", "Arte", "Gastronomía", "Cultura"];
 
-  // 3. Optimizamos la extracción de ciudades y países de nuestra BD
+  // ✨ ACTUALIZADO: Optimizamos la extracción usando textos normalizados
   const availableLocationsInDB = useMemo(() => {
-    // Mapeamos los tours para extraer ciudad y país normalizados
     return tours.map(t => ({
       id: t.id,
-      city: t.city ? t.city.toLowerCase().trim() : '',
-      country: t.country ? t.country.toLowerCase().trim() : ''
+      city: normalizeText(t.city),
+      country: normalizeText(t.country),
+      originalCity: t.city,
+      originalCountry: t.country
     }));
   }, [tours]);
+
+  // ✨ ACTUALIZADO: Filtramos comprobando ciudad Y país con la validación flexible
+  const displayedTours = useMemo(() => {
+    if (selectedLocation) {
+      return tours.filter(t => {
+        const tCity = normalizeText(t.city);
+        const tCountry = normalizeText(t.country);
+        
+        const cityMatch = tCity === selectedLocation.city;
+        
+        const countryMatch = 
+          !tCountry || 
+          tCountry === selectedLocation.country || 
+          selectedLocation.country.includes(tCountry) || 
+          tCountry.includes(selectedLocation.country) || 
+          (tCountry === 'espana' && selectedLocation.country === 'spain') || 
+          (tCountry === 'spain' && selectedLocation.country === 'espana');
+        
+        return cityMatch && countryMatch;
+      });
+    }
+    return tours; 
+  }, [tours, selectedLocation]);
 
   if (loading) {
     return (
@@ -49,34 +84,40 @@ export default function ExploreScreen() {
     );
   }
 
-  // Renderizado condicional: ¿Estamos buscando o explorando?
-  const isSearching = searchQuery.length > 0;
+  // Actualizado para usar selectedLocation
+  const showAutocomplete = searchQuery.length > 0 && !selectedLocation;
 
   return (
     <View style={styles.container}>
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          {/* ✨ Icono morado de Figma */}
           <Ionicons name="search" size={20} color="#8C77ED" />
           <TextInput 
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={(text) => {
+              setSearchQuery(text);
+              // Reseteamos la localización completa si el usuario vuelve a escribir
+              if (selectedLocation) setSelectedLocation(null);
+            }}
             placeholder="¿Dónde quieres caminar hoy?" 
             style={styles.searchInput}
             placeholderTextColor={COLORS.placeholder}
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => { 
+              setSearchQuery(''); 
+              setSelectedLocation(null); // Limpiamos filtro
+            }}>
               <Ionicons name="close-circle" size={20} color={COLORS.placeholder} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      {/* Renderizado Condicional: Si estamos buscando, mostramos la lista de ciudades */}
-      {isSearching ? (
+      {/* Renderizado Condicional */}
+      {showAutocomplete ? (
         <View style={styles.searchResultsContainer}>
           {loadingSearch ? (
             <ActivityIndicator size="small" color="#8C77ED" style={{ marginTop: 20 }} />
@@ -86,14 +127,23 @@ export default function ExploreScreen() {
               keyExtractor={(item) => item.id}
               keyboardShouldPersistTaps="handled" 
               renderItem={({ item }) => {
-                const apiCity = item.name.toLowerCase().trim();
-                const apiCountry = item.country.toLowerCase().trim();
+                // ✨ ACTUALIZADO: Normalizamos los datos que vienen de la API (Search)
+                const apiCity = normalizeText(item.name);
+                const apiCountry = normalizeText(item.country);
 
-                const matchingTour = availableLocationsInDB.find(
-                  (loc) => loc.city === apiCity
-                );
+                // ✨ ACTUALIZADO: Validación flexible para detectar las guías en base de datos
+                const hasAudioGuide = availableLocationsInDB.some((loc) => {
+                  const cityMatch = loc.city === apiCity;
+                  const countryMatch = 
+                    !loc.country || 
+                    loc.country === apiCountry || 
+                    apiCountry.includes(loc.country) || 
+                    loc.country.includes(apiCountry) ||
+                    (loc.country === 'espana' && apiCountry === 'spain') ||
+                    (loc.country === 'spain' && apiCountry === 'espana');
 
-                const hasAudioGuide = !!matchingTour;
+                  return cityMatch && countryMatch;
+                });
 
                 return (
                   <TouchableOpacity 
@@ -101,10 +151,9 @@ export default function ExploreScreen() {
                     activeOpacity={hasAudioGuide ? 0.2 : 1}
                     onPress={() => {
                       if (hasAudioGuide) {
-                        router.push({ 
-                          pathname: "/tour/[id]", 
-                          params: { id: matchingTour.id } 
-                        } as any);
+                        // Guardamos el par ciudad/país normalizado en el estado
+                        setSelectedLocation({ city: apiCity, country: apiCountry });
+                        setSearchQuery(item.name);
                       }
                     }}
                   >
@@ -153,10 +202,12 @@ export default function ExploreScreen() {
           </View>
 
           <FlatList
-            data={tours}
+            data={displayedTours} 
             keyExtractor={(item) => item.id}
             ListHeaderComponent={() => (
-              <Text style={styles.sectionTitle}>Audioguías cerca de ti</Text>
+              <Text style={styles.sectionTitle}>
+                {selectedLocation ? `Resultados en ${searchQuery}` : 'Audioguías cerca de ti'}
+              </Text>
             )}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
@@ -195,22 +246,21 @@ const styles = StyleSheet.create({
   },
   searchContainer: { 
     paddingHorizontal: 20, 
-    marginBottom: 20, // Un poco más de margen inferior para respirar
+    marginBottom: 20, 
     zIndex: 1 
   },
-  // ✨ Buscador estilo Cuadrangular (Squircle) con sombra sutil
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF', // Blanco puro
+    backgroundColor: '#FFFFFF', 
     paddingHorizontal: 15,
-    paddingVertical: 14, // Ligeramente más alto
-    borderRadius: 12, // Forma cuadrangular
+    paddingVertical: 14, 
+    borderRadius: 12, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 5,
-    elevation: 3, // Sombra en Android
+    elevation: 3, 
     borderWidth: 1,
     borderColor: '#F0F0F0',
   },
@@ -220,7 +270,6 @@ const styles = StyleSheet.create({
     fontSize: 16, 
     color: COLORS.text 
   },
-  
   searchResultsContainer: {
     flex: 1,
     paddingHorizontal: 20,
@@ -250,10 +299,10 @@ const styles = StyleSheet.create({
   audioBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#8C77ED', // Morado Figma
+    backgroundColor: '#8C77ED', 
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8, // Cuadrangular pequeño
+    borderRadius: 8, 
   },
   audioBadgeText: {
     color: COLORS.white,
@@ -267,7 +316,6 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
     fontSize: 14,
   },
-
   categoriesWrapper: {
     marginBottom: 15,
   },
@@ -277,25 +325,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 5,
   },
-  // ✨ Botón de Filtro (Idioma) - Cuadrangular
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 10, // Squircle
+    borderRadius: 10, 
     borderWidth: 1,
     borderColor: '#EAEAEA', 
     backgroundColor: '#FFFFFF',
   },
-  // ✨ Categorías - Cuadrangular
   categoryCard: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 10, // Squircle
+    borderRadius: 10, 
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EAEAEA', 
   },
-  // ✨ Categoría Activa - Morado Figma
   activeCategoryCard: {
     backgroundColor: '#8C77ED', 
     borderColor: '#8C77ED',
@@ -309,7 +354,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: 'bold',
   },
-  // ✨ Título "Audioguías cerca de ti"
   sectionTitle: { 
     fontSize: 22, 
     fontWeight: 'bold', 
