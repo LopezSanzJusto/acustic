@@ -9,7 +9,8 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  ActivityIndicator 
+  ActivityIndicator,
+  Image
 } from 'react-native';
 import { TourCard } from '../components/tourCard';
 import { useFirebaseTours } from '../hooks/useFirebaseTours';
@@ -165,8 +166,11 @@ export default function ExploreScreen() {
                     
                     {hasAudioGuide && (
                       <View style={styles.audioBadge}>
-                        <Ionicons name="headset" size={16} color={COLORS.white} />
-                        <Text style={styles.audioBadgeText}>Audioguía</Text>
+                        <Image 
+                          source={require('../assets/images/logo.png')} 
+                          style={styles.badgeLogo} 
+                          resizeMode="contain" 
+                        />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -309,6 +313,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     marginLeft: 4,
+  },
+  badgeLogo: {
+    width: 16,  // Ajusta este tamaño según lo grande que quieras el logo
+    height: 16,
+    tintColor: COLORS.white, // 💡 IMPORTANTE: Si tu logo original es negro/color, pero el fondo del badge es oscuro y quieres que el logo se vuelva blanco puro (como el icono de antes), descomenta esta línea.
   },
   noResultsText: {
     textAlign: 'center',

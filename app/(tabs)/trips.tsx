@@ -11,6 +11,9 @@ import { EmptyState } from '../../components/emptyState';
 import { useMyTours } from '../../hooks/useMyTours';
 import { COLORS } from '../../utils/theme';
 
+// ✅ Importamos el logo. Asegúrate de que esta ruta hacia assets/images/logo.png sea correcta
+const LogoAcustic = require('../../assets/images/logo.png');
+
 export default function TripsScreen() {
   const router = useRouter();
   const { purchasedTours, favoriteTours, loading } = useMyTours();
@@ -21,9 +24,9 @@ export default function TripsScreen() {
   // Lógica: ¿Qué datos mostramos ahora?
   const dataToShow = activeTab === 'purchased' ? purchasedTours : favoriteTours;
 
-  // Lógica: Textos dinámicos para cuando no hay resultados
+  // Lógica: Textos y Logo dinámicos
   const emptyStateConfig = activeTab === 'purchased' 
-    ? { icon: "map-outline" as const, title: "No tienes audioguías", desc: "Explora el catálogo y añade tu primer destino." }
+    ? { imageSource: LogoAcustic, title: "No tienes audioguías", desc: "Explora el catálogo y añade tu primer destino." } // ✅ Logo aquí
     : { icon: "heart-dislike-outline" as const, title: "Aún no hay favoritos", desc: "Guarda las rutas que más te gusten para verlas luego." };
 
   if (loading) {
@@ -48,6 +51,7 @@ export default function TripsScreen() {
       {dataToShow.length === 0 ? (
         <EmptyState 
           icon={emptyStateConfig.icon}
+          imageSource={emptyStateConfig.imageSource} // ✅ Pasamos la prop (puede ser undefined, EmptyState lo maneja)
           title={emptyStateConfig.title}
           description={emptyStateConfig.desc}
           buttonText="Ir a Explora"
