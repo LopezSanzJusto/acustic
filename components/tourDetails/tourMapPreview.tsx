@@ -1,9 +1,10 @@
-// components/tourDetails/tourMapPreview.tsx
-
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { PointOfInterest } from '../../data/points';
 import { MapDisplay } from '../mapDisplay';
+
+// ✨ NUEVO: Importamos nuestro hook global
+import { useCustomRoute } from '../../hooks/useCustomRoute';
 
 interface TourMapPreviewProps {
   points: PointOfInterest[];
@@ -12,16 +13,22 @@ interface TourMapPreviewProps {
 }
 
 export const TourMapPreview = ({ points, onPress, onRouteCalculated }: TourMapPreviewProps) => {
+  // ✨ Extraemos la ruta activa desde el contexto
+  const { activeRoutePoints } = useCustomRoute();
+
+  // Si hay puntos en el estado global, los usamos. Si es la primera carga, usamos los props.
+  const displayPoints = activeRoutePoints.length > 0 ? activeRoutePoints : points;
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.touchable}>
         <View style={styles.mapWrapper} pointerEvents="none">
           <MapDisplay 
             location={null} 
-            points={points} 
+            // ✨ PASAMOS LOS PUNTOS FILTRADOS AL MINI MAPA
+            points={displayPoints} 
             showGeofence={false} 
             onRouteCalculated={onRouteCalculated} 
-            // ✨ Activamos el diseño del Figma
             markerType="number"
             dashedRoute={true}
           />

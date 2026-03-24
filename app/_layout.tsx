@@ -7,7 +7,10 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { COLORS } from '../utils/theme';
 import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
-import { useColorScheme } from '@/hooks/use-color-scheme'; // Si no usas este hook, puedes quitar esta línea y el ThemeProvider
+import { useColorScheme } from '@/hooks/use-color-scheme';
+
+// ✨ NUEVO: Importamos el Provider que acabamos de crear
+import { RouteProvider } from '../hooks/useCustomRoute'; 
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -45,7 +48,6 @@ export default function RootLayout() {
   }, [user, initializing, segments]);
 
   // 4. Pantalla de Carga (El "Escudo")
-  // Importante: Mostramos esto mientras Firebase inicializa O mientras decidimos dónde mandar al usuario.
   if (initializing) {
     return (
       <View style={styles.loadingContainer}>
@@ -55,21 +57,23 @@ export default function RootLayout() {
   }
 
   // 5. Renderizado de la App
-  // Solo llegamos aquí si el usuario está en el sitio correcto
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* Pantallas Principales */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        
-        {/* Pantallas de Autenticación */}
-        <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-        
-        {/* Otras Pantallas */}
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
-        <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
-      </Stack>
+      {/* ✨ NUEVO: Envolvemos toda la navegación con nuestro RouteProvider */}
+      <RouteProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* Pantallas Principales */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          
+          {/* Pantallas de Autenticación */}
+          <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+          
+          {/* Otras Pantallas */}
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
+          <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
+        </Stack>
+      </RouteProvider>
     </ThemeProvider>
   );
 }

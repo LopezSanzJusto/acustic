@@ -1,5 +1,3 @@
-// app/tour/map/[id].tsx
-
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
@@ -7,11 +5,14 @@ import { doc, getDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { db } from '../../../services/firebaseConfig';
 import { useFirebasePoints } from '../../../hooks/useFirebasePoints';
-import { useFavorites } from '../../../hooks/useFavorites'; // ✨ Importamos favoritos
+import { useFavorites } from '../../../hooks/useFavorites'; 
 import { MapDisplay } from '../../../components/mapDisplay';
 import { TourFooter } from '../../../components/tourDetails/tourFooter';
 import { COLORS, COMMON_STYLES } from '../../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// ✨ NUEVO: Importamos nuestro hook global
+import { useCustomRoute } from '../../../hooks/useCustomRoute'; 
 
 export default function TourMapScreen() {
   const { id } = useLocalSearchParams();
@@ -19,8 +20,21 @@ export default function TourMapScreen() {
   const insets = useSafeAreaInsets();
   
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
-  const { isFavorite, toggleFavorite } = useFavorites(id as string); // ✨ Estado del corazón
+  const { isFavorite, toggleFavorite } = useFavorites(id as string); 
   const [tourPrice, setTourPrice] = useState<number | null>(null);
+
+  // ✨ NUEVO: Extraemos la ruta filtrada y la función para inicializarla
+  const { activeRoutePoints, setInitialPoints } = useCustomRoute();
+
+  // Sincronizamos por si el usuario entra directo a este mapa (por ejemplo, vía Deep Link)
+  useEffect(() => {
+    if (points && points.length > 0) {
+      setInitialPoints(points);
+    }
+  }, [points, setInitialPoints]);
+
+  // Si ya tenemos la ruta filtrada, la usamos. Si no, esperamos con un array vacío.
+  const routeToUse = activeRoutePoints.length > 0 ? activeRoutePoints : [];
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -45,17 +59,14 @@ export default function TourMapScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* === CABECERA BLANCA (Diseño Figma) === */}
+      {/* === CABECERA === */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        {/* Botón Atrás */}
         <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         
-        {/* Título */}
         <Text style={styles.headerTitle}>Mapa del recorrido</Text>
         
-        {/* Botón Corazón */}
         <TouchableOpacity onPress={toggleFavorite} style={styles.headerIcon}>
           <Ionicons 
             name={isFavorite ? "heart" : "heart-outline"} 
@@ -69,14 +80,15 @@ export default function TourMapScreen() {
       <View style={styles.mapContainer}>
         <MapDisplay 
             location={null} 
-            points={points} 
+            // ✨ PASAMOS LA RUTA FILTRADA
+            points={routeToUse} 
             showGeofence={false} 
             markerType="number"
             dashedRoute={true}
         />
       </View>
 
-      {/* === CAPA INFERIOR (Footer) === */}
+      {/* === CAPA INFERIOR === */}
       <View style={[styles.footerContainer, { paddingBottom: insets.bottom }]}>
         <TourFooter 
             price={tourPrice || 0} 
@@ -89,8 +101,6 @@ export default function TourMapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  
-  // ✨ Estilos de la nueva cabecera
   header: {
     backgroundColor: COLORS.white,
     flexDirection: 'row',
@@ -102,20 +112,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  headerIcon: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontWeight: 'bold',
-    color: COLORS.textDark,
-    fontSize: 16
-  },
-
-  // ✨ El mapa ahora toma el resto de la pantalla debajo de la cabecera
-  mapContainer: { 
-    flex: 1 
-  },
-  
+  headerIcon: { padding: 5 },
+  headerTitle: { fontWeight: 'bold', color: COLORS.textDark, fontSize: 16 },
+  mapContainer: { flex: 1 },
   footerContainer: { 
     position: 'absolute', 
     bottom: 0, left: 0, right: 0,
