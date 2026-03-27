@@ -1,10 +1,12 @@
 // components/audioMiniPlayer.tsx
 
-import React from "react";
+import React, { useMemo, useCallback, useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import BottomSheet, { BottomSheetView, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { PointOfInterest } from "../data/points";
+import { StopCard } from "./StopCard";
 
 interface Props {
   activePoint: PointOfInterest;
@@ -12,6 +14,8 @@ interface Props {
   positionMillis: number;
   durationMillis: number;
   playbackRate?: number;
+  points: PointOfInterest[];
+  onSelectAudio: (index: number) => void;
   onPlayPause: () => void;
   onNext: () => void;
   onPrevious: () => void;
@@ -32,104 +36,136 @@ export const AudioMiniPlayer = ({
   positionMillis,
   durationMillis,
   playbackRate = 1.0,
+  points,
+  onSelectAudio,
   onPlayPause,
   onNext,
   onPrevious,
   onSeek,
   onToggleSpeed,
 }: Props) => {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // SnapPoints: El 18% es para cuando está "mini", el 85% para cuando ves la lista.
+  const snapPoints = useMemo(() => ['18%', '85%'], []);
+
+  // Al pulsar una parada, cambiamos el audio. 
+  // La cabecera se actualizará sola porque recibe 'activePoint' por props.
+  const handleStopPress = useCallback((pointId: string) => {
+    const index = points.findIndex(p => p.id === pointId);
+    if (index !== -1) {
+      onSelectAudio(index);
+    }
+  }, [points, onSelectAudio]);
+
+  const renderItem = useCallback(({ item }: { item: PointOfInterest }) => (
+    <StopCard point={item} onPress={() => handleStopPress(item.id)} />
+  ), [handleStopPress]);
+
   return (
-    <View style={styles.container}>
-      
-      <View style={styles.dragIndicatorWrapper}>
-        <View style={styles.dragIndicator} />
-      </View>
-
-      <View style={styles.headerRow}>
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: activePoint.image }} style={styles.thumbnail} />
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{activePoint.order}</Text>
+    <BottomSheet
+      ref={bottomSheetRef}
+      index={0}
+      snapPoints={snapPoints}
+      handleIndicatorStyle={styles.dragIndicator}
+      backgroundStyle={styles.sheetBackground}
+      // IMPORTANTE: quitamos el style={styles.container} que tenía position absolute
+    >
+      {/* Esta View es la "Cabecera". No desaparece al subir, se queda arriba 
+          porque es lo primero dentro del BottomSheet. 
+      */}
+      <BottomSheetView style={styles.playerHeader}>
+        <View style={styles.headerRow}>
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: activePoint.image }} style={styles.thumbnail} />
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{activePoint.order}</Text>
+            </View>
           </View>
-        </View>
-        <Text style={styles.title} numberOfLines={1}>
-          {activePoint.name}
-        </Text>
-      </View>
-
-      <View style={styles.controlsAndSpeedRow}>
-        <View style={styles.mainControls}>
-          <TouchableOpacity onPress={onPrevious} style={styles.controlBtn}>
-            <Ionicons name="play-back" size={26} color="#3730A3" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={onPlayPause} style={styles.playPauseBtn}>
-            <Ionicons name={isPlaying ? "pause" : "play"} size={30} color="#8B5CF6" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={onNext} style={styles.controlBtn}>
-            <Ionicons name="play-forward" size={26} color="#3730A3" />
-          </TouchableOpacity>
+          <Text style={styles.title} numberOfLines={1}>
+            {activePoint.name}
+          </Text>
         </View>
 
-        {onToggleSpeed ? (
-          <TouchableOpacity style={styles.speedBadge} onPress={onToggleSpeed}>
-            <Text style={styles.speedText}>{playbackRate}x</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.speedBadgePlaceholder} />
-        )}
-      </View>
+        <View style={styles.controlsAndSpeedRow}>
+          <View style={styles.mainControls}>
+            <TouchableOpacity onPress={onPrevious} style={styles.controlBtn}>
+              <Ionicons name="play-back" size={26} color="#3730A3" />
+            </TouchableOpacity>
 
-      <View style={styles.progress}>
-        <Text style={styles.timeLabel}>{formatTime(positionMillis)}</Text>
+            <TouchableOpacity onPress={onPlayPause} style={styles.playPauseBtn}>
+              <Ionicons name={isPlaying ? "pause" : "play"} size={30} color="#8B5CF6" />
+            </TouchableOpacity>
 
-        <Slider
-          style={{ flex: 1, height: 28 }}
-          minimumValue={0}
-          maximumValue={durationMillis || 1}
-          value={positionMillis}
-          onSlidingComplete={onSeek}
-          minimumTrackTintColor="#8B5CF6"
-          maximumTrackTintColor="#E5E7EB"
-          thumbTintColor="#8B5CF6"
-        />
+            <TouchableOpacity onPress={onNext} style={styles.controlBtn}>
+              <Ionicons name="play-forward" size={26} color="#3730A3" />
+            </TouchableOpacity>
+          </View>
 
-        <Text style={styles.timeLabel}>{formatTime(durationMillis)}</Text>
-      </View>
-    </View>
+          {onToggleSpeed && (
+            <TouchableOpacity style={styles.speedBadge} onPress={onToggleSpeed}>
+              <Text style={styles.speedText}>{playbackRate}x</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.progress}>
+          <Text style={styles.timeLabel}>{formatTime(positionMillis)}</Text>
+          <Slider
+            style={{ flex: 1, height: 28 }}
+            minimumValue={0}
+            maximumValue={durationMillis || 1}
+            value={positionMillis}
+            onSlidingComplete={onSeek}
+            minimumTrackTintColor="#8B5CF6"
+            maximumTrackTintColor="#E5E7EB"
+            thumbTintColor="#8B5CF6"
+          />
+          <Text style={styles.timeLabel}>{formatTime(durationMillis)}</Text>
+        </View>
+      </BottomSheetView>
+
+      {/* Título de la lista */}
+      <BottomSheetView style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Próximas paradas</Text>
+      </BottomSheetView>
+
+      <BottomSheetFlatList
+        data={points} // Mostramos todos para que el usuario pueda elegir cualquiera
+        keyExtractor={(item: PointOfInterest) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+    </BottomSheet>
   );
 };
 
-const FONT_FAMILY = 'Urbanist-SemiBold'; 
+const FONT_FAMILY = 'Urbanist-SemiBold';
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+  // ELIMINADO: styles.container que causaba el doble renderizado
+  sheetBackground: {
     backgroundColor: "#FFF",
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    paddingTop: 8,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    // Sombra para que se vea claramente sobre el mapa
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -6 },
+    shadowOffset: { width: 0, height: -10 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 10,
-  },
-  dragIndicatorWrapper: {
-    alignItems: "center",
-    marginBottom: 10,
   },
   dragIndicator: {
     width: 36,
     height: 4,
     backgroundColor: "#C4B5FD",
     borderRadius: 2,
+    marginTop: 4,
+  },
+  playerHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   headerRow: {
     flexDirection: "row",
@@ -148,7 +184,6 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: "absolute",
-    // top: -5,
     right: -5,
     backgroundColor: "#8B5CF6",
     width: 19,
@@ -177,19 +212,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    marginBottom: 0,
   },
   mainControls: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
   },
-  controlBtn: {
-    padding: 2,
-  },
-  playPauseBtn: {
-    marginHorizontal: 0,
-  },
+  controlBtn: { padding: 2 },
+  playPauseBtn: { marginHorizontal: 0 },
   speedBadge: {
     position: "absolute",
     right: 0,
@@ -204,9 +234,6 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY,
     fontSize: 11,
   },
-  speedBadgePlaceholder: {
-    width: 40,
-  },
   progress: {
     flexDirection: "row",
     alignItems: "center",
@@ -219,5 +246,20 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY,
     width: 32,
     textAlign: "center",
+  },
+  sectionHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#FFF',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+    fontFamily: FONT_FAMILY,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
 });
