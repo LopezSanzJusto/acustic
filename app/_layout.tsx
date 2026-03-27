@@ -8,21 +8,20 @@ import { auth } from '../services/firebaseConfig';
 import { COLORS } from '../utils/theme';
 import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-// ✨ NUEVO: Importamos el Provider que acabamos de crear
 import { RouteProvider } from '../hooks/useCustomRoute'; 
+
+// ✨ NUEVO: Importamos el motor de gestos
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   
-  // 1. Estados de Autenticación
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   
   const router = useRouter();
   const segments = useSegments();
 
-  // 2. Escuchar a Firebase (Se ejecuta una sola vez al arrancar)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -31,23 +30,18 @@ export default function RootLayout() {
     return unsubscribe;
   }, []);
 
-  // 3. El Portero (Lógica de Protección)
   useEffect(() => {
     if (initializing) return;
 
-    // Verificamos si el usuario está intentando entrar en la zona de 'auth' (login/registro)
     const inAuthGroup = segments[0] === 'auth';
 
     if (user && inAuthGroup) {
-      // CASO A: Usuario Logueado intenta ver Login -> Lo mandamos a la App (Tabs)
       router.replace('/(tabs)' as any);
     } else if (!user && !inAuthGroup) {
-      // CASO B: Usuario NO Logueado intenta ver la App -> Lo mandamos al Login
       router.replace('/auth/login' as any);
     }
   }, [user, initializing, segments]);
 
-  // 4. Pantalla de Carga (El "Escudo")
   if (initializing) {
     return (
       <View style={styles.loadingContainer}>
@@ -56,33 +50,24 @@ export default function RootLayout() {
     );
   }
 
-  // 5. Renderizado de la App
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {/* ✨ NUEVO: Envolvemos toda la navegación con nuestro RouteProvider */}
-      <RouteProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          {/* Pantallas Principales */}
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          
-          {/* Pantallas de Autenticación */}
-          <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-          
-          {/* Otras Pantallas */}
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
-          <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
-        </Stack>
-      </RouteProvider>
-    </ThemeProvider>
+    // ✨ NUEVO: Envolvemos TODO con el GestureHandler (OBLIGATORIO para Drag & Drop)
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <RouteProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
+            <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
+          </Stack>
+        </RouteProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-  },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
 });
