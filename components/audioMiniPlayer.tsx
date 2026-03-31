@@ -2,7 +2,8 @@
 
 import React, { useMemo, useCallback, useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import BottomSheet, { BottomSheetView, BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { COLORS } from "../utils/theme";
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { PointOfInterest } from "../data/points";
@@ -46,11 +47,8 @@ export const AudioMiniPlayer = ({
 }: Props) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  // SnapPoints: El 18% es para cuando está "mini", el 85% para cuando ves la lista.
-  const snapPoints = useMemo(() => ['18%', '85%'], []);
+  const snapPoints = useMemo(() => [180, '85%'], []);
 
-  // Al pulsar una parada, cambiamos el audio. 
-  // La cabecera se actualizará sola porque recibe 'activePoint' por props.
   const handleStopPress = useCallback((pointId: string) => {
     const index = points.findIndex(p => p.id === pointId);
     if (index !== -1) {
@@ -69,17 +67,14 @@ export const AudioMiniPlayer = ({
       snapPoints={snapPoints}
       handleIndicatorStyle={styles.dragIndicator}
       backgroundStyle={styles.sheetBackground}
-      // IMPORTANTE: quitamos el style={styles.container} que tenía position absolute
     >
-      {/* Esta View es la "Cabecera". No desaparece al subir, se queda arriba 
-          porque es lo primero dentro del BottomSheet. 
-      */}
-      <BottomSheetView style={styles.playerHeader}>
+      <View style={styles.stickyHeader}>
         <View style={styles.headerRow}>
           <View style={styles.imageContainer}>
             <Image source={{ uri: activePoint.image }} style={styles.thumbnail} />
+            {/* ✨ EL BADGE VUELVE A ESTAR AQUÍ, DENTRO DEL IMAGE CONTAINER */}
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{activePoint.order}</Text>
+               <Text style={styles.badgeText}>{activePoint.order}</Text>
             </View>
           </View>
           <Text style={styles.title} numberOfLines={1}>
@@ -112,7 +107,7 @@ export const AudioMiniPlayer = ({
         <View style={styles.progress}>
           <Text style={styles.timeLabel}>{formatTime(positionMillis)}</Text>
           <Slider
-            style={{ flex: 1, height: 28 }}
+            style={styles.slider}
             minimumValue={0}
             maximumValue={durationMillis || 1}
             value={positionMillis}
@@ -123,17 +118,17 @@ export const AudioMiniPlayer = ({
           />
           <Text style={styles.timeLabel}>{formatTime(durationMillis)}</Text>
         </View>
-      </BottomSheetView>
-
-      {/* Título de la lista */}
-      <BottomSheetView style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Próximas paradas</Text>
-      </BottomSheetView>
+      </View>
 
       <BottomSheetFlatList
-        data={points} // Mostramos todos para que el usuario pueda elegir cualquiera
+        data={points}
         keyExtractor={(item: PointOfInterest) => item.id}
         renderItem={renderItem}
+        ListHeaderComponent={
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Próximas paradas</Text>
+          </View>
+        }
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
@@ -144,112 +139,123 @@ export const AudioMiniPlayer = ({
 const FONT_FAMILY = 'Urbanist-SemiBold';
 
 const styles = StyleSheet.create({
-  // ELIMINADO: styles.container que causaba el doble renderizado
   sheetBackground: {
     backgroundColor: "#FFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    // Sombra para que se vea claramente sobre el mapa
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -10 },
+    shadowOffset: { width: 0, height: -5 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowRadius: 8,
+    elevation: 10,
   },
   dragIndicator: {
-    width: 36,
-    height: 4,
-    backgroundColor: "#C4B5FD",
-    borderRadius: 2,
-    marginTop: 4,
+    width: 40,
+    height: 5,
+    backgroundColor: COLORS.primary,
+    borderRadius: 3,
+    marginTop: 10,
   },
-  playerHeader: {
+  stickyHeader: {
+    backgroundColor: "#FFF", 
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6", 
+    zIndex: 10,
+    elevation: 5, 
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   imageContainer: {
     position: "relative",
-    marginRight: 12,
+    marginRight: 16, // ✨ MARGEN AUMENTADO PARA QUE QUEPA EL CÍRCULO
   },
   thumbnail: {
-    width: 38,
-    height: 38,
-    borderRadius: 7,
+    width: 48, // ✨ UN POQUITO MÁS GRANDE PARA QUE DESTAQUE
+    height: 48,
+    borderRadius: 8,
     backgroundColor: "#E5E7EB",
   },
   badge: {
     position: "absolute",
-    right: -5,
-    backgroundColor: "#8B5CF6",
-    width: 19,
-    height: 19,
+    // ✨ LA MAGIA PARA CENTRARLO EN EL BORDE DERECHO:
+    right: -10,      // Lo empuja 10px fuera de la imagen (hacia la derecha)
+    top: "50%",      // Lo sitúa en la mitad vertical de la foto
+    marginTop: -10,  // Compensa su propia altura para que el centro sea exacto
+    // APARIENCIA VISUAL:
+    backgroundColor: COLORS.primary, 
+    width: 20,
+    height: 20,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1.5,
+    borderWidth: 2, // ✨ Borde blanco clave para separar de la imagen
     borderColor: "#FFF",
   },
   badgeText: {
-    color: "#FFF",
+    color: "#FFF", 
     fontSize: 10,
     fontFamily: FONT_FAMILY,
     fontWeight: "700",
   },
   title: {
     flex: 1,
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: 16,
     fontFamily: FONT_FAMILY,
-    color: "#312E81",
+    color: "#1F2937",
   },
   controlsAndSpeedRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+    marginBottom: 5,
   },
   mainControls: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 20,
   },
-  controlBtn: { padding: 2 },
+  controlBtn: { padding: 4 },
   playPauseBtn: { marginHorizontal: 0 },
   speedBadge: {
     position: "absolute",
     right: 0,
     backgroundColor: "#EDE9FE",
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 5,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
   },
   speedText: {
     color: "#8B5CF6",
     fontWeight: "700",
     fontFamily: FONT_FAMILY,
-    fontSize: 11,
+    fontSize: 12,
   },
   progress: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginTop: -2,
+    gap: 8,
+  },
+  slider: {
+    flex: 1, 
   },
   timeLabel: {
     fontSize: 12,
     color: "#6B7280",
     fontFamily: FONT_FAMILY,
-    width: 32,
+    width: 36,
     textAlign: "center",
   },
   sectionHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 20,
+    paddingBottom: 12,
     backgroundColor: '#FFF',
   },
   sectionTitle: {

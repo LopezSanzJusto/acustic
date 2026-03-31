@@ -4,6 +4,7 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PointOfInterest } from '../data/points';
+import { COLORS } from '../utils/theme';
 
 interface StopCardProps {
   point: PointOfInterest;
@@ -13,7 +14,7 @@ interface StopCardProps {
 // Usamos memo para evitar re-renderizados si las props no cambian (Optimización de rendimiento)
 export const StopCard = memo(({ point, onPress }: StopCardProps) => {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: point.image }} style={styles.image} />
         <View style={styles.badge}>
@@ -60,12 +61,15 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    bottom: -6,
-    right: -6,
-    backgroundColor: '#8B5CF6',
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    // ✨ LA MAGIA PARA CENTRARLO AL MEDIO A LA DERECHA:
+    right: -10,      
+    top: '50%',      
+    marginTop: -10,  
+    // APARIENCIA IDÉNTICA AL REPRODUCTOR:
+    backgroundColor: COLORS.primary,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
