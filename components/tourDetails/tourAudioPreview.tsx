@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
 import { useAudio } from '../../hooks/useAudio';
+// ✨ IMPORTAMOS useLocalSearchParams para leer los parámetros de la ruta
+import { useLocalSearchParams } from 'expo-router';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -17,6 +19,9 @@ interface TourAudioPreviewProps {
 }
 
 export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
+  // ✨ CAPTURAMOS EL PARÁMETRO 'fromTrips'
+  const { fromTrips } = useLocalSearchParams();
+  
   const [isExpanded, setIsExpanded] = useState(false);
   const { activePoint, isPlaying, setActivePointIndex, togglePlayPause } = useAudio(points);
 
@@ -25,7 +30,19 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
     setIsExpanded(!isExpanded);
   };
 
+  // 1. Si no hay puntos, no mostramos nada
   if (!points || points.length === 0) return null;
+
+  // ✨ 2. LÓGICA DE OCULTACIÓN INTELIGENTE
+  // Comprobamos si venimos de la pestaña de Mis Viajes
+  const isFromTrips = fromTrips === 'true';
+  // Comprobamos si la ruta es gratuita
+  const isFree = price === 0 || String(price).toLowerCase() === 'gratis';
+  
+  // Si venimos de Mis Viajes Y la ruta es gratis, el componente se oculta (retorna null)
+  if (isFromTrips && isFree) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
