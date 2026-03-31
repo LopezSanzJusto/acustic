@@ -1,53 +1,67 @@
+// app/tour/map/[id].tsx
+
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
-import { Ionicons } from '@expo/vector-icons';
 import { db } from '../../../services/firebaseConfig';
 import { useFirebasePoints } from '../../../hooks/useFirebasePoints';
-import { useFavorites } from '../../../hooks/useFavorites'; 
 import { MapDisplay } from '../../../components/mapDisplay';
 import { TourFooter } from '../../../components/tourDetails/tourFooter';
+import { FloatingButton } from '../../../components/floatingButton';
 import { COLORS, COMMON_STYLES } from '../../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-// ✨ NUEVO: Importamos nuestro hook global
-import { useCustomRoute } from '../../../hooks/useCustomRoute'; 
+import { usePurchaseTour } from '../../../hooks/usePurchaseTour';
 
 export default function TourMapScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets(); 
   
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
-  const { isFavorite, toggleFavorite } = useFavorites(id as string); 
-  const [tourPrice, setTourPrice] = useState<number | null>(null);
-
-  // ✨ NUEVO: Extraemos la ruta filtrada y la función para inicializarla
-  const { activeRoutePoints, setInitialPoints } = useCustomRoute();
-
-  // Sincronizamos por si el usuario entra directo a este mapa (por ejemplo, vía Deep Link)
-  useEffect(() => {
-    if (points && points.length > 0) {
-      setInitialPoints(points);
-    }
-  }, [points, setInitialPoints]);
-
-  // Si ya tenemos la ruta filtrada, la usamos. Si no, esperamos con un array vacío.
-  const routeToUse = activeRoutePoints.length > 0 ? activeRoutePoints : [];
+  
+  // ✅ Usamos undefined en vez de null para alinear con el tipado de TypeScript
+  const [tourPrice, setTourPrice] = useState<number | undefined>(undefined);
+  const { addTourToMyList, isProcessing } = usePurchaseTour();
 
   useEffect(() => {
+    let isMounted = true;
     const fetchPrice = async () => {
         try {
           const docRef = doc(db, "tours", id as string);
           const snap = await getDoc(docRef);
-          if(snap.exists()) setTourPrice(snap.data().price);
-        } catch(e) { console.error(e) }
+          if (snap.exists() && isMounted) {
+            // ✅ Aseguramos que si no tiene precio, sea 0
+            setTourPrice(snap.data().price || 0); 
+          }
+        } catch(e) { 
+          console.error("Error fetching price for map:", e);
+        }
     };
     fetchPrice();
+    return () => { isMounted = false; }
   }, [id]);
 
-  if (pointsLoading) {
+  const handleStartRoute = async () => {
+    // Evitamos ejecutar nada si el precio aún no se ha cargado
+    if (tourPrice === undefined) return;
+
+    if (tourPrice === 0) {
+      const success = await addTourToMyList(id as string);
+      if (success) {
+        router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any);
+      }
+    } else {
+      Alert.alert(
+        "Ruta Premium",
+        "Esta ruta es de pago. En esta versión de demostración la pasarela de pago no está habilitada, pero puedes guardarla en favoritos (❤️).",
+        [{ text: "Entendido", style: "default" }]
+      );
+    }
+  };
+
+  // ✅ Solo renderizamos si ya tenemos los puntos y el precio
+  if (pointsLoading || tourPrice === undefined) {
     return (
         <View style={COMMON_STYLES.centerContainer}>
             <ActivityIndicator size="large" color={COLORS.primary} />
@@ -59,40 +73,38 @@ export default function TourMapScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* === CABECERA === */}
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>Mapa del recorrido</Text>
-        
-        <TouchableOpacity onPress={toggleFavorite} style={styles.headerIcon}>
-          <Ionicons 
-            name={isFavorite ? "heart" : "heart-outline"} 
-            size={24} 
-            color={COLORS.primary} 
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* === MAPA === */}
       <View style={styles.mapContainer}>
         <MapDisplay 
             location={null} 
-            // ✨ PASAMOS LA RUTA FILTRADA
-            points={routeToUse} 
+            points={points} 
             showGeofence={false} 
-            markerType="number"
-            dashedRoute={true}
         />
       </View>
 
-      {/* === CAPA INFERIOR === */}
+      <View 
+        style={[styles.uiLayer, { paddingTop: insets.top + 10 }]} 
+        pointerEvents="box-none"
+      >
+        <View style={styles.headerRow}>
+          <FloatingButton 
+             icon="arrow-back" 
+             onPress={() => router.back()} 
+             style={{ position: 'relative', top: 0, left: 0 }} 
+          />
+          
+          <View style={styles.titlePill}>
+            <Text style={styles.titleText}>Mapa del recorrido</Text>
+          </View>
+          
+          <View style={{ width: 40 }} />
+        </View>
+      </View>
+
       <View style={[styles.footerContainer, { paddingBottom: insets.bottom }]}>
         <TourFooter 
-            price={tourPrice || 0} 
-            onStart={() => router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any)}
+            price={tourPrice} 
+            onStart={handleStartRoute}
+            isLoading={isProcessing}
         />
       </View>
     </View>
@@ -101,24 +113,39 @@ export default function TourMapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    backgroundColor: COLORS.white,
+  mapContainer: { ...StyleSheet.absoluteFillObject }, 
+  
+  uiLayer: {
+    position: 'absolute', 
+    top: 0, left: 0, right: 0,
+    zIndex: 10,
+    paddingHorizontal: 20,
+  },
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    zIndex: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
-  headerIcon: { padding: 5 },
-  headerTitle: { fontWeight: 'bold', color: COLORS.textDark, fontSize: 16 },
-  mapContainer: { flex: 1 },
+  titlePill: {
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    color: COLORS.textDark,
+    fontSize: 16
+  },
   footerContainer: { 
     position: 'absolute', 
     bottom: 0, left: 0, right: 0,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.white, 
     borderTopWidth: 1,
     borderTopColor: COLORS.border
   }
