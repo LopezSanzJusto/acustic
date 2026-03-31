@@ -2,6 +2,9 @@
 
 import React, { useCallback, useEffect } from "react";
 import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
+// ✨ NUEVO: Importación vital para que funcionen los gestos de arrastre (Bottom Sheet)
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import { useLocation } from "../hooks/useLocation";
 import { useFirebasePoints } from "../hooks/useFirebasePoints";
 import { useAudio } from "../hooks/useAudio";
@@ -10,8 +13,6 @@ import { MapDisplay } from "../components/mapDisplay";
 import { AudioMiniPlayer } from "../components/audioMiniPlayer";
 import { COLORS } from "../utils/theme";
 import { useCustomRoute } from "../hooks/useCustomRoute"; 
-// ✨ NUEVO: Importación para habilitar gestos del Bottom Sheet
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const RADIUS = 15;
 
@@ -24,13 +25,16 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   const { points, loading: pointsLoading } = useFirebasePoints(tourId);
   const { activeRoutePoints, setInitialPoints } = useCustomRoute();
 
+  // Cargamos los puntos en la ruta activa al iniciar
   useEffect(() => {
     if (points && points.length > 0) {
       setInitialPoints(points);
     }
   }, [points, setInitialPoints]);
 
-  const routeToUse = activeRoutePoints.length > 0 ? activeRoutePoints : [];
+  // ✅ MEJORA: Hacemos fallback a `points` si activeRoutePoints aún no se ha poblado
+  // para evitar que el mapa o el audio reciban un array vacío por una fracción de segundo.
+  const routeToUse = activeRoutePoints.length > 0 ? activeRoutePoints : (points || []);
 
   const {
     activePoint,
@@ -38,7 +42,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     isPreloading,
     positionMillis,
     durationMillis,
-    setActivePointIndex, // Ya lo exporta tu hook
+    setActivePointIndex, 
     togglePlayPause,
     playNext,
     playPrevious,
@@ -75,7 +79,8 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   }
 
   return (
-    // ✨ IMPORTANTE: Envolvemos en GestureHandlerRootView
+    // ✨ IMPORTANTE: GestureHandlerRootView debe tener flex: 1 para ocupar toda la pantalla
+    // Esto es requisito obligatorio para usar @gorhom/bottom-sheet o similares
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={{ flex: 1, position: "relative" }}>
@@ -97,8 +102,8 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
               positionMillis={positionMillis}
               durationMillis={durationMillis}
               playbackRate={playbackRate}
-              points={routeToUse} // ✨ AHORA DESCOMENTADO
-              onSelectAudio={setActivePointIndex} // ✨ AHORA DESCOMENTADO
+              points={routeToUse} // ✨ Lista de puntos para el menú de capítulos del Bottom Sheet
+              onSelectAudio={setActivePointIndex} // ✨ Función para saltar a un audio concreto desde el Bottom Sheet
               onToggleSpeed={toggleSpeed}
               onPlayPause={togglePlayPause}
               onNext={playNext}
