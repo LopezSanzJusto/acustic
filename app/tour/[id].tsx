@@ -21,18 +21,18 @@ import { TourIntroAudio } from '../../components/tourDetails/tourIntroAudio';
 import { TourPointList } from '../../components/tourDetails/tourPointList';
 import { TourReviews } from '../../components/tourDetails/tourReviews';
 import { TourMapPreview } from '../../components/tourDetails/tourMapPreview';
-import { TourAudioPreview } from '../../components/tourDetails/tourAudioPreview'; 
-import { ImageSlider } from '../../components/imageSlider'; // ✨ Slider importado
+import { TourAudioPreview } from '../../components/tourDetails/tourAudioPreview';
+import { ImageSlider } from '../../components/imageSlider'; 
 
 const { width } = Dimensions.get('window');
 
 export default function TourDetailScreen() {
-  const { id } = useLocalSearchParams();
+  // ✨ EXTRAEMOS 'fromTrips' DE LOS PARÁMETROS
+  const { id, fromTrips } = useLocalSearchParams();
   const router = useRouter();
   
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
   const [calculatedDistance, setCalculatedDistance] = useState<string>("Calculando...");
 
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
@@ -65,9 +65,13 @@ export default function TourDetailScreen() {
     fetchTourDetails();
   }, [id]);
 
+  // ✨ LÓGICA PARA OCULTAR PREVISUALIZACIÓN DE AUDIO
+  const isFromTrips = fromTrips === 'true';
+  const isFree = tour?.price === 0 || tour?.price === "0" || String(tour?.price).toLowerCase() === 'gratis';
+  const shouldHideAudioPreview = isFromTrips && isFree;
+
   const handleStartRoute = async () => {
     if (!tour) return;
-
     if (tour.price === 0) {
       const success = await addTourToMyList(id as string);
       if (success) {
@@ -100,26 +104,24 @@ export default function TourDetailScreen() {
       
       <View style={{ flex: 1, backgroundColor: COLORS.background }}>
         
-        {/* ✨ HEADER FIJO: Al no ser absoluto, empuja todo hacia abajo y se queda quieto */}
-        <TourHeader 
+        <TourHeader
           title={tour.title}
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
-          onBack={() => router.back()} 
+          onBack={() => router.back()}
         />
 
-        {/* ✨ SCROLLVIEW: Todo esto pasará por debajo del header */}
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           
-          <ImageSlider 
-            images={tourImages} 
-            height={280} 
-            width={width} 
+          <ImageSlider
+            images={tourImages}
+            height={280}
+            width={width}
           />
 
           <View style={styles.content}>
             
-            <TourInfo 
+            <TourInfo
               title={tour.title}
               city={tour.city}
               country={tour.country}
@@ -129,23 +131,28 @@ export default function TourDetailScreen() {
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
             />
-            <TourStats 
+            
+            <TourStats
               listens={tour.listens || 0}
               rating={tour.rating || 0}
               reviews={tour.reviews || 0}
             />
               
-            <TourIntroAudio 
-              title={tour.title} 
-              image={tourImages[0]} 
+            <TourIntroAudio
+              title={tour.title}
+              image={tourImages[0]}
               audioUrl={tour.introAudioUrl}
             />
 
-            <TourAudioPreview points={points} price={tour.price || 0} />
+            {/* ✨ RENDERIZADO CONDICIONAL DE LA PREVISUALIZACIÓN DE AUDIO */}
+            {!shouldHideAudioPreview && (
+              <TourAudioPreview points={points} price={tour.price || 0} />
+            )}
 
             <Text style={styles.sectionTitle}>Mapa del tour</Text>
-            <TourMapPreview 
-               points={points} 
+            
+            <TourMapPreview
+               points={points}
                onRouteCalculated={(dist) => setCalculatedDistance(dist)}
                onPress={() => router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any)}
             />
@@ -157,10 +164,10 @@ export default function TourDetailScreen() {
           </View>
         </ScrollView>
 
-        <TourFooter 
-          price={tour.price} 
+        <TourFooter
+          price={tour.price}
           onStart={handleStartRoute}
-          isLoading={isProcessing} 
+          isLoading={isProcessing}
         />
       </View>
     </>

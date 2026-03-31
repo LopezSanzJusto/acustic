@@ -13,7 +13,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 interface TourAudioPreviewProps {
   points: PointOfInterest[];
-  price: number; // ✨ Añadimos el precio como prop
+  price: number; // ✨ Mantenemos la prop por si la necesitas en el futuro, aunque ya no afectará al bloqueo
 }
 
 export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
@@ -34,9 +34,6 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
 
   if (!points || points.length === 0) return null;
 
-  // ✨ Verificamos si la ruta es totalmente gratuita
-  const isFreeTour = price === 0;
-
   return (
     <View style={styles.container}>
       {/* Botón Principal */}
@@ -55,10 +52,10 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
       {isExpanded && (
         <View style={styles.dropdownContainer}>
           {points.map((point, index) => {
-            // ✨ LÓGICA CORE: 
-            // Si es gratis, nunca se bloquea.
-            // Si es de pago, se bloquea a partir del 3er audio (index >= 2).
-            const isLocked = !isFreeTour && index >= 2; 
+            // ✨ LÓGICA CORE ACTUALIZADA: 
+            // Ahora TODAS las rutas se bloquean a partir del 3er audio (index >= 2)
+            // Ya no diferenciamos entre isFreeTour o pago para esta regla.
+            const isLocked = index >= 2; 
             
             // Comprobamos si este punto es el que está sonando ahora mismo
             const isCurrentPoint = activePoint?.id === point.id;
@@ -80,11 +77,10 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
                   >
                     {index + 1}. {point.name || `Punto ${index + 1}`}
                   </Text>
+                  
+                  {/* ✨ TEXTOS ACTUALIZADOS: Adaptados para que tengan sentido en gratis y pago */}
                   <Text style={[styles.audioStatus, !isLocked && styles.textFree]}>
-                    {isFreeTour 
-                      ? "Audio completo" 
-                      : (isLocked ? "Contenido Pro" : "Muestra gratuita")
-                    }
+                    {isLocked ? "Disponible al iniciar la ruta" : "Muestra de audio"}
                   </Text>
                 </View>
 

@@ -26,7 +26,7 @@ export default function TripsScreen() {
 
   // Lógica: Textos y Logo dinámicos
   const emptyStateConfig = activeTab === 'purchased' 
-    ? { imageSource: LogoAcustic, title: "No tienes audioguías", desc: "Explora el catálogo y añade tu primer destino." } // ✅ Logo aquí
+    ? { imageSource: LogoAcustic, title: "No tienes audioguías", desc: "Explora el catálogo y añade tu primer destino." } 
     : { icon: "heart-dislike-outline" as const, title: "Aún no hay favoritos", desc: "Guarda las rutas que más te gusten para verlas luego." };
 
   if (loading) {
@@ -51,7 +51,7 @@ export default function TripsScreen() {
       {dataToShow.length === 0 ? (
         <EmptyState 
           icon={emptyStateConfig.icon}
-          imageSource={emptyStateConfig.imageSource} // ✅ Pasamos la prop (puede ser undefined, EmptyState lo maneja)
+          imageSource={emptyStateConfig.imageSource} 
           title={emptyStateConfig.title}
           description={emptyStateConfig.desc}
           buttonText="Ir a Explora"
@@ -64,7 +64,16 @@ export default function TripsScreen() {
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <TourCard tour={item} onPress={() => router.push({ pathname: "/tour/[id]", params: { id: item.id } } as any)} />
+            <TourCard 
+              tour={item} 
+              onPress={() => 
+                // ✨ AÑADIDO: fromTrips: 'true' para identificar el origen en la pantalla de destino
+                router.push({ 
+                  pathname: "/tour/[id]", 
+                  params: { id: item.id, fromTrips: 'true' } 
+                } as any)
+              } 
+            />
           )}
         />
       )}

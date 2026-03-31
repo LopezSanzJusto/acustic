@@ -6,7 +6,8 @@ import { PointOfInterest } from "../data/points";
 
 type LoadedSounds = Record<string, Audio.Sound>;
 
-export function useAudio(points: PointOfInterest[]) {
+// ✨ AÑADIMOS EL PARÁMETRO autoSelectFirst (por defecto en false)
+export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = false) {
   const soundsLoaded = useRef<LoadedSounds>({});
   const currentSoundRef = useRef<Audio.Sound | null>(null);
 
@@ -17,21 +18,19 @@ export function useAudio(points: PointOfInterest[]) {
   const [positionMillis, setPositionMillis] = useState(0);
   const [durationMillis, setDurationMillis] = useState(0);
   
-  // ✨ ESTADO DE VELOCIDAD
   const [playbackRate, setPlaybackRate] = useState(1.0);
 
-  const activePoint =
-    activePointIndex !== null ? points[activePointIndex] : null;
+  const activePoint = activePointIndex !== null ? points[activePointIndex] : null;
 
   /* =========================
    * 🆕 NUEVO: SELECCIÓN POR DEFECTO
    * ========================= */
-  // Selecciona el primer audio por defecto cuando los puntos terminan de cargar
   useEffect(() => {
-    if (points && points.length > 0 && activePointIndex === null) {
+    // ✨ AHORA SOLO AUTO-SELECCIONA SI LE DECIMOS QUE LO HAGA
+    if (autoSelectFirst && points && points.length > 0 && activePointIndex === null) {
       setActivePointIndex(0);
     }
-  }, [points, activePointIndex]);
+  }, [points, activePointIndex, autoSelectFirst]);
 
   /* =========================
    * 🎧 PRELOAD AUDIOS
@@ -45,7 +44,6 @@ export function useAudio(points: PointOfInterest[]) {
 
       for (const point of points) {
         try {
-          // Asegúrate de que apunte a la propiedad correcta de tu audio, ej: point.audio o point.audioUrl
           const { sound } = await Audio.Sound.createAsync(
             { uri: point.audio }, 
             { shouldPlay: false }
@@ -86,6 +84,8 @@ export function useAudio(points: PointOfInterest[]) {
       return;
     }
 
+    if (isPreloading) return;
+
     const point = points[activePointIndex];
     const sound = soundsLoaded.current[point.id];
     if (!sound) return;
@@ -94,7 +94,6 @@ export function useAudio(points: PointOfInterest[]) {
       await stopAll();
       currentSoundRef.current = sound;
 
-      // ✨ Aplicar la velocidad guardada al nuevo audio
       await sound.setRateAsync(playbackRate, true);
 
       sound.setOnPlaybackStatusUpdate((status) => {
@@ -109,8 +108,10 @@ export function useAudio(points: PointOfInterest[]) {
     };
 
     play();
-  }, [activePointIndex]);
+  }, [activePointIndex, isPreloading]);
 
+  // ... (RESTO DE TUS FUNCIONES SE MANTIENEN EXACTAMENTE IGUAL) ...
+  
   /* =========================
    * ⏯️ CONTROLES
    * ========================= */
@@ -134,19 +135,13 @@ export function useAudio(points: PointOfInterest[]) {
     const sound = currentSoundRef.current;
     if (!sound) return;
 
-    const newPos = Math.max(
-      0,
-      Math.min(positionMillis + millis, durationMillis)
-    );
-
+    const newPos = Math.max(0, Math.min(positionMillis + millis, durationMillis));
     await sound.setPositionAsync(newPos);
   };
 
-  // ✨ FUNCIÓN PARA CAMBIAR VELOCIDAD
   const toggleSpeed = async () => {
     const sound = currentSoundRef.current;
     
-    // Nuevo ciclo de velocidades: 1.0 -> 1.25 -> 1.5 -> 2.0 -> 1.0
     let newRate = 1.0;
     if (playbackRate === 1.0) newRate = 1.25;
     else if (playbackRate === 1.25) newRate = 1.5;
@@ -170,9 +165,7 @@ export function useAudio(points: PointOfInterest[]) {
 
   const playPrevious = () => {
     if (activePointIndex === null || points.length === 0) return;
-    setActivePointIndex(
-      (activePointIndex - 1 + points.length) % points.length
-    );
+    setActivePointIndex((activePointIndex - 1 + points.length) % points.length);
   };
 
   const stopAll = async () => {
@@ -192,13 +185,13 @@ export function useAudio(points: PointOfInterest[]) {
     isPreloading,
     positionMillis,
     durationMillis,
-    playbackRate, // ✨ Exponemos el estado
+    playbackRate,
     setActivePointIndex,
     togglePlayPause,
     playNext,
     playPrevious,
     seekTo,
     skipBy,
-    toggleSpeed, // ✨ Exponemos la función
+    toggleSpeed,
   };
 }
