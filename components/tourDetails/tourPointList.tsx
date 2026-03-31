@@ -7,10 +7,15 @@ import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
 import { useCustomRoute } from '../../hooks/useCustomRoute';
 
-// ✨ NUEVO: Importamos la librería de Drag & Drop
+// Importamos la librería de Drag & Drop
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 
-export const TourPointList = ({ points }: { points: PointOfInterest[] }) => {
+interface TourPointListProps {
+  points: PointOfInterest[];
+  hasAccess?: boolean; // ✅ NUEVA PROP
+}
+
+export const TourPointList = ({ points, hasAccess = true }: TourPointListProps) => {
   const { customPoints, setInitialPoints, togglePointVisibility, reorderPoints } = useCustomRoute();
 
   useEffect(() => {
@@ -19,8 +24,6 @@ export const TourPointList = ({ points }: { points: PointOfInterest[] }) => {
     }
   }, [points, setInitialPoints]);
 
-  // ✨ TRUCO PRO: Pre-calculamos los números dinámicos en la memoria 
-  // antes de dárselos a la lista para evitar bugs de reciclaje visual.
   const listData = useMemo(() => {
     let visibleCounter = 0;
     return customPoints.map(point => {
@@ -34,14 +37,13 @@ export const TourPointList = ({ points }: { points: PointOfInterest[] }) => {
 
   if (customPoints.length === 0) return null;
 
-  // ✨ NUEVO: La función que pinta cada tarjeta
   const renderItem = ({ item, drag, isActive }: RenderItemParams<any>) => (
     <ScaleDecorator>
       <View 
         style={[
           styles.row, 
           item.isHidden && styles.rowHidden,
-          isActive && styles.rowActive // Resaltamos la tarjeta cuando se levanta para moverla
+          isActive && styles.rowActive 
         ]}
       >
         <Image 
@@ -55,46 +57,53 @@ export const TourPointList = ({ points }: { points: PointOfInterest[] }) => {
           </Text>
         </View>
 
-        <TouchableOpacity 
-          onPress={() => togglePointVisibility(item.id)}
-          style={styles.iconButton}
-        >
-           <Ionicons 
-             name={item.isHidden ? "eye-off-outline" : "eye-outline"} 
-             size={24} 
-             color={item.isHidden ? COLORS.muted : COLORS.textDark} 
-           />
-        </TouchableOpacity>
+        {/* ✅ SOLO MOSTRAMOS CONTROLES SI TIENE ACCESO */}
+        {hasAccess && (
+          <>
+            <TouchableOpacity 
+              onPress={() => togglePointVisibility(item.id)}
+              style={styles.iconButton}
+            >
+               <Ionicons 
+                 name={item.isHidden ? "eye-off-outline" : "eye-outline"} 
+                 size={24} 
+                 color={item.isHidden ? COLORS.muted : COLORS.textDark} 
+               />
+            </TouchableOpacity>
 
-        {/* ✨ AQUÍ ESTÁ LA MAGIA: onPressIn={drag} activa el Drag & Drop instantáneamente */}
-        <TouchableOpacity onPressIn={drag} style={styles.dragHandle}>
-           <Ionicons 
-             name="menu-outline" 
-             size={24} 
-             // Cambiamos el color si lo están arrastrando
-             color={isActive ? COLORS.primary : COLORS.muted} 
-           />
-        </TouchableOpacity>
+            <TouchableOpacity onPressIn={drag} style={styles.dragHandle}>
+               <Ionicons 
+                 name="menu-outline" 
+                 size={24} 
+                 color={isActive ? COLORS.primary : COLORS.muted} 
+               />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </ScaleDecorator>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Personaliza tu ruta</Text>
-      <View style={styles.infoBox}>
-        <Ionicons name="information-circle" size={20} color={COLORS.primary} />
-        <Text style={styles.infoText}>Arrastra desde el icono derecho para reordenar o toca el ojo para ocultar paradas.</Text>
-      </View>
+      {/* ✅ CAMBIO DE TÍTULO SEGÚN ACCESO */}
+      <Text style={styles.header}>
+        {hasAccess ? "Personaliza tu ruta" : "Puntos del recorrido"}
+      </Text>
 
-      {/* ✨ NUESTRA NUEVA LISTA ANIMADA */}
+      {/* ✅ SOLO MOSTRAMOS INFO BOX SI TIENE ACCESO */}
+      {hasAccess && (
+        <View style={styles.infoBox}>
+          <Ionicons name="information-circle" size={20} color={COLORS.primary} />
+          <Text style={styles.infoText}>Arrastra desde el icono derecho para reordenar o toca el ojo para ocultar paradas.</Text>
+        </View>
+      )}
+
       <DraggableFlatList
         data={listData}
         keyExtractor={(item) => item.id}
-        // Llamamos a tu función reorderPoints cuando sueltas la tarjeta
         onDragEnd={({ from, to }) => reorderPoints(from, to)}
         renderItem={renderItem}
-        // Desactivamos el scroll interno para que la pantalla fluya normal
         scrollEnabled={false}
       />
     </View>
@@ -111,8 +120,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface, borderRadius: 16, borderWidth: 1, borderColor: COLORS.border 
   },
   rowHidden: { backgroundColor: '#f9f9f9', borderColor: '#eaeaea' },
-  
-  // ✨ NUEVO ESTILO: Resalta la tarjeta flotante
   rowActive: { 
     elevation: 8, 
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 5,
@@ -120,7 +127,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderColor: COLORS.primary
   },
-
   image: { width: 50, height: 50, borderRadius: 8, marginRight: 15 },
   imageHidden: { opacity: 0.5 },
   textContainer: { flex: 1, justifyContent: 'center' },

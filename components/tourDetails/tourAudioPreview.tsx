@@ -1,31 +1,24 @@
 // components/tourDetails/tourAudioPreview.tsx
+
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
-import { useAudio } from '../../hooks/useAudio'; // ✨ Importamos tu hook de audio
+import { useAudio } from '../../hooks/useAudio';
 
-// Habilitar animaciones de Layout en Android (necesario para LayoutAnimation)
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 interface TourAudioPreviewProps {
   points: PointOfInterest[];
-  price: number; // ✨ Mantenemos la prop por si la necesitas en el futuro, aunque ya no afectará al bloqueo
+  price: number;
 }
 
 export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // ✨ Inicializamos el hook de audio con los puntos
-  const { 
-    activePoint, 
-    isPlaying, 
-    setActivePointIndex, 
-    togglePlayPause 
-  } = useAudio(points);
+  const { activePoint, isPlaying, setActivePointIndex, togglePlayPause } = useAudio(points);
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -36,10 +29,9 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
 
   return (
     <View style={styles.container}>
-      {/* Botón Principal */}
       <TouchableOpacity style={styles.previewButton} onPress={toggleExpand} activeOpacity={0.8}>
          <Ionicons name="headset" size={20} color="white" style={{ marginRight: 8 }} />
-         <Text style={styles.previewText}>Previsualización de la ruta</Text>
+         <Text style={styles.previewText}>Previsualización de audios</Text>
          <Ionicons 
             name={isExpanded ? "chevron-up" : "chevron-down"} 
             size={20} 
@@ -48,37 +40,19 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
          />
       </TouchableOpacity>
 
-      {/* Lista Desplegable */}
       {isExpanded && (
         <View style={styles.dropdownContainer}>
           {points.map((point, index) => {
-            // ✨ LÓGICA CORE ACTUALIZADA: 
-            // Ahora TODAS las rutas se bloquean a partir del 3er audio (index >= 2)
-            // Ya no diferenciamos entre isFreeTour o pago para esta regla.
             const isLocked = index >= 2; 
-            
-            // Comprobamos si este punto es el que está sonando ahora mismo
             const isCurrentPoint = activePoint?.id === point.id;
-
-            // Determinamos qué icono mostrar
-            let iconName: any = "play-circle";
-            if (isLocked) {
-              iconName = "lock-closed";
-            } else if (isCurrentPoint && isPlaying) {
-              iconName = "pause-circle";
-            }
+            let iconName: any = isLocked ? "lock-closed" : (isCurrentPoint && isPlaying ? "pause-circle" : "play-circle");
 
             return (
               <View key={point.id || index} style={styles.audioRow}>
                 <View style={styles.audioInfo}>
-                  <Text 
-                    style={[styles.audioTitle, isLocked && styles.textLocked]} 
-                    numberOfLines={1}
-                  >
+                  <Text style={[styles.audioTitle, isLocked && styles.textLocked]} numberOfLines={1}>
                     {index + 1}. {point.name || `Punto ${index + 1}`}
                   </Text>
-                  
-                  {/* ✨ TEXTOS ACTUALIZADOS: Adaptados para que tengan sentido en gratis y pago */}
                   <Text style={[styles.audioStatus, !isLocked && styles.textFree]}>
                     {isLocked ? "Disponible al iniciar la ruta" : "Muestra de audio"}
                   </Text>
@@ -87,16 +61,7 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
                 <TouchableOpacity
                   style={styles.actionButton}
                   disabled={isLocked}
-                  onPress={() => {
-                    // ✨ LÓGICA DE REPRODUCCIÓN
-                    if (isCurrentPoint) {
-                      // Si ya es el audio actual, lo pausamos o reanudamos
-                      togglePlayPause();
-                    } else {
-                      // Si es un audio diferente, cambiamos el índice para que empiece a sonar
-                      setActivePointIndex(index);
-                    }
-                  }}
+                  onPress={() => isCurrentPoint ? togglePlayPause() : setActivePointIndex(index)}
                 >
                   <Ionicons
                     name={iconName}
