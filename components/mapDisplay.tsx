@@ -1,3 +1,5 @@
+// componentes/MapDisplay.tsx
+
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { StyleSheet, View, Image, Text } from "react-native";
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
@@ -64,7 +66,13 @@ export const MapDisplay = ({
         longitudeDelta: 0.005,
       };
     }
-    return undefined;
+    // ✅ AÑADIDO: Fallback de seguridad por si no hay puntos al cargar
+    return {
+      latitude: 40.416775,
+      longitude: -3.703790,
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    };
   }, [sortedPoints]);
 
   const handleMapLayout = () => {
@@ -183,8 +191,15 @@ export const MapDisplay = ({
 };
 
 const styles = StyleSheet.create({
-  mapContainer: { height: "100%", width: "100%" },
-  map: { width: "100%", height: "100%" },
+  // ✅ CORRECCIÓN DE ESTILOS PARA EL NUEVO MOTOR (SDK 55 / RN 0.74+)
+  mapContainer: { 
+    flex: 1, 
+    width: "100%", 
+    overflow: "hidden" 
+  },
+  map: { 
+    ...StyleSheet.absoluteFillObject 
+  },
 
   markerBorder: {
     width: 45,

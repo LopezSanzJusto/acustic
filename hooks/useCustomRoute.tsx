@@ -2,65 +2,63 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { CustomPoint, PointOfInterest } from '../data/points';
 
+// 1. El estado ahora es un Diccionario: Record<ID_DEL_TOUR, PUNTOS>
 interface RouteContextProps {
-  customPoints: CustomPoint[];
-  activeRoutePoints: CustomPoint[];
-  setInitialPoints: (points: PointOfInterest[]) => void;
-  togglePointVisibility: (id: string) => void;
-  reorderPoints: (fromIndex: number, toIndex: number) => void; // ¡Listo para el futuro!
+  routes: Record<string, CustomPoint[]>;
+  setRoutePoints: (tourId: string, points: CustomPoint[]) => void;
 }
 
 const RouteContext = createContext<RouteContextProps | undefined>(undefined);
 
 export const RouteProvider = ({ children }: { children: React.ReactNode }) => {
-  const [customPoints, setCustomPoints] = useState<CustomPoint[]>([]);
+  const [routes, setRoutes] = useState<Record<string, CustomPoint[]>>({});
 
-  // 1. Inicializa los puntos desde Firebase
-  const setInitialPoints = useCallback((points: PointOfInterest[]) => {
-    // Solo inicializamos si customPoints está vacío para no sobreescribir la edición del usuario
-    if (customPoints.length === 0 && points.length > 0) {
-      // Ordenamos por defecto basándonos en Firebase y añadimos isHidden
-      const sorted = [...points].sort((a, b) => (a.order || 0) - (b.order || 0));
-      setCustomPoints(sorted.map(p => ({ ...p, isHidden: false })));
-    }
-  }, [customPoints.length]);
-
-  // 2. Alterna el estado de visibilidad
-  const togglePointVisibility = useCallback((id: string) => {
-    setCustomPoints(prev => 
-      prev.map(p => p.id === id ? { ...p, isHidden: !p.isHidden } : p)
-    );
+  const setRoutePoints = useCallback((tourId: string, points: CustomPoint[]) => {
+    setRoutes(prev => ({ ...prev, [tourId]: points }));
   }, []);
-
-  // 3. Preparado para el futuro Drag & Drop
-  const reorderPoints = useCallback((fromIndex: number, toIndex: number) => {
-    setCustomPoints(prev => {
-      const result = Array.from(prev);
-      const [removed] = result.splice(fromIndex, 1);
-      result.splice(toIndex, 0, removed);
-      return result;
-    });
-  }, []);
-
-  // LA MAGIA ESTÁ AQUÍ: Filtramos los ocultos y recalculamos el 'order'
-  const activeRoutePoints = useMemo(() => {
-    return customPoints
-      .filter(p => !p.isHidden)
-      .map((p, index) => ({
-         ...p,
-         order: index + 1 // El mapa y el audio ahora verán esto como 1, 2, 3 siempre.
-      }));
-  }, [customPoints]);
 
   return (
-    <RouteContext.Provider value={{ customPoints, activeRoutePoints, setInitialPoints, togglePointVisibility, reorderPoints }}>
+    <RouteContext.Provider value={{ routes, setRoutePoints }}>
       {children}
     </RouteContext.Provider>
   );
 };
 
-export const useCustomRoute = () => {
+// 2. El hook AHORA EXIGE un tourId para saber de qué cajón sacar los datos
+export const useCustomRoute = (tourId: string) => {
   const context = useContext(RouteContext);
   if (!context) throw new Error("useCustomRoute debe usarse dentro de un RouteProvider");
-  return context;
+
+  // Extraemos SOLO los puntos de ESTA audioguía específica
+  const customPoints = context.routes[tourId] || [];
+
+  const setInitialPoints = useCallback((points: PointOfInterest[]) => {
+    if (customPoints.length === 0 && points.length > 0) {
+      const sorted = [...points].sort((a, b) => (a.order || 0) - (b.order || 0));
+      context.setRoutePoints(tourId, sorted.map(p => ({ ...p, isHidden: false })));
+    }
+  }, [customPoints.length, tourId, context]); // ✅ CORREGIDO: Quitamos 'points' de aquí
+
+  const togglePointVisibility = useCallback((id: string) => {
+    const updated = customPoints.map(p => p.id === id ? { ...p, isHidden: !p.isHidden } : p);
+    context.setRoutePoints(tourId, updated);
+  }, [customPoints, tourId, context]);
+
+  const reorderPoints = useCallback((fromIndex: number, toIndex: number) => {
+    const result = Array.from(customPoints);
+    const [removed] = result.splice(fromIndex, 1);
+    result.splice(toIndex, 0, removed);
+    context.setRoutePoints(tourId, result);
+  }, [customPoints, tourId, context]);
+
+  const activeRoutePoints = useMemo(() => {
+    return customPoints
+      .filter(p => !p.isHidden)
+      .map((p, index) => ({
+         ...p,
+         order: index + 1
+      }));
+  }, [customPoints]);
+
+  return { customPoints, activeRoutePoints, setInitialPoints, togglePointVisibility, reorderPoints };
 };

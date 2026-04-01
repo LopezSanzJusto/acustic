@@ -1,161 +1,74 @@
 // hooks/useAudio.ts
 
-import { useEffect, useRef, useState } from "react";
-import { Audio } from "expo-av";
+import { useEffect, useState } from "react";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { PointOfInterest } from "../data/points";
 
-type LoadedSounds = Record<string, Audio.Sound>;
-
-// ✨ AÑADIMOS EL PARÁMETRO autoSelectFirst (por defecto en false)
 export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = false) {
-  const soundsLoaded = useRef<LoadedSounds>({});
-  const currentSoundRef = useRef<Audio.Sound | null>(null);
-
   const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPreloading, setIsPreloading] = useState(true);
-
-  const [positionMillis, setPositionMillis] = useState(0);
-  const [durationMillis, setDurationMillis] = useState(0);
-  
   const [playbackRate, setPlaybackRate] = useState(1.0);
 
   const activePoint = activePointIndex !== null ? points[activePointIndex] : null;
 
+  // 1. Cargamos el reproductor de forma nativa. Si no hay audio, le pasamos null.
+  const audioUri = activePoint?.audio || null;
+  const player = useAudioPlayer(audioUri);
+  
+  // 2. Este hook mágico nos da el estado en tiempo real sin tener que hacer callbacks manuales
+  const status = useAudioPlayerStatus(player);
+
+  // 3. Adaptamos los tiempos (expo-audio usa SEGUNDOS, tu MiniPlayer usa MILISEGUNDOS)
+  const positionMillis = (status.currentTime || 0) * 1000;
+  const durationMillis = (status.duration || 0) * 1000;
+  
+  // Si tenemos un URI pero la duración es 0, significa que el audio está "cargando"
+  const isPreloading = audioUri !== null && status.duration === 0;
+  const isPlaying = status.playing;
+
   /* =========================
-   * 🆕 NUEVO: SELECCIÓN POR DEFECTO
+   * AUTOSELECCIÓN INICIAL
    * ========================= */
   useEffect(() => {
-    // ✨ AHORA SOLO AUTO-SELECCIONA SI LE DECIMOS QUE LO HAGA
     if (autoSelectFirst && points && points.length > 0 && activePointIndex === null) {
       setActivePointIndex(0);
     }
   }, [points, activePointIndex, autoSelectFirst]);
 
   /* =========================
-   * 🎧 PRELOAD AUDIOS
+   * REPRODUCCIÓN AUTOMÁTICA
    * ========================= */
   useEffect(() => {
-    let cancelled = false;
-
-    const preload = async () => {
-      setIsPreloading(true);
-      const loaded: LoadedSounds = {};
-
-      for (const point of points) {
-        try {
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: point.audio }, 
-            { shouldPlay: false }
-          );
-          loaded[point.id] = sound;
-        } catch (e) {
-          console.warn("Error cargando audio:", point.id);
-        }
-      }
-
-      if (!cancelled) {
-        soundsLoaded.current = loaded;
-        setIsPreloading(false);
-      }
-    };
-
-    if (points.length > 0) {
-      preload();
-    } else {
-      setIsPreloading(false);
+    // Al cambiar de punto o de URI, le decimos al reproductor que arranque solo
+    if (audioUri && player) {
+      player.play();
     }
-
-    return () => {
-      cancelled = true;
-      Object.values(soundsLoaded.current).forEach((s) => s.unloadAsync());
-      soundsLoaded.current = {};
-    };
-  }, [points]);
+  }, [audioUri, player]);
 
   /* =========================
-   * ▶️ CAMBIO DE PUNTO
+   * CONTROLES
    * ========================= */
-  useEffect(() => {
-    if (activePointIndex === null) {
-      stopAll();
-      setPositionMillis(0);
-      setDurationMillis(0);
-      return;
-    }
-
-    if (isPreloading) return;
-
-    const point = points[activePointIndex];
-    const sound = soundsLoaded.current[point.id];
-    if (!sound) return;
-
-    const play = async () => {
-      await stopAll();
-      currentSoundRef.current = sound;
-
-      await sound.setRateAsync(playbackRate, true);
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded) return;
-
-        setIsPlaying(status.isPlaying);
-        setPositionMillis(status.positionMillis ?? 0);
-        setDurationMillis(status.durationMillis ?? 0);
-      });
-
-      await sound.playAsync();
-    };
-
-    play();
-  }, [activePointIndex, isPreloading]);
-
-  // ... (RESTO DE TUS FUNCIONES SE MANTIENEN EXACTAMENTE IGUAL) ...
-  
-  /* =========================
-   * ⏯️ CONTROLES
-   * ========================= */
-  const togglePlayPause = async () => {
-    const sound = currentSoundRef.current;
-    if (!sound) return;
-
-    const status = await sound.getStatusAsync();
-    if (!status.isLoaded) return;
-
-    status.isPlaying ? await sound.pauseAsync() : await sound.playAsync();
+  const togglePlayPause = () => {
+    if (isPlaying) player.pause();
+    else player.play();
   };
 
-  const seekTo = async (millis: number) => {
-    const sound = currentSoundRef.current;
-    if (!sound) return;
-    await sound.setPositionAsync(millis);
+  const seekTo = (millis: number) => {
+    player.seekTo(millis / 1000); // expo-audio pide segundos
   };
 
-  const skipBy = async (millis: number) => {
-    const sound = currentSoundRef.current;
-    if (!sound) return;
-
+  const skipBy = (millis: number) => {
     const newPos = Math.max(0, Math.min(positionMillis + millis, durationMillis));
-    await sound.setPositionAsync(newPos);
+    player.seekTo(newPos / 1000);
   };
 
-  const toggleSpeed = async () => {
-    const sound = currentSoundRef.current;
-    
+  const toggleSpeed = () => {
     let newRate = 1.0;
     if (playbackRate === 1.0) newRate = 1.25;
     else if (playbackRate === 1.25) newRate = 1.5;
     else if (playbackRate === 1.5) newRate = 2.0;
 
     setPlaybackRate(newRate);
-    
-    if (sound) {
-      try {
-        await sound.setRateAsync(newRate, true);
-      } catch (error) {
-        console.error("Error cambiando velocidad:", error);
-      }
-    }
+    player.setPlaybackRate(newRate);
   };
 
   const playNext = () => {
@@ -166,17 +79,6 @@ export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = f
   const playPrevious = () => {
     if (activePointIndex === null || points.length === 0) return;
     setActivePointIndex((activePointIndex - 1 + points.length) % points.length);
-  };
-
-  const stopAll = async () => {
-    for (const sound of Object.values(soundsLoaded.current)) {
-      try {
-        await sound.stopAsync();
-        await sound.setPositionAsync(0);
-      } catch {}
-    }
-    currentSoundRef.current = null;
-    setIsPlaying(false);
   };
 
   return {

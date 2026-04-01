@@ -1,6 +1,6 @@
 // hooks/useGeoAudioSync.ts
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { PointOfInterest } from '../data/points';
 import { isWithinRadius } from '../services/proximityService';
 
@@ -8,10 +8,8 @@ interface UseGeoAudioSyncProps {
   location: { latitude: number; longitude: number } | null;
   points: PointOfInterest[];
   radius: number;
-  // Estados de carga para evitar disparar lógica antes de tiempo
   isPreloading: boolean;
   pointsLoading: boolean;
-  // Función para controlar el audio
   setActivePointIndex: (index: number | null) => void;
 }
 
@@ -24,12 +22,12 @@ export const useGeoAudioSync = ({
   setActivePointIndex
 }: UseGeoAudioSyncProps) => {
 
-  // 1. Lógica Pura: Determinar si estamos cerca de algún punto
-  // Esto ahora es fácil de testear unitariamente
+  // ✅ 1. "Memoria" para no disparar el mismo punto múltiples veces
+  const playedPoints = useRef<Set<string>>(new Set());
+
   const gpsActivePoint = useMemo(() => {
     if (!location || points.length === 0) return null;
 
-    // Buscamos el primer punto que cumpla la condición de radio
     return (
       points.find((p) =>
         isWithinRadius(
@@ -41,24 +39,27 @@ export const useGeoAudioSync = ({
     );
   }, [location, points, radius]);
 
-  // 2. Efecto Secundario: Sincronizar con el Reproductor de Audio
   useEffect(() => {
-    // Si todavía estamos cargando datos o audios, no hacemos nada
     if (isPreloading || pointsLoading) return;
 
-    // Caso A: Si no estamos en la zona de ningún punto, NO hacemos nada.
-    // Esto evita que el reproductor se oculte o cambie a null.
+    // ✅ 2. CORRECCIÓN CRÍTICA: Si el GPS no detecta nada cerca, NO hacemos setActivePointIndex(null).
+    // Simplemente ignoramos la acción. Esto evita pelearnos con el autoSelectFirst de useAudio.
     if (!gpsActivePoint) {
       return;
     }
 
-    // Caso B: Estamos dentro de una zona, buscamos el índice y activamos
+    // ✅ 3. Si ya pasamos por aquí y activamos el audio, no lo volvemos a hacer.
+    if (playedPoints.current.has(gpsActivePoint.id)) {
+      return;
+    }
+
     const index = points.findIndex(p => p.id === gpsActivePoint.id);
     if (index !== -1) {
+      // Registramos que este punto ya disparó el evento
+      playedPoints.current.add(gpsActivePoint.id);
       setActivePointIndex(index);
     }
   }, [gpsActivePoint, isPreloading, pointsLoading, points, setActivePointIndex]);
 
-  // Devolvemos el punto activo por si la UI necesita mostrar algo específico (ej: una notificación)
   return { gpsActivePoint };
 };

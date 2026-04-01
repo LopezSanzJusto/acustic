@@ -23,7 +23,7 @@ interface ActiveRouteScreenProps {
 export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   const { location } = useLocation(true); 
   const { points, loading: pointsLoading } = useFirebasePoints(tourId);
-  const { activeRoutePoints, setInitialPoints } = useCustomRoute();
+  const { activeRoutePoints, setInitialPoints } = useCustomRoute(tourId);
 
   // Cargamos los puntos en la ruta activa al iniciar
   useEffect(() => {

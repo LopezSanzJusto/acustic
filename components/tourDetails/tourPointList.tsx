@@ -12,14 +12,15 @@ import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-han
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 
 interface TourPointListProps {
+  tourId: string;
   points: PointOfInterest[];
   hasAccess?: boolean;
   headerComponent?: React.ReactElement | null; 
   footerComponent?: React.ReactElement | null; 
 }
 
-export const TourPointList = ({ points, hasAccess = true, headerComponent, footerComponent }: TourPointListProps) => {
-  const { customPoints, setInitialPoints, togglePointVisibility, reorderPoints } = useCustomRoute();
+export const TourPointList = ({ tourId, points, hasAccess = true, headerComponent, footerComponent }: TourPointListProps) => {
+  const { customPoints, setInitialPoints, togglePointVisibility, reorderPoints } = useCustomRoute(tourId);
 
   useEffect(() => {
     if (points && points.length > 0) {
@@ -38,12 +39,8 @@ export const TourPointList = ({ points, hasAccess = true, headerComponent, foote
     });
   }, [customPoints]);
 
-// ✅ CORRECCIÓN DE ESCALADO VISUAL
   const renderItem = useCallback(({ item, drag, isActive }: RenderItemParams<any>) => (
-    // 1. El wrapper con el padding se queda FUERA para que los márgenes no crezcan
     <View style={styles.itemWrapper}>
-      
-      {/* 2. El ScaleDecorator envuelve SOLO la tarjeta, y controlamos su tamaño (1.02) */}
       <ScaleDecorator activeScale={1.02}>
         <View 
           style={[
@@ -90,9 +87,9 @@ export const TourPointList = ({ points, hasAccess = true, headerComponent, foote
     </View>
   ), [hasAccess, togglePointVisibility]);
 
-  // ⚠️ EL RETURN ANTICIPADO AHORA ESTÁ DEBAJO DE TODOS LOS HOOKS
   if (customPoints.length === 0) {
     return (
+      // ✅ REVERTIDO: Quitamos el style={{ flex: 1 }}
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {headerComponent}
         {footerComponent}
@@ -101,6 +98,7 @@ export const TourPointList = ({ points, hasAccess = true, headerComponent, foote
   }
 
   return (
+    // ✅ REVERTIDO: Quitamos el style={{ flex: 1 }}
     <DraggableFlatList
       data={listData}
       keyExtractor={(item) => item.id}
@@ -134,6 +132,7 @@ export const TourPointList = ({ points, hasAccess = true, headerComponent, foote
   );
 };
 
+// ... mantén tus estilos intactos (styles.listHeaderContainer, etc.)
 const styles = StyleSheet.create({
   listHeaderContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 },
   itemWrapper: { paddingHorizontal: 20 },
@@ -158,4 +157,4 @@ const styles = StyleSheet.create({
   textHidden: { color: COLORS.muted, textDecorationLine: 'line-through' },
   iconButton: { padding: 5, marginRight: 5 },
   dragHandle: { padding: 10 }
-});
+}); 

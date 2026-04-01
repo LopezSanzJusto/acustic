@@ -136,19 +136,24 @@ export default function TourDetailScreen() {
         
         <TourHeader title={tour.title} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} onBack={() => router.back()} />
 
-        {/* ✅ 3. Eliminamos el ScrollView padre. La lista controlará el scroll de TODA la pantalla */}
-        <TourPointList 
-          points={points} 
-          hasAccess={hasAccess} 
-          headerComponent={renderHeader()} 
-          footerComponent={renderFooter()} 
-        />
+        {/* ✅ AÑADIDO: Envolvemos la lista en un View con flex: 1. 
+            Esto obliga a la lista a quedarse en el centro y respetar el espacio del footer */}
+        <View style={{ flex: 1 }}>
+          <TourPointList 
+            tourId={id as string} 
+            points={points} 
+            hasAccess={hasAccess} 
+            headerComponent={renderHeader()} 
+            footerComponent={renderFooter()} 
+          />
+        </View>
 
         <TourFooter price={tour.price} onStart={handleStartRoute} isLoading={isProcessing} />
       </View>
     </>
   );
 }
+
 
 const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 10 },

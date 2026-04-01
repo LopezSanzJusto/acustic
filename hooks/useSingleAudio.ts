@@ -1,72 +1,64 @@
 // hooks/useSingleAudio.ts
-import { useState, useEffect, useRef } from 'react';
-import { Audio } from 'expo-av';
+import { useState, useEffect } from 'react';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 
 export function useSingleAudio(audioUrl?: string) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // ✨ Nuevo estado para el loading
-  const [positionMillis, setPositionMillis] = useState(0);
-  const [durationMillis, setDurationMillis] = useState(0);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  // ✨ LAZY LOAD: Empezamos en null para no consumir RAM ni datos hasta pulsar Play
+  const [source, setSource] = useState<string | null>(null);
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
-  // Limpiamos la memoria si el componente se desmonta (cambiamos de pestaña, etc.)
+  // 1. Cargamos el reproductor de forma nativa (si source es null, no hace nada)
+  const player = useAudioPlayer(source);
+  
+  // 2. Este hook mágico nos da el estado en tiempo real (adiós al setOnPlaybackStatusUpdate)
+  const status = useAudioPlayerStatus(player);
+
+  const isPlaying = status.playing;
+  // Adaptamos los tiempos (expo-audio usa SEGUNDOS, tu app espera MILISEGUNDOS)
+  const positionMillis = (status.currentTime || 0) * 1000;
+  const durationMillis = (status.duration || 0) * 1000;
+
+  // ✨ Está cargando si ya le dimos la URL pero el motor aún no ha decodificado la duración
+  const isLoading = source !== null && status.duration === 0;
+
+  // Reseteamos el estado si la URL original cambia
   useEffect(() => {
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-      }
-    };
-  }, []);
+    setSource(null);
+    setShouldAutoPlay(false);
+  }, [audioUrl]);
 
-  const togglePlayPause = async () => {
+  // Efecto para auto-reproducir justo en el momento en el que el Lazy Load termina de cargar
+  useEffect(() => {
+    if (shouldAutoPlay && player && status.duration > 0) {
+      player.play();
+      setShouldAutoPlay(false);
+    }
+  }, [player, status.duration, shouldAutoPlay]);
+
+  const togglePlayPause = () => {
     if (!audioUrl) return;
 
-    // ✨ Obligamos a que suene aunque el móvil (ej. iPhone) esté en silencio
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-    });
-
-    try {
-      if (soundRef.current) {
-        // 1. El audio ya estaba cargado previamente
-        if (isPlaying) {
-          await soundRef.current.pauseAsync();
-        } else {
-          await soundRef.current.playAsync();
-        }
+    if (!source) {
+      // CASO 1: LAZY LOAD - Es la primera vez que pulsa Play
+      setSource(audioUrl); // Disparamos la carga del audio
+      setShouldAutoPlay(true); // Le decimos que suene en cuanto esté listo
+    } else {
+      // CASO 2: El audio ya estaba cargado en memoria
+      if (isPlaying) {
+        player.pause();
       } else {
-        // 2. LAZY LOAD: Cargamos el audio SOLO si es la primera vez que pulsa Play
-        setIsLoading(true);
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: audioUrl },
-          { shouldPlay: true }, // Lo reproducimos inmediatamente tras cargar
-          (status) => {
-            if (status.isLoaded) {
-              setIsPlaying(status.isPlaying);
-              setPositionMillis(status.positionMillis);
-              setDurationMillis(status.durationMillis ?? 0);
-
-              // Si el audio termina, lo volvemos a poner al principio
-              if (status.didJustFinish) {
-                setIsPlaying(false);
-                sound.setPositionAsync(0);
-              }
-            }
-          }
-        );
-        soundRef.current = sound;
-        setIsLoading(false);
+        // Si el audio llegó al final (con un pequeño margen de 0.5s), lo reiniciamos
+        if (status.duration > 0 && status.currentTime >= status.duration - 0.5) {
+          player.seekTo(0);
+        }
+        player.play();
       }
-    } catch (error) {
-      console.error("Error reproduciendo audio:", error);
-      setIsLoading(false);
     }
   };
 
-  const seekTo = async (millis: number) => {
-    if (!soundRef.current) return;
-    await soundRef.current.setPositionAsync(millis);
+  const seekTo = (millis: number) => {
+    if (!player) return;
+    player.seekTo(millis / 1000); // Recordamos dividir por 1000 para expo-audio
   };
 
   return { isPlaying, isLoading, positionMillis, durationMillis, togglePlayPause, seekTo };
