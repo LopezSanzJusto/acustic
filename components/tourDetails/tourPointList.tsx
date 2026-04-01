@@ -1,21 +1,24 @@
 // components/tourDetails/tourPointList.tsx
 
-import React, { useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity as RNTouchableOpacity } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
 import { useCustomRoute } from '../../hooks/useCustomRoute';
 
-// Importamos la librería de Drag & Drop
+import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 
 interface TourPointListProps {
   points: PointOfInterest[];
-  hasAccess?: boolean; // ✅ NUEVA PROP
+  hasAccess?: boolean;
+  headerComponent?: React.ReactElement | null; 
+  footerComponent?: React.ReactElement | null; 
 }
 
-export const TourPointList = ({ points, hasAccess = true }: TourPointListProps) => {
+export const TourPointList = ({ points, hasAccess = true, headerComponent, footerComponent }: TourPointListProps) => {
   const { customPoints, setInitialPoints, togglePointVisibility, reorderPoints } = useCustomRoute();
 
   useEffect(() => {
@@ -35,83 +38,105 @@ export const TourPointList = ({ points, hasAccess = true }: TourPointListProps) 
     });
   }, [customPoints]);
 
-  if (customPoints.length === 0) return null;
+// ✅ CORRECCIÓN DE ESCALADO VISUAL
+  const renderItem = useCallback(({ item, drag, isActive }: RenderItemParams<any>) => (
+    // 1. El wrapper con el padding se queda FUERA para que los márgenes no crezcan
+    <View style={styles.itemWrapper}>
+      
+      {/* 2. El ScaleDecorator envuelve SOLO la tarjeta, y controlamos su tamaño (1.02) */}
+      <ScaleDecorator activeScale={1.02}>
+        <View 
+          style={[
+            styles.row, 
+            item.isHidden && styles.rowHidden,
+            isActive && styles.rowActive 
+          ]}
+        >
+          <Image 
+            source={{ uri: item.image }} 
+            style={[styles.image, item.isHidden && styles.imageHidden]} 
+          />
+          
+          <View style={styles.textContainer}>
+            <Text style={[styles.pointName, item.isHidden && styles.textHidden]} numberOfLines={2}>
+              {item.displayNumber ? `${item.displayNumber}. ` : ''}{item.name}
+            </Text>
+          </View>
 
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<any>) => (
-    <ScaleDecorator>
-      <View 
-        style={[
-          styles.row, 
-          item.isHidden && styles.rowHidden,
-          isActive && styles.rowActive 
-        ]}
-      >
-        <Image 
-          source={{ uri: item.image }} 
-          style={[styles.image, item.isHidden && styles.imageHidden]} 
-        />
-        
-        <View style={styles.textContainer}>
-          <Text style={[styles.pointName, item.isHidden && styles.textHidden]} numberOfLines={2}>
-            {item.displayNumber ? `${item.displayNumber}. ` : ''}{item.name}
-          </Text>
+          {hasAccess && (
+            <>
+              <RNTouchableOpacity 
+                onPress={() => togglePointVisibility(item.id)}
+                style={styles.iconButton}
+              >
+                 <Ionicons 
+                   name={item.isHidden ? "eye-off-outline" : "eye-outline"} 
+                   size={24} 
+                   color={item.isHidden ? COLORS.muted : COLORS.textDark} 
+                 />
+              </RNTouchableOpacity>
+
+              <GHTouchableOpacity onPressIn={drag} style={styles.dragHandle}>
+                 <Ionicons 
+                   name="menu-outline" 
+                   size={24} 
+                   color={isActive ? COLORS.primary : COLORS.muted} 
+                 />
+              </GHTouchableOpacity>
+            </>
+          )}
         </View>
+      </ScaleDecorator>
+    </View>
+  ), [hasAccess, togglePointVisibility]);
 
-        {/* ✅ SOLO MOSTRAMOS CONTROLES SI TIENE ACCESO */}
-        {hasAccess && (
-          <>
-            <TouchableOpacity 
-              onPress={() => togglePointVisibility(item.id)}
-              style={styles.iconButton}
-            >
-               <Ionicons 
-                 name={item.isHidden ? "eye-off-outline" : "eye-outline"} 
-                 size={24} 
-                 color={item.isHidden ? COLORS.muted : COLORS.textDark} 
-               />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPressIn={drag} style={styles.dragHandle}>
-               <Ionicons 
-                 name="menu-outline" 
-                 size={24} 
-                 color={isActive ? COLORS.primary : COLORS.muted} 
-               />
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
-    </ScaleDecorator>
-  );
+  // ⚠️ EL RETURN ANTICIPADO AHORA ESTÁ DEBAJO DE TODOS LOS HOOKS
+  if (customPoints.length === 0) {
+    return (
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        {headerComponent}
+        {footerComponent}
+      </ScrollView>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      {/* ✅ CAMBIO DE TÍTULO SEGÚN ACCESO */}
-      <Text style={styles.header}>
-        {hasAccess ? "Personaliza tu ruta" : "Puntos del recorrido"}
-      </Text>
+    <DraggableFlatList
+      data={listData}
+      keyExtractor={(item) => item.id}
+      onDragEnd={({ from, to }) => reorderPoints(from, to)}
+      renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 100 }}
+      ListHeaderComponent={
+        <View>
+          {headerComponent}
+          <View style={styles.listHeaderContainer}>
+            <Text style={styles.header}>
+              {hasAccess ? "Personaliza tu ruta" : "Puntos del recorrido"}
+            </Text>
 
-      {/* ✅ SOLO MOSTRAMOS INFO BOX SI TIENE ACCESO */}
-      {hasAccess && (
-        <View style={styles.infoBox}>
-          <Ionicons name="information-circle" size={20} color={COLORS.primary} />
-          <Text style={styles.infoText}>Arrastra desde el icono derecho para reordenar o toca el ojo para ocultar paradas.</Text>
+            {hasAccess && (
+              <View style={styles.infoBox}>
+                <Ionicons name="information-circle" size={20} color={COLORS.primary} />
+                <Text style={styles.infoText}>Arrastra desde el icono derecho para reordenar o toca el ojo para ocultar paradas.</Text>
+              </View>
+            )}
+          </View>
         </View>
-      )}
-
-      <DraggableFlatList
-        data={listData}
-        keyExtractor={(item) => item.id}
-        onDragEnd={({ from, to }) => reorderPoints(from, to)}
-        renderItem={renderItem}
-        scrollEnabled={false}
-      />
-    </View>
+      }
+      ListFooterComponent={
+        <View>
+          {footerComponent}
+        </View>
+      }
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: { marginTop: 20 },
+  listHeaderContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 },
+  itemWrapper: { paddingHorizontal: 20 },
   header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 10 },
   infoBox: { flexDirection: 'row', backgroundColor: '#F3E8FF', padding: 12, borderRadius: 12, marginBottom: 15, alignItems: 'center', gap: 10 },
   infoText: { fontSize: 12, color: COLORS.primary, flex: 1, lineHeight: 18 },
@@ -123,7 +148,6 @@ const styles = StyleSheet.create({
   rowActive: { 
     elevation: 8, 
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 5,
-    transform: [{ scale: 1.02 }],
     backgroundColor: COLORS.white,
     borderColor: COLORS.primary
   },

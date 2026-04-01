@@ -1,7 +1,7 @@
 // app/tour/[id].tsx
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
@@ -96,6 +96,39 @@ export default function TourDetailScreen() {
     </View>
   );
 
+  // ✅ 1. Extraemos todo el contenido SUPERIOR a una función
+  const renderHeader = () => (
+    <>
+      <ImageSlider images={tourImages} height={280} width={width} />
+      <View style={styles.content}>
+        <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
+        <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />
+        <TourIntroAudio title={tour.title} image={tourImages[0]} audioUrl={tour.introAudioUrl} />
+        <TourAudioPreview points={points} price={tour.price || 0} />
+        
+        <Text style={styles.sectionTitle}>Mapa del tour</Text>
+        <TourMapPreview points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
+            router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any); 
+          }}
+        />
+
+        {!hasAccess && (
+          <TouchableOpacity style={styles.premiumButton} onPress={handleStartRoute}>
+            <Ionicons name="lock-closed" size={20} color="white" style={{ marginRight: 8 }} />
+            <Text style={styles.premiumText}>Personaliza tu ruta (Premium)</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </>
+  );
+
+  // ✅ 2. Extraemos todo el contenido INFERIOR a otra función
+  const renderFooter = () => (
+    <View style={styles.content}>
+      <TourReviews />
+    </View>
+  );
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -103,36 +136,13 @@ export default function TourDetailScreen() {
         
         <TourHeader title={tour.title} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} onBack={() => router.back()} />
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          <ImageSlider images={tourImages} height={280} width={width} />
-
-          <View style={styles.content}>
-            <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
-            <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />
-            <TourIntroAudio title={tour.title} image={tourImages[0]} audioUrl={tour.introAudioUrl} />
-
-            <TourAudioPreview points={points} price={tour.price || 0} />
-
-            <Text style={styles.sectionTitle}>Mapa del tour</Text>
-            <TourMapPreview points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
-                  router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any); 
-                }}
-            />
-
-            {/* ✅ BOTÓN DORADO ABAJO (SOLO SI NO TIENE ACCESO) */}
-            {!hasAccess && (
-              <TouchableOpacity style={styles.premiumButton} onPress={handleStartRoute}>
-                <Ionicons name="lock-closed" size={20} color="white" style={{ marginRight: 8 }} />
-                <Text style={styles.premiumText}>Personaliza tu ruta (Premium)</Text>
-              </TouchableOpacity>
-            )}
-
-            {/* ✅ PASAMOS HASACCESS A LA LISTA */}
-            <TourPointList points={points} hasAccess={hasAccess} />
-
-            <TourReviews />
-          </View>
-        </ScrollView>
+        {/* ✅ 3. Eliminamos el ScrollView padre. La lista controlará el scroll de TODA la pantalla */}
+        <TourPointList 
+          points={points} 
+          hasAccess={hasAccess} 
+          headerComponent={renderHeader()} 
+          footerComponent={renderFooter()} 
+        />
 
         <TourFooter price={tour.price} onStart={handleStartRoute} isLoading={isProcessing} />
       </View>
