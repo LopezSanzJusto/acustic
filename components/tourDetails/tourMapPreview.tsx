@@ -9,14 +9,15 @@ import { MapDisplay } from '../mapDisplay';
 import { useCustomRoute } from '../../hooks/useCustomRoute';
 
 interface TourMapPreviewProps {
+  tourId: string;
   points: PointOfInterest[];
   onPress: () => void;
   onRouteCalculated?: (distanceText: string) => void; 
 }
 
-export const TourMapPreview = ({ points, onPress, onRouteCalculated }: TourMapPreviewProps) => {
+export const TourMapPreview = ({ tourId, points, onPress, onRouteCalculated }: TourMapPreviewProps) => {
   // ✨ Extraemos la ruta activa desde el contexto
-  const { activeRoutePoints } = useCustomRoute();
+  const { activeRoutePoints } = useCustomRoute(tourId);
 
   // Si hay puntos en el estado global, los usamos. Si es la primera carga, usamos los props.
   const displayPoints = activeRoutePoints.length > 0 ? activeRoutePoints : points;

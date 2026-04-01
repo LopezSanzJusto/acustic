@@ -107,7 +107,7 @@ export default function TourDetailScreen() {
         <TourAudioPreview points={points} price={tour.price || 0} />
         
         <Text style={styles.sectionTitle}>Mapa del tour</Text>
-        <TourMapPreview points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
+        <TourMapPreview tourId={id as string} points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
             router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any); 
           }}
         />

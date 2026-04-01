@@ -1,8 +1,9 @@
-// componentes/MapDisplay.tsx
+// components/mapDisplay.tsx
 
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { StyleSheet, View, Image, Text } from "react-native";
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from "react-native-maps";
+// ✨ QUÍTAMOS PROVIDER_GOOGLE. Dejamos que el SO decida el mapa nativo.
+import MapView, { Marker, Circle } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import { PointOfInterest } from "../data/points";
 import { COLORS } from "../utils/theme";
@@ -39,14 +40,8 @@ export const MapDisplay = ({
     [key: string]: boolean;
   }>({});
 
-  // ✨ EL ARREGLO ESTÁ AQUÍ
   useEffect(() => {
-    // Al cambiar la ruta (por ejemplo, ocultar un punto), reseteamos la carga
-    // para obligar al mapa a repintar los nuevos números.
     setLoadedImages({});
-    
-    // Si usamos números, les damos 1 segundo de cortesía para renderizarse 
-    // visualmente antes de "congelarlos" para ahorrar memoria.
     if (markerType === 'number') {
       const timer = setTimeout(() => {
         const loaded: { [key: string]: boolean } = {};
@@ -66,7 +61,6 @@ export const MapDisplay = ({
         longitudeDelta: 0.005,
       };
     }
-    // ✅ AÑADIDO: Fallback de seguridad por si no hay puntos al cargar
     return {
       latitude: 40.416775,
       longitude: -3.703790,
@@ -88,7 +82,7 @@ export const MapDisplay = ({
     <View style={styles.mapContainer}>
       <MapView
         ref={mapRef}
-        provider={PROVIDER_GOOGLE}
+        // ✨ Eliminado provider y loadingEnabled para evitar bugs en Expo 55
         style={styles.map}
         initialRegion={initialRegion}
         showsUserLocation={false}
@@ -146,13 +140,10 @@ export const MapDisplay = ({
               }}
               anchor={{ x: 0.5, y: 0.5 }}
               zIndex={2}
-              // ✨ Volvemos a tu lógica original que funcionaba perfecta
               tracksViewChanges={!loadedImages[p.id]}
               onPress={() => onMarkerPress && onMarkerPress(p.id)}
             >
               <View style={styles.markerBorder} collapsable={false}>
-                
-                {/* ✨ RENDERIZADO DEL NÚMERO */}
                 {markerType === "number" ? (
                   <View style={[styles.markerImage, styles.numberMarker]}>
                      <Text style={styles.numberText}>{index + 1}</Text>
@@ -191,67 +182,22 @@ export const MapDisplay = ({
 };
 
 const styles = StyleSheet.create({
-  // ✅ CORRECCIÓN DE ESTILOS PARA EL NUEVO MOTOR (SDK 55 / RN 0.74+)
   mapContainer: { 
-    flex: 1, 
-    width: "100%", 
+    // ✨ FORZAMOS POSICIÓN ABSOLUTA para evitar que el mapContainer mida 0x0
+    ...StyleSheet.absoluteFillObject, 
+    backgroundColor: '#E6E6E6',
     overflow: "hidden" 
   },
   map: { 
+    // ✨ EL MAPA TAMBIÉN DEBE SER ABSOLUTO para renderizar en Fabric
     ...StyleSheet.absoluteFillObject 
   },
 
-  markerBorder: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    backgroundColor: COLORS.white,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: COLORS.white,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 6,
-  },
-
-  markerImage: {
-    width: 41,
-    height: 41,
-    borderRadius: 20.5, 
-  },
-
-  // ✨ ESTILOS DEL NÚMERO
-  numberMarker: {
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  numberText: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-
-  userMarkerContainer: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  userMarkerDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "#3B82F6",
-    borderWidth: 3,
-    borderColor: "white",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
+  // ... (el resto de tus estilos se mantienen igual)
+  markerBorder: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: COLORS.white, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: COLORS.white, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 4, elevation: 6 },
+  markerImage: { width: 41, height: 41, borderRadius: 20.5 },
+  numberMarker: { backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' },
+  numberText: { color: COLORS.white, fontSize: 18, fontWeight: 'bold' },
+  userMarkerContainer: { width: 24, height: 24, justifyContent: "center", alignItems: "center" },
+  userMarkerDot: { width: 20, height: 20, borderRadius: 10, backgroundColor: "#3B82F6", borderWidth: 3, borderColor: "white", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 },
 });
