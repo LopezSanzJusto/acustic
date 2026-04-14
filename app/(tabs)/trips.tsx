@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { TourCard } from '../../components/tourCard';
+// ✅ Solo necesitamos ActiveTourCard aquí
+import { ActiveTourCard } from '../../components/activeTourCard';
 import { TripSlider } from '../../components/tripSlider';
 import { EmptyState } from '../../components/emptyState';
 
 import { useMyTours } from '../../hooks/useMyTours';
 import { COLORS } from '../../utils/theme';
 
-// ✅ Importamos el logo. Asegúrate de que esta ruta hacia assets/images/logo.png sea correcta
 const LogoAcustic = require('../../assets/images/logo.png');
 
 export default function TripsScreen() {
@@ -59,20 +59,19 @@ export default function TripsScreen() {
         />
       ) : (
         <FlatList
+          // ✅ CORREGIDO: Usamos dataToShow, que es la variable de esta pantalla
           data={dataToShow}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
           renderItem={({ item }) => (
-            <TourCard 
+            // ✅ CORREGIDO: Usamos ActiveTourCard porque esta es la pantalla de Mis Viajes
+            <ActiveTourCard 
               tour={item} 
-              onPress={() => 
-                // ✨ AÑADIDO: fromTrips: 'true' para identificar el origen en la pantalla de destino
-                router.push({ 
-                  pathname: "/tour/[id]", 
-                  params: { id: item.id, fromTrips: 'true' } 
-                } as any)
-              } 
+              onPress={() => router.push({ 
+                pathname: "/tour/[id]", 
+                params: { id: item.id, fromTrips: 'true' } 
+              } as any)} 
             />
           )}
         />

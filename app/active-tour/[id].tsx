@@ -4,32 +4,38 @@ import React from 'react';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import HomeScreenContent from '../../screens/activeRouteScreen'; 
-// ✅ Importamos el nuevo componente
 import { FloatingButton } from '../../components/floatingButton';
+// Importamos esto para bajar el botón dinámicamente según el móvil
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ActiveTourPage() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       
-      {/* ✅ USO DEL COMPONENTE: Botón Cerrar (X) */}
+      {/* Renderizamos el Mapa primero para que quede debajo */}
+      <HomeScreenContent tourId={id as string} />
+
+      {/* ✨ AJUSTADO: Botón Cerrar (X) movido un poco más abajo */}
       <FloatingButton 
         icon="close" 
-        size={28} // Podemos hacerlo un poco más grande si queremos
+        size={26}
         onPress={() => router.back()}
-        style={{ top: 50, right: 20 }} // A la derecha
+        style={{ 
+          position: 'absolute', // Aseguramos que es flotante
+          top: insets.top + 100, // Lo bajamos para que quede bajo la barra de progreso
+          right: 15,
+          zIndex: 999 
+        }} 
       />
-
-      {/* Renderizamos tu componente de Mapa pasando el ID dinámico */}
-      <HomeScreenContent tourId={id as string} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  // 🗑️ ELIMINADO: closeButton (ya no se usa)
+  container: { flex: 1, position: 'relative' },
 });
