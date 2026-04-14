@@ -23,13 +23,26 @@ export function useMyTours() {
         const purchasedIds = userData.purchasedTours || [];
         const favoriteIds = userData.favoriteTours || [];
 
-        // Función para traer los tours completos usando sus IDs
+        // ✨ AQUÍ RECUPERAMOS EL PROGRESO: Extraemos el diccionario de Firebase
+        // Tendrá una forma así: { "id_ruta_1": 45.6, "id_ruta_2": 12.3 }
+        const userProgressMap = userData.progress || {};
+
+        // Función para traer los tours completos
         const fetchToursByIds = async (ids: string[]) => {
           if (ids.length === 0) return [];
-          // Firestore permite buscar múltiples IDs a la vez con "in"
           const q = query(collection(db, "tours"), where(documentId(), "in", ids));
           const snapshot = await getDocs(q);
-          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          
+          return snapshot.docs.map(doc => {
+            const tourId = doc.id;
+            return { 
+              id: tourId, 
+              ...doc.data(),
+              // ✨ INYECCIÓN VITAL: Le pasamos a la tarjeta el porcentaje guardado.
+              // Si el usuario nunca ha empezado esta ruta, le pasamos un 0.
+              progressPercentage: userProgressMap[tourId] || 0
+            };
+          });
         };
 
         // Cargamos los datos de las rutas
