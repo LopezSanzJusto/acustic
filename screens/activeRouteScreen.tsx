@@ -21,6 +21,9 @@ import { useCustomRoute } from "../hooks/useCustomRoute";
 import { RouteProgressBar } from "../components/routeProgressBar";
 import { calculateRealTimeProgress } from "../utils/geo";
 import { useTourProgress } from "../hooks/useTourProgress";
+import { PointReachedModal } from "../components/pointReachedModal";
+import { notifyPointReached, ensureNotificationPermission } from "../services/notificationService";
+import { PointOfInterest } from "../data/points";
 
 const RADIUS = 15;
 
@@ -75,14 +78,34 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     toggleSpeed
   } = useAudio(routeToUse); 
 
+  // Popup state
+  const [pendingPoint, setPendingPoint] = useState<{ index: number; point: PointOfInterest } | null>(null);
+
+  // Pedimos permiso de notificaciones al abrir la ruta
+  useEffect(() => {
+    ensureNotificationPermission();
+  }, []);
+
+  const handlePointReached = useCallback((index: number, point: PointOfInterest) => {
+    setPendingPoint({ index, point });
+    notifyPointReached(point.name);
+  }, []);
+
   const { gpsActivePoint } = useGeoAudioSync({
     location,
     points: routeToUse,
     radius: RADIUS,
     isPreloading,
     pointsLoading,
-    setActivePointIndex
+    onPointReached: handlePointReached
   });
+
+  const confirmPlayPoint = useCallback(() => {
+    if (pendingPoint) setActivePointIndex(pendingPoint.index);
+    setPendingPoint(null);
+  }, [pendingPoint, setActivePointIndex]);
+
+  const dismissPoint = useCallback(() => setPendingPoint(null), []);
 
   // ✨ Índice máximo alcanzado FÍSICAMENTE (por GPS). Nunca retrocede,
   // y es independiente del audio que el usuario esté escuchando.
@@ -164,6 +187,13 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
               </View>
             </View>
           </View>
+
+          <PointReachedModal
+            visible={!!pendingPoint}
+            point={pendingPoint?.point ?? null}
+            onConfirm={confirmPlayPoint}
+            onDismiss={dismissPoint}
+          />
 
           {activePoint && (
             <AudioMiniPlayer

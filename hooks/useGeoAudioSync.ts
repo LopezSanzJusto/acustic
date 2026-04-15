@@ -10,7 +10,7 @@ interface UseGeoAudioSyncProps {
   radius: number;
   isPreloading: boolean;
   pointsLoading: boolean;
-  setActivePointIndex: (index: number | null) => void;
+  onPointReached: (index: number, point: PointOfInterest) => void;
 }
 
 export const useGeoAudioSync = ({
@@ -19,10 +19,9 @@ export const useGeoAudioSync = ({
   radius,
   isPreloading,
   pointsLoading,
-  setActivePointIndex
+  onPointReached
 }: UseGeoAudioSyncProps) => {
 
-  // ✅ 1. "Memoria" para no disparar el mismo punto múltiples veces
   const playedPoints = useRef<Set<string>>(new Set());
 
   const gpsActivePoint = useMemo(() => {
@@ -41,25 +40,15 @@ export const useGeoAudioSync = ({
 
   useEffect(() => {
     if (isPreloading || pointsLoading) return;
-
-    // ✅ 2. CORRECCIÓN CRÍTICA: Si el GPS no detecta nada cerca, NO hacemos setActivePointIndex(null).
-    // Simplemente ignoramos la acción. Esto evita pelearnos con el autoSelectFirst de useAudio.
-    if (!gpsActivePoint) {
-      return;
-    }
-
-    // ✅ 3. Si ya pasamos por aquí y activamos el audio, no lo volvemos a hacer.
-    if (playedPoints.current.has(gpsActivePoint.id)) {
-      return;
-    }
+    if (!gpsActivePoint) return;
+    if (playedPoints.current.has(gpsActivePoint.id)) return;
 
     const index = points.findIndex(p => p.id === gpsActivePoint.id);
     if (index !== -1) {
-      // Registramos que este punto ya disparó el evento
       playedPoints.current.add(gpsActivePoint.id);
-      setActivePointIndex(index);
+      onPointReached(index, gpsActivePoint);
     }
-  }, [gpsActivePoint, isPreloading, pointsLoading, points, setActivePointIndex]);
+  }, [gpsActivePoint, isPreloading, pointsLoading, points, onPointReached]);
 
   return { gpsActivePoint };
 };
