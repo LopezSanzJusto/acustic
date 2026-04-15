@@ -210,7 +210,7 @@ export default function ExploreScreen() {
             keyExtractor={(item) => item.id}
             ListHeaderComponent={() => (
               <Text style={styles.sectionTitle}>
-                {selectedLocation ? `Resultados en ${searchQuery}` : 'Audioguías cerca de ti'}
+                {selectedLocation ? `Resultados en ${searchQuery}` : 'Audioguías más próximas'}
               </Text>
             )}
             contentContainerStyle={styles.listContent}
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20, 
     marginBottom: 16, 
     marginTop: 10,
-    color: COLORS.textDark 
+    color: COLORS.primary
   },
   listContent: { 
     paddingBottom: 100 

@@ -1,7 +1,8 @@
 // components/imageSlider.tsx
 
 import React, { useState } from 'react';
-import { FlatList, Image, StyleSheet, View, Dimensions, NativeSyntheticEvent, NativeScrollEvent, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, View, Dimensions, NativeSyntheticEvent, NativeScrollEvent, TouchableOpacity } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { COLORS } from '../utils/theme';
 
 interface ImageSliderProps {
@@ -28,23 +29,23 @@ export const ImageSlider = ({ images, height, width = screenWidth, onPress }: Im
 
   return (
     <View style={{ width, height, position: 'relative' }}>
-      <FlatList
-        data={validImages}
+      <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
-        scrollEventThrottle={16} // Para suavidad en iOS
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity activeOpacity={onPress ? 0.9 : 1} onPress={onPress}>
-            <Image 
-              source={{ uri: item }} 
-              style={{ width, height, resizeMode: 'cover' }} 
+        scrollEventThrottle={16}
+        nestedScrollEnabled
+      >
+        {validImages.map((item, i) => (
+          <TouchableOpacity key={i} activeOpacity={onPress ? 0.9 : 1} onPress={onPress}>
+            <Image
+              source={{ uri: item }}
+              style={{ width, height, resizeMode: 'cover' }}
             />
           </TouchableOpacity>
-        )}
-      />
+        ))}
+      </ScrollView>
 
       {/* Indicadores (Puntitos con Sombreado de Fondo Colectivo) */}
       {validImages.length > 1 && (

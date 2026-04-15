@@ -110,9 +110,12 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
         <View>
           {headerComponent}
           <View style={styles.listHeaderContainer}>
-            <Text style={styles.header}>
-              {hasAccess ? "Personaliza tu ruta" : "Puntos del recorrido"}
-            </Text>
+            <View style={styles.headerRow}>
+              <Text style={styles.header}>Personaliza tu ruta</Text>
+              {!hasAccess && (
+                <Text style={styles.headerHint}>(disponible al comprar)</Text>
+              )}
+            </View>
 
             {hasAccess && (
               <View style={styles.infoBox}>
@@ -136,7 +139,9 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
 const styles = StyleSheet.create({
   listHeaderContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 },
   itemWrapper: { paddingHorizontal: 20 },
-  header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 10 },
+  header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
+  headerRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', marginBottom: 10, gap: 8 },
+  headerHint: { fontSize: 18, fontWeight: 'bold', color: COLORS.primary },
   infoBox: { flexDirection: 'row', backgroundColor: '#F3E8FF', padding: 12, borderRadius: 12, marginBottom: 15, alignItems: 'center', gap: 10 },
   infoText: { fontSize: 12, color: COLORS.primary, flex: 1, lineHeight: 18 },
   row: { 
