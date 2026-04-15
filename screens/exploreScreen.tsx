@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
   Image
 } from 'react-native';
-import { TourCard } from '../components/tourCard';
+import { ExploreTourCard } from '../components/exploreTourCard';
 import { useFirebaseTours } from '../hooks/useFirebaseTours';
 import { useCitySearch } from '../hooks/useCitySearch'; 
 import { useRouter } from 'expo-router';
@@ -215,7 +215,7 @@ export default function ExploreScreen() {
             )}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
-              <TourCard 
+              <ExploreTourCard 
                 tour={item} 
                 onPress={() => {
                   router.push({
