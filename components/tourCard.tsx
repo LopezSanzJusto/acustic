@@ -9,12 +9,9 @@ import { useFavorites } from '../hooks/useFavorites';
 import { useSingleAudio } from '../hooks/useSingleAudio'; 
 
 import { db } from '../services/firebaseConfig';
-import { calculateRealTimeProgress } from '../utils/geo'; 
+import { calculateRealTimeProgress } from '../utils/geo';
 import { COLORS } from '../utils/theme';
 import { ImageSlider } from './imageSlider';
-
-// ✨ IMPORTAMOS NUESTRO NUEVO ANILLO
-import { CircularProgress } from './circularProgress';
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 15;
@@ -32,7 +29,6 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
   const [realPointsCount, setRealPointsCount] = useState(0);
   const [preciseDistance, setPreciseDistance] = useState<string>("0.00");
   const [calculatedTime, setCalculatedTime] = useState<string>("0h 0m");
-  const [progressPercentage, setProgressPercentage] = useState<number>(0);
 
   useEffect(() => {
     async function getRealData() {
@@ -42,16 +38,12 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
         const q = query(pointsRef, orderBy("order", "asc"));
         const snapshot = await getDocs(q);
         const pointsArray = snapshot.docs.map(doc => doc.data());
-        
+
         setRealPointsCount(pointsArray.length);
 
         if (pointsArray.length > 1) {
-          // TODO: Sacar este índice de Firebase cuando guardes el progreso del usuario
-          const simulatedCompletedIndex = Math.floor(pointsArray.length / 2); 
-
-          const progressData = calculateRealTimeProgress(pointsArray, simulatedCompletedIndex, null);
-          setProgressPercentage(progressData.percentage);
-
+          // Usamos el último índice para obtener la distancia total de la ruta
+          const progressData = calculateRealTimeProgress(pointsArray, pointsArray.length - 1, null);
           const totalKms = progressData.totalMeters / 1000;
           setPreciseDistance(totalKms.toFixed(2));
 
@@ -62,7 +54,6 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
         } else {
           setPreciseDistance(tour.distance || "0.00");
           setCalculatedTime(tour.duration || "N/A");
-          setProgressPercentage(0);
         }
       } catch (e) {
         console.log("Error al procesar datos reales:", e);
@@ -120,38 +111,27 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
         )}
       </View>
 
-      {/* ✨ REFACTORIZACIÓN DE FLEXBOX PARA EL ANILLO A LA DERECHA */}
       <TouchableOpacity style={styles.infoContainer} onPress={onPress} activeOpacity={0.8}>
-        
-        {/* Columna Izquierda: Textos y Metadatos */}
-        <View style={styles.textColumn}>
-          <Text style={styles.title} numberOfLines={1}>{tour.title}</Text>
-          
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <Ionicons name="location-sharp" size={14} color={COLORS.error} />
-              <Text style={styles.metaText}>{tour.city}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Ionicons name="time-outline" size={14} color={COLORS.primary} />
-              <Text style={styles.metaText}>{calculatedTime}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Ionicons name="walk-outline" size={14} color={COLORS.accent} />
-              <Text style={styles.metaText}>{preciseDistance} km</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Ionicons name="map-outline" size={14} color={COLORS.gold} />
-              <Text style={styles.metaText}>{realPointsCount} pts</Text>
-            </View>
+        <Text style={styles.title} numberOfLines={1}>{tour.title}</Text>
+
+        <View style={styles.metaRow}>
+          <View style={styles.metaItem}>
+            <Ionicons name="location-sharp" size={14} color={COLORS.error} />
+            <Text style={styles.metaText}>{tour.city}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="time-outline" size={14} color={COLORS.primary} />
+            <Text style={styles.metaText}>{calculatedTime}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="walk-outline" size={14} color={COLORS.accent} />
+            <Text style={styles.metaText}>{preciseDistance} km</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="map-outline" size={14} color={COLORS.gold} />
+            <Text style={styles.metaText}>{realPointsCount} pts</Text>
           </View>
         </View>
-
-        {/* Columna Derecha: Anillo de Progreso */}
-        <View style={styles.progressColumn}>
-          <CircularProgress percentage={progressPercentage} size={50} strokeWidth={4.5} />
-        </View>
-
       </TouchableOpacity>
     </View>
   );
@@ -163,21 +143,7 @@ const styles = StyleSheet.create({
   badge: { position: 'absolute', top: 0, left: 0, paddingHorizontal: 15, paddingVertical: 5, borderBottomRightRadius: 15, backgroundColor: COLORS.badge, zIndex: 10 },
   badgeText: { color: COLORS.white, fontWeight: 'bold' },
   
-  // ✨ NUEVO LAYOUT FLEXBOX
-  infoContainer: { 
-    padding: 15, 
-    flexDirection: 'row', 
-    alignItems: 'center', // Centra verticalmente el contenido
-    justifyContent: 'space-between' 
-  },
-  textColumn: { 
-    flex: 1, // Toma todo el espacio disponible dejando a la derecha el progreso
-    paddingRight: 10 // Espacio para que el texto no se pegue al círculo
-  },
-  progressColumn: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  infoContainer: { padding: 15 },
 
   title: { fontSize: 17, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 8 },
   

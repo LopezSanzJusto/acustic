@@ -74,6 +74,10 @@ export default function TourDetailScreen() {
   const handleStartRoute = async () => {
     if (!tour) return;
     if (hasAccess) {
+      // Si la ruta es gratuita y aún no está en "mis rutas", la añadimos antes de navegar
+      if (isFree && !isPurchased) {
+        await addTourToMyList(tour.id);
+      }
       router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any);
       return;
     }

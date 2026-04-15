@@ -1,6 +1,6 @@
 // screens/activeRouteScreen.tsx
 
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -57,14 +57,26 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     toggleSpeed
   } = useAudio(routeToUse); 
 
-  useGeoAudioSync({
+  const { gpsActivePoint } = useGeoAudioSync({
     location,
-    points: routeToUse, 
+    points: routeToUse,
     radius: RADIUS,
     isPreloading,
     pointsLoading,
     setActivePointIndex
   });
+
+  // ✨ Índice máximo alcanzado FÍSICAMENTE (por GPS). Nunca retrocede,
+  // y es independiente del audio que el usuario esté escuchando.
+  const [maxReachedIndex, setMaxReachedIndex] = useState(0);
+
+  useEffect(() => {
+    if (!gpsActivePoint) return;
+    const idx = routeToUse.findIndex(p => p.id === gpsActivePoint.id);
+    if (idx > maxReachedIndex) {
+      setMaxReachedIndex(idx);
+    }
+  }, [gpsActivePoint, routeToUse, maxReachedIndex]);
 
   const handleMarkerPress = useCallback((pointId: string) => {
     const pointIndex = routeToUse.findIndex((p) => p.id === pointId);
@@ -73,27 +85,25 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     }
   }, [routeToUse, setActivePointIndex]);
 
-  // ✨ LÓGICA DEL PROGRESO EN TIEMPO REAL (Usa el GPS 'location')
+  // ✨ PROGRESO EN TIEMPO REAL: basado en el punto máximo alcanzado por GPS,
+  // no en el audio que el usuario esté escuchando. Así, aunque el usuario
+  // haga tap en el último audio del mini-player, el progreso no sube al 100%
+  // hasta que llegue físicamente al último punto de interés.
   const currentProgressData = useMemo(() => {
     if (!routeToUse || routeToUse.length === 0) return { percentage: 0 };
-    
-    let currentIndex = routeToUse.findIndex(p => p.id === activePoint?.id);
-    if (currentIndex === -1) currentIndex = 0; 
-
-    // Calculamos el % exacto sumando la distancia caminada desde el último punto
-    return calculateRealTimeProgress(routeToUse, currentIndex, location);
-  }, [routeToUse, activePoint, location]); // Depende del GPS para actualizarse al caminar
+    return calculateRealTimeProgress(routeToUse, maxReachedIndex, location);
+  }, [routeToUse, maxReachedIndex, location]);
 
   const currentProgress = currentProgressData.percentage;
 
-  // ✨ GUARDADO AUTOMÁTICO EN FIREBASE
+  // ✨ GUARDADO EN FIREBASE: solo cuando se alcanza un nuevo punto por GPS,
+  // evitando escrituras masivas y garantizando que el % guardado refleja
+  // avance físico real.
   useEffect(() => {
-    if (activePoint && routeToUse.length > 0) {
-      // Guardamos el % exacto cada vez que el usuario salta de punto de interés
-      // Así evitamos saturar Firebase escribiendo a cada paso que da.
+    if (routeToUse.length > 0) {
       saveProgress(tourId, currentProgress);
     }
-  }, [activePoint?.id]); 
+  }, [maxReachedIndex]);
 
   if (pointsLoading) {
     return (

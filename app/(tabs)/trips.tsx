@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 
-// ✅ Solo necesitamos ActiveTourCard aquí
 import { ActiveTourCard } from '../../components/activeTourCard';
+import { TourCard } from '../../components/tourCard';
 import { TripSlider } from '../../components/tripSlider';
 import { EmptyState } from '../../components/emptyState';
 
@@ -64,16 +64,18 @@ export default function TripsScreen() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            // ✅ CORREGIDO: Usamos ActiveTourCard porque esta es la pantalla de Mis Viajes
-            <ActiveTourCard 
-              tour={item} 
-              onPress={() => router.push({ 
-                pathname: "/tour/[id]", 
-                params: { id: item.id, fromTrips: 'true' } 
-              } as any)} 
-            />
-          )}
+          renderItem={({ item }) => {
+            const handlePress = () => router.push({
+              pathname: "/tour/[id]",
+              params: { id: item.id, fromTrips: 'true' }
+            } as any);
+
+            // Compradas → tarjeta con progreso (ActiveTourCard)
+            // Favoritas → misma tarjeta que Explora (TourCard, con intro y favorito)
+            return activeTab === 'purchased'
+              ? <ActiveTourCard tour={item} onPress={handlePress} />
+              : <TourCard tour={item} onPress={handlePress} />;
+          }}
         />
       )}
     </View>
