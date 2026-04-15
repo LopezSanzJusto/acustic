@@ -138,40 +138,40 @@ export const MapDisplay = ({
                 latitude: p.latitude,
                 longitude: p.longitude,
               }}
-              anchor={{ x: 0.5, y: 0.5 }}
+              anchor={markerType === "number" && index === 0 ? { x: 0.5, y: 0.72 } : { x: 0.5, y: 0.5 }}
               zIndex={2}
               tracksViewChanges={!loadedImages[p.id]}
               onPress={() => onMarkerPress && onMarkerPress(p.id)}
             >
-              <View style={styles.markerBorder} collapsable={false}>
-                {markerType === "number" ? (
-                  <View style={[styles.markerImage, styles.numberMarker]}>
-                     <Text style={styles.numberText}>{index + 1}</Text>
+              <View collapsable={false} style={{ alignItems: 'center' }}>
+                {markerType === "number" && index === 0 && (
+                  <View style={styles.startBadge}>
+                    <Text style={styles.startText}>START</Text>
                   </View>
-                ) : p.image ? (
-                  <Image
-                    key={p.image}
-                    source={{ uri: p.image }}
-                    style={styles.markerImage}
-                    resizeMode="cover"
-                    fadeDuration={0}
-                    onLoadEnd={() => {
-                      setTimeout(() => {
-                        setLoadedImages((prev) => ({
-                          ...prev,
-                          [p.id]: true,
-                        }));
-                      }, 1000); 
-                    }}
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.markerImage,
-                      { backgroundColor: COLORS.primary },
-                    ]}
-                  />
                 )}
+                <View style={markerType === "number" ? [styles.numberMarkerOuter, { backgroundColor: index === 0 ? '#FF8533' : COLORS.primary }] : styles.markerBorder} collapsable={false}>
+                  {markerType === "number" ? (
+                    <Text style={styles.numberText}>{index + 1}</Text>
+                  ) : p.image ? (
+                    <Image
+                      key={p.image}
+                      source={{ uri: p.image }}
+                      style={styles.markerImage}
+                      resizeMode="cover"
+                      fadeDuration={0}
+                      onLoadEnd={() => {
+                        setTimeout(() => {
+                          setLoadedImages((prev) => ({
+                            ...prev,
+                            [p.id]: true,
+                          }));
+                        }, 1000);
+                      }}
+                    />
+                  ) : (
+                    <View style={[styles.markerImage, { backgroundColor: COLORS.primary }]} />
+                  )}
+                </View>
               </View>
             </Marker>
           </React.Fragment>
@@ -196,8 +196,10 @@ const styles = StyleSheet.create({
   // ... (el resto de tus estilos se mantienen igual)
   markerBorder: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: COLORS.white, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: COLORS.white, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 4, elevation: 6 },
   markerImage: { width: 41, height: 41, borderRadius: 20.5 },
-  numberMarker: { backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' },
-  numberText: { color: COLORS.white, fontSize: 18, fontWeight: 'bold' },
+  numberMarkerOuter: { width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', borderWidth: 2.5, borderColor: 'white', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 },
+  numberText: { color: COLORS.white, fontSize: 13, fontWeight: 'bold' },
+  startBadge: { backgroundColor: '#FF8533', borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2, marginBottom: 3 },
+  startText: { color: 'white', fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5 },
   userMarkerContainer: { width: 24, height: 24, justifyContent: "center", alignItems: "center" },
   userMarkerDot: { width: 20, height: 20, borderRadius: 10, backgroundColor: "#3B82F6", borderWidth: 3, borderColor: "white", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 },
 });

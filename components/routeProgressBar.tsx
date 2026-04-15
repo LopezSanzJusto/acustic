@@ -13,10 +13,8 @@ export const RouteProgressBar = ({ percentage }: RouteProgressBarProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.track}>
-        <View style={[styles.fill, { width: `${safePercentage}%` }]} />
-      </View>
-      
+      <View style={styles.track} />
+
       <View style={[styles.indicatorWrapper, { left: `${safePercentage}%` }]}>
         <View style={styles.indicator}>
           <Ionicons name="walk" size={12} color={COLORS.white} />
@@ -29,19 +27,14 @@ export const RouteProgressBar = ({ percentage }: RouteProgressBarProps) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: 20, // Altura muy reducida
+    height: 20,
     justifyContent: 'center',
   },
   track: {
-    height: 4, // Barra muy fina y sutil
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderRadius: 2,
-    width: '100%',
-  },
-  fill: {
-    height: '100%',
+    height: 4,
     backgroundColor: COLORS.primary,
     borderRadius: 2,
+    width: '100%',
   },
   indicatorWrapper: {
     position: 'absolute',
