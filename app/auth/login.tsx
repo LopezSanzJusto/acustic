@@ -46,8 +46,9 @@ export default function LoginScreen() {
     }
   };
 
-  const handleFaceID = () => {
-    Alert.alert('Próximamente', 'El inicio de sesión con Face ID estará disponible muy pronto.');
+  // TODO: activar cuando se haga el build nativo con expo-local-authentication
+  const handleBiometric = () => {
+    Alert.alert('Próximamente', 'El inicio de sesión por biometría se activará en una próxima versión.');
   };
 
   const handleForgotPassword = () => {
@@ -74,10 +75,14 @@ export default function LoginScreen() {
           Start exploring{'\n'}the world{'\n'}through sound
         </Text>
 
-        {/* Face ID */}
-        <TouchableOpacity style={styles.faceIdButton} onPress={handleFaceID} activeOpacity={0.85}>
+        {/* Biometría */}
+        <TouchableOpacity
+          style={styles.faceIdButton}
+          onPress={handleBiometric}
+          activeOpacity={0.85}
+        >
           <Ionicons name="happy-outline" size={24} color="#6FB8FF" style={styles.faceIdIcon} />
-          <Text style={styles.faceIdText}>Inicia sesión con Face ID</Text>
+          <Text style={styles.faceIdText}>Inicia sesión usando biometría</Text>
         </TouchableOpacity>
 
         {/* Separador */}

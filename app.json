@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.acustic.app",
       "config": {
         "googleMapsApiKey": "AIzaSyCvA68C5hB-6FPF0kun4vsluEHkgCCs0NU"
@@ -33,7 +34,7 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
+      "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
@@ -42,19 +43,22 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "dark": { "backgroundColor": "#000000" }
         }
       ],
       "expo-font",
       "expo-image",
       "expo-web-browser",
-      "expo-audio"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    }
+      "expo-audio",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        { "iosUrlScheme": "com.googleusercontent.apps.XXX" }
+      ],
+      [
+        "expo-local-authentication",
+        { "faceIDPermission": "Usamos Face ID para iniciar sesión de forma rápida y segura." }
+      ]
+    ]
   }
 }

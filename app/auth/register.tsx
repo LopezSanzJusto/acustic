@@ -17,7 +17,6 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../../hooks/useAuth';
 
 const PURPLE_BG = '#3D3E8C';
 const PURPLE_BUTTON = '#A39BF8';
@@ -29,19 +28,26 @@ const LINK_HIGHLIGHT = '#F5A623';
 export default function RegisterScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { registerWithEmail, loading, error } = useAuth();
 
   const [email, setEmail] = useState('');
+  const [emailConfirm, setEmailConfirm] = useState('');
   const [password, setPassword] = useState('');
 
   const isFormValid = useMemo(
-    () => email.trim().length > 0 && password.length >= 6,
-    [email, password]
+    () =>
+      email.trim().length > 0 &&
+      email.trim().toLowerCase() === emailConfirm.trim().toLowerCase() &&
+      password.length >= 6,
+    [email, emailConfirm, password]
   );
 
-  const handleRegister = async () => {
-    if (!email.trim() || !password) {
-      Alert.alert('Faltan campos', 'Introduce tu email y una contraseña.');
+  const handleRegister = () => {
+    if (!email.trim() || !emailConfirm.trim() || !password) {
+      Alert.alert('Faltan campos', 'Introduce email, confirmación y contraseña.');
+      return;
+    }
+    if (email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase()) {
+      Alert.alert('Email no coincide', 'La confirmación de email no coincide.');
       return;
     }
     if (password.length < 6) {
@@ -50,21 +56,22 @@ export default function RegisterScreen() {
     }
 
     Keyboard.dismiss();
-    const user = await registerWithEmail(password, {
-      name: '',
-      lastName: '',
-      email: email.trim().toLowerCase(),
-      birthDate: '',
-      country: '',
+    router.push({
+      pathname: '/auth/user-info',
+      params: {
+        email: email.trim().toLowerCase(),
+        password,
+      },
     });
-
-    if (user) {
-      router.replace('/(tabs)');
-    }
   };
 
-  const handleSocialAuth = (provider: string) => {
-    Alert.alert('Próximamente', `El registro con ${provider} estará disponible muy pronto.`);
+  // TODO: implementar cuando se haga el build nativo con Google/Apple
+  const handleGoogle = () => {
+    Alert.alert('Próximamente', 'El registro con Google se activará en una próxima versión.');
+  };
+
+  const handleApple = () => {
+    Alert.alert('Próximamente', 'El registro con Apple se activará en una próxima versión.');
   };
 
   return (
@@ -88,21 +95,23 @@ export default function RegisterScreen() {
         <View style={styles.socialBlock}>
           <TouchableOpacity
             style={styles.socialButton}
-            onPress={() => handleSocialAuth('Google')}
+            onPress={handleGoogle}
             activeOpacity={0.85}
           >
             <Ionicons name="logo-google" size={22} color="#DB4437" style={styles.socialIcon} />
             <Text style={styles.socialText}>Continuar con Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={() => handleSocialAuth('Apple')}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="logo-apple" size={22} color="#000000" style={styles.socialIcon} />
-            <Text style={styles.socialText}>Continuar con Apple</Text>
-          </TouchableOpacity>
+          {Platform.OS === 'ios' && (
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={handleApple}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="logo-apple" size={22} color="#000000" style={styles.socialIcon} />
+              <Text style={styles.socialText}>Continuar con Apple</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Separador */}
@@ -141,7 +150,6 @@ export default function RegisterScreen() {
           />
         </View>
 
-        {/* Error Firebase */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         {/* Botón crear cuenta */}
