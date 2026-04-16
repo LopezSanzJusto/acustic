@@ -1,149 +1,305 @@
 // app/auth/login.tsx
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../../utils/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
+
+const PURPLE_BG = '#3D3E8C';
+const PURPLE_BUTTON = '#A39BF8';
+const INPUT_BORDER = 'rgba(255,255,255,0.35)';
+const PLACEHOLDER = 'rgba(255,255,255,0.55)';
+const LINK_HIGHLIGHT = '#F5A623';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { loginWithEmail, loading, error } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Por favor, completa todos los campos.");
+      Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
+    Keyboard.dismiss();
     const user = await loginWithEmail(email, password);
     if (user) {
       router.replace('/(tabs)');
     }
   };
 
-  const handleSocialAuth = (provider: string) => {
-    Alert.alert("Próximamente", `El inicio de sesión con ${provider} se activará muy pronto.`);
+  const handleFaceID = () => {
+    Alert.alert('Próximamente', 'El inicio de sesión con Face ID estará disponible muy pronto.');
+  };
+
+  const handleForgotPassword = () => {
+    router.push('/auth/forgot-password');
   };
 
   return (
-    <View style={styles.container}>
-      {/* Título y Subtítulo */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Bienvenido de nuevo</Text>
-        <Text style={styles.subtitle}>Inicia sesión para continuar tu viaje</Text>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Título */}
+        <Text style={styles.title}>Unlock your journey</Text>
+        <Text style={styles.subtitle}>
+          Start exploring{'\n'}the world{'\n'}through sound
+        </Text>
 
-      {/* Formulario */}
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Correo electrónico"
-          placeholderTextColor={COLORS.placeholder}
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          placeholderTextColor={COLORS.placeholder}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        {/* Face ID */}
+        <TouchableOpacity style={styles.faceIdButton} onPress={handleFaceID} activeOpacity={0.85}>
+          <Ionicons name="happy-outline" size={24} color="#6FB8FF" style={styles.faceIdIcon} />
+          <Text style={styles.faceIdText}>Inicia sesión con Face ID</Text>
+        </TouchableOpacity>
 
+        {/* Separador */}
+        <View style={styles.dividerContainer}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>o si lo prefieres</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Email */}
+        <View style={styles.inputWrapper}>
+          <Ionicons name="mail" size={20} color="#FF8A4C" style={styles.inputLeftIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor={PLACEHOLDER}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+
+        {/* Contraseña */}
+        <View style={styles.inputWrapper}>
+          <Ionicons name="lock-closed" size={20} color="#F5C542" style={styles.inputLeftIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor={PLACEHOLDER}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword((prev) => !prev)}
+            style={styles.eyeButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons
+              name={showPassword ? 'eye' : 'eye-off'}
+              size={20}
+              color="#9EEDD6"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Olvidaste contraseña */}
+        <TouchableOpacity
+          onPress={handleForgotPassword}
+          style={styles.forgotWrapper}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+        </TouchableOpacity>
+
+        {/* Error */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <TouchableOpacity style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.mainButton} onPress={handleLogin} disabled={loading}>
+        {/* Botón login */}
+        <TouchableOpacity
+          style={styles.mainButton}
+          onPress={handleLogin}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
           {loading ? (
-            <ActivityIndicator color={COLORS.white} />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.mainButtonText}>Iniciar Sesión</Text>
+            <Text style={styles.mainButtonText}>Iniciar sesión</Text>
           )}
         </TouchableOpacity>
-      </View>
 
-      {/* Separador */}
-      <View style={styles.dividerContainer}>
-        <View style={styles.divider} />
-        <Text style={styles.dividerText}>O continúa con</Text>
-        <View style={styles.divider} />
-      </View>
-
-      {/* Social Buttons */}
-      <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.socialButton} onPress={() => handleSocialAuth('Google')}>
-          <Ionicons name="logo-google" size={24} color={COLORS.textDark} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton} onPress={() => handleSocialAuth('Apple')}>
-          <Ionicons name="logo-apple" size={24} color={COLORS.textDark} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Toggle a Registro */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>¿No tienes cuenta?</Text>
-        <TouchableOpacity onPress={() => router.push('/auth/register')}>
-          <Text style={styles.footerLink}> Regístrate</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>¿Aún no tienes cuenta con nosotros? </Text>
+          <TouchableOpacity onPress={() => router.push('/auth/register')} activeOpacity={0.7}>
+            <Text style={styles.footerLink}>Crea una</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, paddingHorizontal: 30, justifyContent: 'center' },
-  header: { marginBottom: 40 },
-  title: { fontSize: 32, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 10 },
-  subtitle: { fontSize: 16, color: COLORS.muted },
-  form: { gap: 15 },
+  flex: { flex: 1, backgroundColor: PURPLE_BG },
+  scrollContent: {
+    paddingHorizontal: 26,
+    flexGrow: 1,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  subtitle: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 20,
+    fontStyle: 'italic',
+    fontWeight: '400',
+    textAlign: 'center',
+    marginBottom: 34,
+    lineHeight: 26,
+  },
+
+  // Face ID
+  faceIdButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: PURPLE_BUTTON,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    marginBottom: 20,
+  },
+  faceIdIcon: { marginRight: 10 },
+  faceIdText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+
+  // Divider
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  dividerText: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 14,
+    marginHorizontal: 12,
+  },
+
+  // Inputs
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: INPUT_BORDER,
+    borderRadius: 30,
+    paddingHorizontal: 18,
+    paddingVertical: 4,
+    marginBottom: 14,
+  },
+  inputLeftIcon: { marginRight: 10 },
   input: {
-    backgroundColor: COLORS.inputBackground,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderRadius: 15,
-    fontSize: 16,
-    color: COLORS.text,
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 15,
+    paddingVertical: 12,
   },
-  forgotPassword: { alignSelf: 'flex-end', marginTop: -5 },
-  forgotPasswordText: { color: COLORS.primary, fontWeight: '600' },
+  eyeButton: { paddingLeft: 8 },
+
+  // Forgot password
+  forgotWrapper: {
+    alignSelf: 'flex-end',
+    marginTop: 2,
+    marginBottom: 6,
+  },
+  forgotText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    backgroundColor: LINK_HIGHLIGHT,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+
+  errorText: {
+    color: '#FFB4B4',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+
+  // Main button
   mainButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: PURPLE_BUTTON,
     paddingVertical: 18,
-    borderRadius: 18,
+    borderRadius: 30,
     alignItems: 'center',
-    marginTop: 10,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    marginTop: 38,
   },
-  mainButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: 18 },
-  errorText: { color: COLORS.error, fontSize: 14, textAlign: 'center' },
-  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 30 },
-  divider: { flex: 1, height: 1, backgroundColor: COLORS.border },
-  dividerText: { marginHorizontal: 15, color: COLORS.muted, fontWeight: '600' },
-  socialContainer: { flexDirection: 'row', justifyContent: 'center', gap: 20 },
-  socialButton: {
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 15,
-    borderRadius: 15,
-    width: 70,
+  mainButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  // Footer
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 30,
+    flexWrap: 'wrap',
   },
-  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 40 },
-  footerText: { color: COLORS.muted, fontSize: 16 },
-  footerLink: { color: COLORS.primary, fontWeight: 'bold', fontSize: 16 },
+  footerText: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+  },
+  footerLink: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    backgroundColor: LINK_HIGHLIGHT,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
 });

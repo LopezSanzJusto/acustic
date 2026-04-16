@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
 } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
@@ -48,10 +49,28 @@ export const useAuth = () => {
     }
   };
 
-  // 3. LOGOUT
+  // 3. RECUPERAR CONTRASEÑA
+  const sendPasswordReset = async (email: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found') setError('No existe ninguna cuenta con este correo.');
+      else if (err.code === 'auth/invalid-email') setError('El correo no es válido.');
+      else if (err.code === 'auth/too-many-requests') setError('Demasiados intentos. Espera unos minutos.');
+      else setError('Error al enviar el email. Inténtalo de nuevo.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 4. LOGOUT
   const logOut = async () => {
     await signOut(auth);
   };
 
-  return { registerWithEmail, loginWithEmail, logOut, loading, error };
+  return { registerWithEmail, loginWithEmail, sendPasswordReset, logOut, loading, error };
 };

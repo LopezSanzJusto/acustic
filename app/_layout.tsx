@@ -38,7 +38,7 @@ export default function RootLayout() {
     if (user && inAuthGroup) {
       router.replace('/(tabs)' as any);
     } else if (!user && !inAuthGroup) {
-      router.replace('/auth/login' as any);
+      router.replace('/auth/register' as any);
     }
   }, [user, initializing, segments]);
 
@@ -59,6 +59,8 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="auth/login" options={{ headerShown: false }} />
             <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/forgot-password" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/email-sent" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
             <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
