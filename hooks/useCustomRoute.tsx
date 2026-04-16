@@ -1,9 +1,13 @@
 // hooks/useCustomRoute.tsx
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../services/firebaseConfig';
 import { CustomPoint, PointOfInterest } from '../data/points';
 
-const STORAGE_KEY = '@custom_routes';
+const STORAGE_PREFIX = '@custom_routes:';
+const ANON_KEY = `${STORAGE_PREFIX}anon`;
+const buildKey = (uid: string | null) => (uid ? `${STORAGE_PREFIX}${uid}` : ANON_KEY);
 
 interface RouteContextProps {
   routes: Record<string, CustomPoint[]>;
@@ -16,24 +20,35 @@ const RouteContext = createContext<RouteContextProps | undefined>(undefined);
 export const RouteProvider = ({ children }: { children: React.ReactNode }) => {
   const [routes, setRoutes] = useState<Record<string, CustomPoint[]>>({});
   const [loaded, setLoaded] = useState(false);
+  const [storageKey, setStorageKey] = useState<string>(ANON_KEY);
 
-  // Carga desde AsyncStorage al arrancar
+  // Escuchamos cambios de sesión: cada usuario tiene su propio "cajón" en AsyncStorage.
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(raw => {
-      if (raw) {
-        try { setRoutes(JSON.parse(raw)); } catch {}
-      }
-      setLoaded(true);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const nextKey = buildKey(user?.uid ?? null);
+      setStorageKey(nextKey);
+      setLoaded(false);
+      // Reseteamos en memoria mientras cargamos los datos del nuevo usuario
+      setRoutes({});
+
+      AsyncStorage.getItem(nextKey)
+        .then(raw => {
+          if (raw) {
+            try { setRoutes(JSON.parse(raw)); } catch {}
+          }
+        })
+        .finally(() => setLoaded(true));
     });
+    return unsubscribe;
   }, []);
 
   const setRoutePoints = useCallback((tourId: string, points: CustomPoint[]) => {
     setRoutes(prev => {
       const next = { ...prev, [tourId]: points };
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      AsyncStorage.setItem(storageKey, JSON.stringify(next));
       return next;
     });
-  }, []);
+  }, [storageKey]);
 
   return (
     <RouteContext.Provider value={{ routes, loaded, setRoutePoints }}>
@@ -42,16 +57,13 @@ export const RouteProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// 2. El hook AHORA EXIGE un tourId para saber de qué cajón sacar los datos
 export const useCustomRoute = (tourId: string) => {
   const context = useContext(RouteContext);
   if (!context) throw new Error("useCustomRoute debe usarse dentro de un RouteProvider");
 
-  // Extraemos SOLO los puntos de ESTA audioguía específica
   const customPoints = context.routes[tourId] || [];
 
   const setInitialPoints = useCallback((points: PointOfInterest[]) => {
-    // Solo inicializa si AsyncStorage ya cargó y no hay datos guardados para este tour
     if (context.loaded && customPoints.length === 0 && points.length > 0) {
       const sorted = [...points].sort((a, b) => (a.order || 0) - (b.order || 0));
       context.setRoutePoints(tourId, sorted.map(p => ({ ...p, isHidden: false })));

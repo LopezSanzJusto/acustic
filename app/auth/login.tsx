@@ -1,40 +1,30 @@
 // app/auth/login.tsx
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, COMMON_STYLES } from '../../utils/theme';
+import { COLORS } from '../../utils/theme';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { registerWithEmail, loginWithEmail, loading, error } = useAuth();
+  const { loginWithEmail, loading, error } = useAuth();
 
-  // Estados del formulario
-  const [isLogin, setIsLogin] = useState(true); // true = Login, false = Registro
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Manejar el botón principal
-  const handleAuth = async () => {
-    if (!email || !password || (!isLogin && !name)) {
+  const handleLogin = async () => {
+    if (!email || !password) {
       Alert.alert("Error", "Por favor, completa todos los campos.");
       return;
     }
-
-    const user = isLogin 
-      ? await loginWithEmail(email, password)
-      : await registerWithEmail(email, password, name);
-
-    // Si todo va bien, redirigimos al Explora
+    const user = await loginWithEmail(email, password);
     if (user) {
       router.replace('/(tabs)');
     }
   };
 
-  // Simulación para Social Auth en MVP 1.0
   const handleSocialAuth = (provider: string) => {
     Alert.alert("Próximamente", `El inicio de sesión con ${provider} se activará muy pronto.`);
   };
@@ -43,24 +33,12 @@ export default function LoginScreen() {
     <View style={styles.container}>
       {/* Título y Subtítulo */}
       <View style={styles.header}>
-        <Text style={styles.title}>{isLogin ? "Bienvenido de nuevo" : "Crea tu cuenta"}</Text>
-        <Text style={styles.subtitle}>
-          {isLogin ? "Inicia sesión para continuar tu viaje" : "Regístrate para guardar tus audioguías"}
-        </Text>
+        <Text style={styles.title}>Bienvenido de nuevo</Text>
+        <Text style={styles.subtitle}>Inicia sesión para continuar tu viaje</Text>
       </View>
 
       {/* Formulario */}
       <View style={styles.form}>
-        {!isLogin && (
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre completo"
-            placeholderTextColor={COLORS.placeholder}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-          />
-        )}
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
@@ -79,21 +57,17 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        {/* Mensaje de error de Firebase */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {isLogin && (
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity style={styles.forgotPassword}>
+          <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+        </TouchableOpacity>
 
-        {/* Botón Principal */}
-        <TouchableOpacity style={styles.mainButton} onPress={handleAuth} disabled={loading}>
+        <TouchableOpacity style={styles.mainButton} onPress={handleLogin} disabled={loading}>
           {loading ? (
             <ActivityIndicator color={COLORS.white} />
           ) : (
-            <Text style={styles.mainButtonText}>{isLogin ? "Iniciar Sesión" : "Registrarse"}</Text>
+            <Text style={styles.mainButtonText}>Iniciar Sesión</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -115,13 +89,11 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Toggle Login/Registro */}
+      {/* Toggle a Registro */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          {isLogin ? "¿No tienes cuenta?" : "¿Ya tienes una cuenta?"}
-        </Text>
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-          <Text style={styles.footerLink}>{isLogin ? " Regístrate" : " Inicia Sesión"}</Text>
+        <Text style={styles.footerText}>¿No tienes cuenta?</Text>
+        <TouchableOpacity onPress={() => router.push('/auth/register')}>
+          <Text style={styles.footerLink}> Regístrate</Text>
         </TouchableOpacity>
       </View>
     </View>

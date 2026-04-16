@@ -3,17 +3,26 @@
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 
+export interface UserProfileData {
+  name: string;
+  lastName: string;
+  email: string;
+  birthDate: string;   // formato DD/MM/AAAA
+  country: string;
+}
+
 export const useAuthDB = () => {
-  // Función para crear el perfil del usuario en Firestore
-  const createUserInDB = async (userId: string, email: string, name: string) => {
+  const createUserInDB = async (userId: string, profile: UserProfileData) => {
     try {
       const userRef = doc(db, 'users', userId);
-      // setDoc crea el documento si no existe o lo sobrescribe si ya existe
       await setDoc(userRef, {
-        name: name,
-        email: email,
-        purchasedTours: [], // Array vacío inicial
-        favoriteTours: [],  // Array vacío inicial
+        name: profile.name,
+        lastName: profile.lastName,
+        email: profile.email,
+        birthDate: profile.birthDate,
+        country: profile.country,
+        purchasedTours: [],
+        favoriteTours: [],
         createdAt: new Date(),
       });
       console.log("✅ Perfil de usuario creado en Firestore");

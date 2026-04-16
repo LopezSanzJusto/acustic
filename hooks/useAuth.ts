@@ -1,35 +1,31 @@
 // hooks/useAuth.ts
 
 import { useState } from 'react';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
 } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
-import { useAuthDB } from './useAuthDB';
+import { useAuthDB, UserProfileData } from './useAuthDB';
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { createUserInDB } = useAuthDB();
 
-  // 1. REGISTRO con Email y Contraseña
-  const registerWithEmail = async (email: string, password: string, name: string) => {
+  // 1. REGISTRO con Email y Contraseña + perfil completo
+  const registerWithEmail = async (password: string, profile: UserProfileData) => {
     setLoading(true);
     setError(null);
     try {
-      // A. Creamos el usuario en Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // B. Guardamos sus datos extra en Firestore
-      await createUserInDB(userCredential.user.uid, email, name);
-      
+      const userCredential = await createUserWithEmailAndPassword(auth, profile.email, password);
+      await createUserInDB(userCredential.user.uid, profile);
       return userCredential.user;
     } catch (err: any) {
-      // Traducimos los errores comunes de Firebase al español
       if (err.code === 'auth/email-already-in-use') setError('El correo ya está registrado.');
       else if (err.code === 'auth/weak-password') setError('La contraseña es muy débil (mínimo 6 caracteres).');
+      else if (err.code === 'auth/invalid-email') setError('El correo no es válido.');
       else setError('Error al registrar usuario. Inténtalo de nuevo.');
       return null;
     } finally {
@@ -52,7 +48,7 @@ export const useAuth = () => {
     }
   };
 
-  // 3. LOGOUT (Cerrar sesión)
+  // 3. LOGOUT
   const logOut = async () => {
     await signOut(auth);
   };
