@@ -1,39 +1,61 @@
 // app/profile/personal-info.tsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TextInput,
-  TouchableOpacity, Image, Alert, Modal, FlatList,
+  TouchableOpacity, Image, Alert, ActivityIndicator,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { auth } from '../../services/firebaseConfig';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { auth, db } from '../../services/firebaseConfig';
 import { COLORS } from '../../utils/theme';
-
-const COUNTRIES = [
-  'España', 'México', 'Argentina', 'Colombia', 'Chile', 'Perú',
-  'Venezuela', 'Ecuador', 'Bolivia', 'Uruguay', 'Paraguay',
-  'Estados Unidos', 'Francia', 'Italia', 'Alemania', 'Reino Unido',
-  'Portugal', 'Brasil', 'Otro',
-];
+import { CountrySelector } from '../../components/countrySelector';
+import { DateInput } from '../../components/dateInput';
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = auth.currentUser;
 
-  const nameParts = (user?.displayName || '').split(' ');
-  const [nombre, setNombre] = useState(nameParts[0] || '');
-  const [apellido, setApellido] = useState(nameParts.slice(1).join(' ') || '');
+  const [loading, setLoading] = useState(true);
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
   const [email] = useState(user?.email || '');
   const [birthDate, setBirthDate] = useState('');
-  const [country, setCountry] = useState('España');
-  const [countryModalVisible, setCountryModalVisible] = useState(false);
+  const [country, setCountry] = useState('');
 
-  const handleSave = () => {
-    Alert.alert('Guardado', 'Información personal actualizada.');
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    getDoc(doc(db, 'users', user.uid)).then((snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        setNombre(d.name || '');
+        setApellido(d.lastName || '');
+        setBirthDate(d.birthDate || '');
+        setCountry(d.country || '');
+      }
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { name: nombre, lastName: apellido, birthDate, country });
+      Alert.alert('Guardado', 'Información personal actualizada.');
+    } catch {
+      Alert.alert('Error', 'No se pudo guardar. Inténtalo de nuevo.');
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered, { paddingTop: insets.top }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -107,23 +129,13 @@ export default function PersonalInfoScreen() {
         {/* Año de nacimiento */}
         <View style={styles.field}>
           <Text style={styles.label}>Año de nacimiento</Text>
-          <TextInput
-            style={styles.input}
-            value={birthDate}
-            onChangeText={setBirthDate}
-            placeholder="DD/MM/AAAA"
-            placeholderTextColor={COLORS.placeholder}
-            keyboardType="numeric"
-          />
+          <DateInput value={birthDate} onChange={setBirthDate} variant="light" />
         </View>
 
         {/* País */}
         <View style={styles.field}>
           <Text style={styles.label}>País</Text>
-          <TouchableOpacity style={styles.dropdown} onPress={() => setCountryModalVisible(true)}>
-            <Text style={styles.dropdownText}>{country}</Text>
-            <Ionicons name="chevron-down" size={20} color={COLORS.muted} />
-          </TouchableOpacity>
+          <CountrySelector value={country} onChange={setCountry} variant="light" />
         </View>
 
         {/* Guardar */}
@@ -132,35 +144,13 @@ export default function PersonalInfoScreen() {
         </TouchableOpacity>
 
       </ScrollView>
-
-      {/* Modal selector de país */}
-      <Modal visible={countryModalVisible} transparent animationType="slide">
-        <TouchableOpacity style={styles.modalBackdrop} onPress={() => setCountryModalVisible(false)} />
-        <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Selecciona tu país</Text>
-          <FlatList
-            data={COUNTRIES}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.modalItem, item === country && styles.modalItemActive]}
-                onPress={() => { setCountry(item); setCountryModalVisible(false); }}
-              >
-                <Text style={[styles.modalItemText, item === country && styles.modalItemTextActive]}>
-                  {item}
-                </Text>
-                {item === country && <Ionicons name="checkmark" size={18} color={COLORS.primary} />}
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  centered: { justifyContent: 'center', alignItems: 'center' },
   scroll: { paddingHorizontal: 22, paddingBottom: 50 },
 
   // Header
@@ -184,19 +174,8 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
   input: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary },
   inputDisabled: { color: COLORS.muted },
-  dropdown: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  dropdownText: { fontSize: 16, color: COLORS.primary },
 
   // Guardar
   saveButton: { backgroundColor: COLORS.primary, borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 24 },
   saveButtonText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
-
-  // Modal país
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
-  modalCard: { backgroundColor: COLORS.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '60%' },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginBottom: 12, textAlign: 'center' },
-  modalItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border },
-  modalItemActive: {},
-  modalItemText: { fontSize: 16, color: COLORS.text },
-  modalItemTextActive: { color: COLORS.primary, fontWeight: '600' },
 });

@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -41,7 +40,7 @@ export default function RegisterScreen() {
     [email, emailConfirm, password]
   );
 
-  const handleRegister = () => {
+  const handleContinue = () => {
     if (!email.trim() || !emailConfirm.trim() || !password) {
       Alert.alert('Faltan campos', 'Introduce email, confirmación y contraseña.');
       return;
@@ -136,6 +135,21 @@ export default function RegisterScreen() {
           />
         </View>
 
+        {/* Confirmación de email */}
+        <View style={styles.inputWrapper}>
+          <Ionicons name="mail-open" size={20} color="#FF8A4C" style={styles.inputLeftIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Confirma tu email"
+            placeholderTextColor={PLACEHOLDER}
+            value={emailConfirm}
+            onChangeText={setEmailConfirm}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+
         {/* Contraseña */}
         <View style={styles.inputWrapper}>
           <Ionicons name="lock-closed" size={20} color="#F5C542" style={styles.inputLeftIcon} />
@@ -150,20 +164,14 @@ export default function RegisterScreen() {
           />
         </View>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
-
-        {/* Botón crear cuenta */}
+        {/* Botón crear cuenta (continúa al siguiente paso de onboarding) */}
         <TouchableOpacity
-          style={[styles.mainButton, (!isFormValid || loading) && styles.mainButtonDisabled]}
-          onPress={handleRegister}
-          disabled={loading || !isFormValid}
+          style={[styles.mainButton, !isFormValid && styles.mainButtonDisabled]}
+          onPress={handleContinue}
+          disabled={!isFormValid}
           activeOpacity={0.85}
         >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.mainButtonText}>Crear cuenta</Text>
-          )}
+          <Text style={styles.mainButtonText}>Crear cuenta</Text>
         </TouchableOpacity>
 
         {/* Términos */}
@@ -196,7 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 48,
+    marginBottom: 40,
   },
 
   // Social
@@ -251,13 +259,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     paddingVertical: 12,
-  },
-
-  errorText: {
-    color: '#FFB4B4',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 6,
   },
 
   // Botón principal

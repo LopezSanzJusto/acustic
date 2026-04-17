@@ -93,15 +93,16 @@ export default function ExploreScreen() {
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#8C77ED" />
-          <TextInput 
+          <View style={styles.searchIconWrapper}>
+            <Ionicons name="search" size={18} color="#FFFFFF" />
+          </View>
+          <TextInput
             value={searchQuery}
             onChangeText={(text) => {
               setSearchQuery(text);
-              // Reseteamos la localización completa si el usuario vuelve a escribir
               if (selectedLocation) setSelectedLocation(null);
             }}
-            placeholder="¿Dónde quieres caminar hoy?" 
+            placeholder="¿Dónde quieres caminar hoy?"
             style={styles.searchInput}
             placeholderTextColor={COLORS.placeholder}
             autoCorrect={false}
@@ -256,23 +257,31 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF', 
-    paddingHorizontal: 15,
-    paddingVertical: 14, 
-    borderRadius: 12, 
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 3, 
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: '#DDD8F5',
   },
-  searchInput: { 
-    flex: 1, 
-    marginLeft: 10, 
-    fontSize: 16, 
-    color: COLORS.text 
+  searchIconWrapper: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#8C77ED',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: COLORS.text
   },
   searchResultsContainer: {
     flex: 1,
