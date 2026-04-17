@@ -104,7 +104,7 @@ export default function ProfileScreen() {
             iconBgColor="#F0EDFF"
             iconColor={COLORS.primary}
             title="Preguntas frecuentes"
-            onPress={() => soon('Preguntas frecuentes')}
+            onPress={() => router.push('/profile/faq' as any)}
           />
           <MenuItem
             icon="person-outline"

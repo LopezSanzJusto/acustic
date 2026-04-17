@@ -65,6 +65,7 @@ export default function RootLayout() {
             <Stack.Screen name="profile/change-password" options={{ headerShown: false }} />
             <Stack.Screen name="profile/password-sent" options={{ headerShown: false }} />
             <Stack.Screen name="profile/privacy" options={{ headerShown: false }} />
+            <Stack.Screen name="profile/faq" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
             <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
