@@ -1,13 +1,14 @@
 // app/(tabs)/profile.tsx
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { auth } from '../../services/firebaseConfig';
+import { auth, db } from '../../services/firebaseConfig';
 import { COLORS } from '../../utils/theme';
 import { MenuItem } from '../../components/menuItem';
 
@@ -16,7 +17,17 @@ export default function ProfileScreen() {
   const user = auth.currentUser;
   const insets = useSafeAreaInsets();
 
-  const firstName = user?.displayName?.split(' ')[0] || 'Viajero';
+  const [firstName, setFirstName] = useState(user?.displayName?.split(' ')[0] || 'Viajero');
+
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, 'users', user.uid)).then((snap) => {
+      if (snap.exists()) {
+        const name = snap.data().name;
+        if (name) setFirstName(name);
+      }
+    });
+  }, []);
 
   const handleLogout = async () => {
     Alert.alert('Cerrar Sesión', '¿Estás seguro de que quieres salir?', [

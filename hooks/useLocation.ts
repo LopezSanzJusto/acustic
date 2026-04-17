@@ -14,13 +14,12 @@ const SIMULATED_PATH: Coords[] = [
   // ORDEN 1: Monumento a Beatriz Galindo 
   // Ubicación real: Plaza de la Puerta de los Moros
   // ---------------------------------------------------------
-  { latitude: 40.4112, longitude: -3.7116 }, // 1. EXACTO (Ajustado a La Latina real)
+  { latitude: 40.4153, longitude: -3.7239 }, // 1. EXACTO — Monumento a Beatriz Galindo
 
   // // ---------------------------------------------------------
   // // ORDEN 2: Mayrit Alcázar Madrid
   // // ---------------------------------------------------------
-  { latitude: 40.4140, longitude: -3.7080 }, // Caminando hacia Ópera...
-  { latitude: 40.416228, longitude: -3.706381 }, // 2. EXACTO 
+  { latitude: 40.416228, longitude: -3.706381 }, // 2. EXACTO
 
   // // ---------------------------------------------------------
   // // ORDEN 3: Calle Toledo
@@ -74,7 +73,7 @@ export const useLocation = (simulate = false) => {
         console.log(`📍 Simulación paso ${index}:`, nextPoint);
         setLocation(nextPoint);
 
-      }, 4000); // Cambia de posición cada 4 segundos (ajusta esto si va muy rápido/lento)
+      }, 30000);
 
       return () => clearInterval(interval);
     }

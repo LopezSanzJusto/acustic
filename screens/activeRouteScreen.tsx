@@ -191,6 +191,8 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
           <PointReachedModal
             visible={!!pendingPoint}
             point={pendingPoint?.point ?? null}
+            pointIndex={pendingPoint != null ? pendingPoint.index + 1 : undefined}
+            totalPoints={routeToUse.length}
             onConfirm={confirmPlayPoint}
             onDismiss={dismissPoint}
           />
