@@ -7,16 +7,27 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/theme';
 import { PointOfInterest } from '../data/points';
 
+// Hook que carga el audio silenciosamente sólo para obtener la duración
+function useAudioDuration(uri: string | null): number {
+  const player = useAudioPlayer(uri);
+  const status = useAudioPlayerStatus(player);
+  return status.duration ?? 0;
+}
+
 const { width: SCREEN_W } = Dimensions.get('window');
 const CARD_W = SCREEN_W - 48;
 const IMAGE_H = 200;
-const FADE_H = 70; // altura de la zona difuminada en la parte inferior de la imagen
+const FADE_H = 80;
 
 const PURPLE = '#4A4BA6';
 const PURPLE_BTN = '#7B72E8';
 
-// Capas de opacidad para simular el degradado imagen→morado (de arriba a abajo)
-const FADE_STEPS = [0, 0.1, 0.22, 0.38, 0.55, 0.72, 0.88, 1.0];
+// 30 pasos con curva cuadrática para un degradado visualmente lineal y suave
+const STEPS = 30;
+const FADE_STEPS = Array.from({ length: STEPS }, (_, i) => {
+  const t = i / (STEPS - 1);
+  return parseFloat((t * t).toFixed(4)); // ease-in cuadrático
+});
 
 interface Props {
   visible: boolean;
@@ -33,28 +44,20 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-// Componente interno que carga el audio sólo para leer la duración, sin reproducir.
-function DurationLabel({ audioUri }: { audioUri: string }) {
-  const player = useAudioPlayer(audioUri);
-  const status = useAudioPlayerStatus(player);
-  const dur = status.duration ?? 0;
-  if (dur <= 0) return null;
-  return (
-    <Text style={styles.duration}>
-      {'  \uD83C\uDF99 '}{formatDuration(dur)}
-    </Text>
-  );
-}
-
 export const PointReachedModal = ({
   visible, point, pointIndex, totalPoints, onConfirm, onDismiss,
 }: Props) => {
+  // Cargamos la duración siempre (el hook requiere llamarse siempre, no condicionalmente)
+  const durSeconds = useAudioDuration(point?.audio ?? null);
+
   if (!point) return null;
 
   const counter =
     pointIndex != null && totalPoints != null
       ? `punto ${pointIndex}/${totalPoints}`
       : null;
+
+  const durLabel = durSeconds > 0 ? `  🎙 ${formatDuration(durSeconds)}` : '';
 
   return (
     <Modal transparent animationType="fade" visible={visible} onRequestClose={onDismiss}>
@@ -99,11 +102,11 @@ export const PointReachedModal = ({
             {/* "Has llegado a" */}
             <Text style={styles.arrived}>Has llegado a</Text>
 
-            {/* Nombre + duración en la misma línea */}
-            <View style={styles.nameRow}>
-              <Text style={styles.pointName} numberOfLines={2}>{point.name}</Text>
-              {point.audio ? <DurationLabel audioUri={point.audio} /> : null}
-            </View>
+            {/* Nombre con duración como sufijo inline — siempre en el mismo flujo de texto */}
+            <Text style={styles.pointName}>
+              {point.name}
+              {durLabel ? <Text style={styles.duration}>{durLabel}</Text> : null}
+            </Text>
 
             {/* Botón principal */}
             <TouchableOpacity style={styles.listenButton} onPress={onConfirm} activeOpacity={0.85}>
@@ -187,26 +190,18 @@ const styles = StyleSheet.create({
 
   // Título + duración
   arrived: { fontSize: 17, color: '#FFFFFF', fontWeight: '500', textAlign: 'center', marginBottom: 2 },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 20,
-  },
   pointName: {
     fontSize: 19,
     fontWeight: '800',
     fontStyle: 'italic',
     color: '#FFFFFF',
     textAlign: 'center',
-    flexShrink: 1,
+    marginBottom: 20,
   },
   duration: {
     fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
     fontWeight: '500',
-    marginLeft: 4,
     fontStyle: 'normal',
   },
 

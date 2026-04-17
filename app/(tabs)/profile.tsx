@@ -71,7 +71,7 @@ export default function ProfileScreen() {
             iconBgColor="#F0EDFF"
             iconColor={COLORS.primary}
             title="Cambio de contraseña"
-            onPress={() => soon('Cambio de contraseña')}
+            onPress={() => router.push('/profile/change-password' as any)}
           />
           <MenuItem
             icon="notifications-outline"
