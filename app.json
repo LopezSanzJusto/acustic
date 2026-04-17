@@ -28,13 +28,21 @@
         "googleMaps": {
           "apiKey": "AIzaSyCvA68C5hB-6FPF0kun4vsluEHkgCCs0NU"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-      "plugins": [
+    "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
@@ -43,7 +51,9 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
-          "dark": { "backgroundColor": "#000000" }
+          "dark": {
+            "backgroundColor": "#000000"
+          }
         }
       ],
       "expo-font",
@@ -51,14 +61,24 @@
       "expo-web-browser",
       "expo-audio",
       "expo-apple-authentication",
-      [
-        "@react-native-google-signin/google-signin",
-        { "iosUrlScheme": "com.googleusercontent.apps.XXX" }
-      ],
+      // [
+      //   "@react-native-google-signin/google-signin",
+      //   {
+      //     "iosUrlScheme": "com.googleusercontent.apps.XXX"
+      //   }
+      // ],
       [
         "expo-local-authentication",
-        { "faceIDPermission": "Usamos Face ID para iniciar sesión de forma rápida y segura." }
+        {
+          "faceIDPermission": "Usamos Face ID para iniciar sesión de forma rápida y segura."
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ed2edee7-8731-4647-af8b-d3b988bb050f"
+      }
+    }
   }
 }
