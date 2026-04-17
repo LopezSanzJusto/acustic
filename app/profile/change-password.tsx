@@ -1,9 +1,9 @@
 // app/profile/change-password.tsx
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Alert, ActivityIndicator,
+  ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,6 +34,7 @@ export default function ChangePasswordScreen() {
   // Bloque recuperación
   const [recoveryEmail, setRecoveryEmail] = useState(auth.currentUser?.email || '');
   const [loadingRecovery, setLoadingRecovery] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
 
   const handleChangePassword = async () => {
     const user = auth.currentUser;
@@ -98,8 +99,13 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <View style={[styles.flex, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior="padding"
+      keyboardVerticalOffset={insets.top}
+    >
       <Stack.Screen options={{ headerShown: false }} />
+      <View style={[styles.flex, { paddingTop: insets.top }]}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -111,10 +117,10 @@ export default function ChangePasswordScreen() {
         </View>
 
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 60 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          automaticallyAdjustKeyboardInsets
         >
           {/* ── Bloque cambio de contraseña ── */}
           <View style={styles.block}>
@@ -170,6 +176,9 @@ export default function ChangePasswordScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                onFocus={() =>
+                  setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)
+                }
               />
             </View>
 
@@ -185,7 +194,8 @@ export default function ChangePasswordScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 

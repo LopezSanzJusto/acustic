@@ -91,7 +91,7 @@ export default function ProfileScreen() {
             iconBgColor="#FFF0F0"
             iconColor="#E05C5C"
             title="Privacidad y términos de uso"
-            onPress={() => Linking.openURL('https://acustic.app/privacidad').catch(() => soon('Privacidad'))}
+            onPress={() => router.push('/profile/privacy' as any)}
             showBorder={false}
           />
         </View>
