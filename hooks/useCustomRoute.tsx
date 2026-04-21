@@ -1,7 +1,7 @@
 // hooks/useCustomRoute.tsx
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from '@react-native-firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { CustomPoint, PointOfInterest } from '../data/points';
 

@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../services/firebaseConfig';
+import { doc, getDoc } from '@react-native-firebase/firestore';
+import { db, firestoreReady } from '../../services/firebaseConfig';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -53,6 +53,7 @@ export default function TourDetailScreen() {
     async function fetchTourDetails() {
       if (!id) return;
       try {
+        await firestoreReady;
         const docRef = doc(db, "tours", id as string);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {

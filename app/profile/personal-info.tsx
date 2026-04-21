@@ -8,8 +8,8 @@ import {
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../../services/firebaseConfig';
+import { doc, getDoc, updateDoc } from '@react-native-firebase/firestore';
+import { auth, db, firestoreReady } from '../../services/firebaseConfig';
 import { COLORS } from '../../utils/theme';
 import { CountrySelector } from '../../components/countrySelector';
 import { DateInput } from '../../components/dateInput';
@@ -28,7 +28,7 @@ export default function PersonalInfoScreen() {
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    getDoc(doc(db, 'users', user.uid)).then((snap) => {
+    firestoreReady.then(() => getDoc(doc(db, 'users', user.uid))).then((snap) => {
       if (snap.exists()) {
         const d = snap.data();
         setNombre(d.name || '');

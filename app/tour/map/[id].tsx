@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../services/firebaseConfig';
+import { doc, getDoc } from '@react-native-firebase/firestore';
+import { db, firestoreReady } from '../../../services/firebaseConfig';
 import { useFirebasePoints } from '../../../hooks/useFirebasePoints';
 import { MapDisplay } from '../../../components/mapDisplay';
 import { TourFooter } from '../../../components/tourDetails/tourFooter';
@@ -28,6 +28,7 @@ export default function TourMapScreen() {
     let isMounted = true;
     const fetchPrice = async () => {
         try {
+          await firestoreReady;
           const docRef = doc(db, "tours", id as string);
           const snap = await getDoc(docRef);
           if (snap.exists() && isMounted) {

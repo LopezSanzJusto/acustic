@@ -8,8 +8,8 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signInWithCredential,
-} from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+} from '@react-native-firebase/auth';
+import { doc, getDoc, setDoc } from '@react-native-firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 
 // Configuración de Google Sign-In. webClientId se obtiene del Firebase Console

@@ -1,36 +1,42 @@
 // hooks/useFavorites.ts
 
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { db, auth } from '../services/firebaseConfig';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from '@react-native-firebase/firestore';
+import { db, auth, firestoreReady } from '../services/firebaseConfig';
 
 export const useFavorites = (tourId: string) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const userId = auth.currentUser?.uid;
     if (!userId || !tourId) return;
 
-    // Escuchamos el documento del usuario para saber si esta ruta está en sus favoritos
-    const unsubscribe = onSnapshot(doc(db, 'users', userId), (docSnap) => {
-      if (docSnap.exists()) {
-        const favs = docSnap.data().favoriteTours || [];
-        setIsFavorite(favs.includes(tourId));
-      }
+    firestoreReady.then(async () => {
+      if (cancelled) return;
+      try {
+        const snap = await getDoc(doc(db, 'users', userId));
+        if (!cancelled && snap.exists()) {
+          const favs = snap.data().favoriteTours || [];
+          setIsFavorite(favs.includes(tourId));
+        }
+      } catch { /* silent */ }
     });
 
-    return () => unsubscribe();
+    return () => { cancelled = true; };
   }, [tourId]);
 
-  // Función para dar/quitar like
   const toggleFavorite = async () => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
-
-    const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, {
-      favoriteTours: isFavorite ? arrayRemove(tourId) : arrayUnion(tourId)
-    });
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        favoriteTours: isFavorite ? arrayRemove(tourId) : arrayUnion(tourId),
+      });
+      setIsFavorite(prev => !prev);
+    } catch (e) {
+      console.error('Error toggling favorite:', e);
+    }
   };
 
   return { isFavorite, toggleFavorite };

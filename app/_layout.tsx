@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { COLORS } from '../utils/theme';
 import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
@@ -17,7 +17,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   
   const router = useRouter();
   const segments = useSegments();

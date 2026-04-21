@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail } from '@react-native-firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 
 const PURPLE_BG = '#3D3E8C';

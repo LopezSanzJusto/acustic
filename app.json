@@ -11,12 +11,11 @@
       "supportsTablet": true,
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.acustic.app",
-      "config": {
-        "googleMapsApiKey": "AIzaSyCvA68C5hB-6FPF0kun4vsluEHkgCCs0NU"
-      }
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "package": "com.acustic.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -24,11 +23,6 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyCvA68C5hB-6FPF0kun4vsluEHkgCCs0NU"
-        }
-      },
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
@@ -44,6 +38,14 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "useFrameworks": "static" }
+        }
+      ],
       [
         "expo-splash-screen",
         {

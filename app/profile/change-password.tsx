@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   EmailAuthProvider, reauthenticateWithCredential, updatePassword,
   sendPasswordResetEmail,
-} from 'firebase/auth';
+} from '@react-native-firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { COLORS } from '../../utils/theme';
 

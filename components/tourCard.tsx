@@ -2,13 +2,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from '@react-native-firebase/firestore';
 
 // Hooks
 import { useFavorites } from '../hooks/useFavorites';
 import { useSingleAudio } from '../hooks/useSingleAudio'; 
 
-import { db } from '../services/firebaseConfig';
+import { db, firestoreReady } from '../services/firebaseConfig';
 import { calculateRealTimeProgress } from '../utils/geo';
 import { COLORS } from '../utils/theme';
 import { ImageSlider } from './imageSlider';
@@ -33,6 +33,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
   useEffect(() => {
     async function getRealData() {
       if (!tour.id) return;
+      await firestoreReady;
       try {
         const pointsRef = collection(db, "tours", tour.id, "points");
         const q = query(pointsRef, orderBy("order", "asc"));

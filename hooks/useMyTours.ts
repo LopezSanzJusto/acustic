@@ -1,8 +1,8 @@
 // hooks/useMyTours.ts
 
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, collection, query, where, getDocs, documentId } from 'firebase/firestore';
-import { db, auth } from '../services/firebaseConfig';
+import { doc, onSnapshot, collection, query, where, getDocs, documentId } from '@react-native-firebase/firestore';
+import { db, auth, firestoreReady } from '../services/firebaseConfig';
 
 export function useMyTours() {
   const [purchasedTours, setPurchasedTours] = useState<any[]>([]);
@@ -10,54 +10,54 @@ export function useMyTours() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userId = auth.currentUser?.uid;
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
 
-    // Escuchamos el perfil del usuario en tiempo real
-    const unsubscribe = onSnapshot(doc(db, 'users', userId), async (userDoc) => {
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const purchasedIds = userData.purchasedTours || [];
-        const favoriteIds = userData.favoriteTours || [];
+    const fetchToursByIds = async (ids: string[], progressMap: Record<string, number>) => {
+      if (ids.length === 0) return [];
+      const q = query(collection(db, 'tours'), where(documentId(), 'in', ids));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data(),
+        progressPercentage: progressMap[d.id] || 0,
+      }));
+    };
 
-        // ✨ AQUÍ RECUPERAMOS EL PROGRESO: Extraemos el diccionario de Firebase
-        // Tendrá una forma así: { "id_ruta_1": 45.6, "id_ruta_2": 12.3 }
-        const userProgressMap = userData.progress || {};
+    const setup = async () => {
+      const userId = auth.currentUser?.uid;
+      if (!userId) { setLoading(false); return; }
 
-        // Función para traer los tours completos
-        const fetchToursByIds = async (ids: string[]) => {
-          if (ids.length === 0) return [];
-          const q = query(collection(db, "tours"), where(documentId(), "in", ids));
-          const snapshot = await getDocs(q);
-          
-          return snapshot.docs.map(doc => {
-            const tourId = doc.id;
-            return { 
-              id: tourId, 
-              ...doc.data(),
-              // ✨ INYECCIÓN VITAL: Le pasamos a la tarjeta el porcentaje guardado.
-              // Si el usuario nunca ha empezado esta ruta, le pasamos un 0.
-              progressPercentage: userProgressMap[tourId] || 0
-            };
-          });
-        };
+      await firestoreReady;
+      if (cancelled) return;
 
-        // Cargamos los datos de las rutas
-        const [purchases, favorites] = await Promise.all([
-          fetchToursByIds(purchasedIds),
-          fetchToursByIds(favoriteIds)
-        ]);
+      unsubscribe = onSnapshot(
+        doc(db, 'users', userId),
+        async (userDoc) => {
+          if (cancelled) return;
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            const progressMap = data.progress || {};
+            const [purchases, favorites] = await Promise.all([
+              fetchToursByIds(data.purchasedTours || [], progressMap),
+              fetchToursByIds(data.favoriteTours || [], progressMap),
+            ]);
+            if (!cancelled) {
+              setPurchasedTours(purchases);
+              setFavoriteTours(favorites);
+            }
+          }
+          if (!cancelled) setLoading(false);
+        },
+        () => { if (!cancelled) setLoading(false); }
+      );
+    };
 
-        setPurchasedTours(purchases);
-        setFavoriteTours(favorites);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    setup();
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, []);
 
   return { purchasedTours, favoriteTours, loading };

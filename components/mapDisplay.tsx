@@ -3,13 +3,11 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { StyleSheet, View, Image, Text } from "react-native";
 // ✨ QUÍTAMOS PROVIDER_GOOGLE. Dejamos que el SO decida el mapa nativo.
-import MapView, { Marker, Circle } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
+import MapView, { Marker, Circle, Polyline, UrlTile } from "react-native-maps";
 import { PointOfInterest } from "../data/points";
 import { COLORS } from "../utils/theme";
-import { useSortedPoints, useRouteDirections } from "../hooks/useMapLogic";
-
-const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY || "";
+import { useSortedPoints } from "../hooks/useMapLogic";
+import { getDistanceInMeters } from "../utils/geo";
 
 interface MapDisplayProps {
   location: { latitude: number; longitude: number } | null;
@@ -34,7 +32,23 @@ export const MapDisplay = ({
 }: MapDisplayProps) => {
   const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
-  const directionData = useRouteDirections(sortedPoints);
+
+  const routeCoords = useMemo(
+    () => sortedPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude })),
+    [sortedPoints]
+  );
+
+  useEffect(() => {
+    if (!onRouteCalculated || sortedPoints.length < 2) return;
+    let meters = 0;
+    for (let i = 0; i < sortedPoints.length - 1; i++) {
+      meters += getDistanceInMeters(
+        sortedPoints[i].latitude, sortedPoints[i].longitude,
+        sortedPoints[i + 1].latitude, sortedPoints[i + 1].longitude
+      );
+    }
+    onRouteCalculated(`${(meters / 1000).toFixed(2)} km`);
+  }, [sortedPoints, onRouteCalculated]);
 
   const [loadedImages, setLoadedImages] = useState<{
     [key: string]: boolean;
@@ -82,30 +96,27 @@ export const MapDisplay = ({
     <View style={styles.mapContainer}>
       <MapView
         ref={mapRef}
-        // ✨ Eliminado provider y loadingEnabled para evitar bugs en Expo 55
+        // ✨ mapType="none" oculta los tiles de Google; los pinta UrlTile (OSM).
+        mapType="none"
         style={styles.map}
         initialRegion={initialRegion}
         showsUserLocation={false}
         showsMyLocationButton={false}
         onLayout={handleMapLayout}
       >
-        {directionData && (
-          <MapViewDirections
-            origin={directionData.origin}
-            destination={directionData.destination}
-            waypoints={directionData.waypoints}
-            apikey={GOOGLE_MAPS_APIKEY}
-            mode="WALKING"
+        <UrlTile
+          urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maximumZ={19}
+          flipY={false}
+          zIndex={-1}
+        />
+
+        {routeCoords.length > 1 && (
+          <Polyline
+            coordinates={routeCoords}
             strokeWidth={4}
             strokeColor={COLORS.primary}
-            optimizeWaypoints={false}
-            lineDashPattern={dashedRoute ? [10, 10] : undefined} 
-            onReady={(result) => {
-              if (onRouteCalculated) {
-                const distanceText = `${result.distance.toFixed(2)} km`;
-                onRouteCalculated(distanceText);
-              }
-            }}
+            lineDashPattern={dashedRoute ? [10, 10] : undefined}
           />
         )}
 

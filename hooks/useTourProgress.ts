@@ -1,6 +1,6 @@
 // hooks/useTourProgress.ts
 
-import { setDoc, doc } from 'firebase/firestore';
+import { setDoc, doc } from '@react-native-firebase/firestore';
 import { db, auth } from '../services/firebaseConfig';
 
 export const useTourProgress = () => {

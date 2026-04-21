@@ -6,8 +6,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../services/firebaseConfig';
+import { doc, getDoc } from '@react-native-firebase/firestore';
+import { db, firestoreReady } from '../services/firebaseConfig';
 
 import { useLocation } from "../hooks/useLocation";
 import { useFirebasePoints } from "../hooks/useFirebasePoints";
@@ -42,6 +42,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   useEffect(() => {
     async function fetchTourName() {
       try {
+        await firestoreReady;
         const docSnap = await getDoc(doc(db, "tours", tourId));
         if (docSnap.exists()) {
           const data = docSnap.data();

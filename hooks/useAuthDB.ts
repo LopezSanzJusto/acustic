@@ -1,6 +1,6 @@
 // hooks/useAuthDB.ts
 
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from '@react-native-firebase/firestore';
 import { db } from '../services/firebaseConfig';
 
 export interface UserProfileData {

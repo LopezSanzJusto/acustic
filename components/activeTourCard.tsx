@@ -3,8 +3,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../services/firebaseConfig';
+import { collection, getDocs } from '@react-native-firebase/firestore';
+import { db, firestoreReady } from '../services/firebaseConfig';
 import { COLORS } from '../utils/theme';
 import { CircularProgress } from './circularProgress';
 
@@ -26,6 +26,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
   useEffect(() => {
     async function getPointsCount() {
       if (!tour.id) return;
+      await firestoreReady;
       try {
         const snapshot = await getDocs(collection(db, 'tours', tour.id, 'points'));
         setPointsCount(snapshot.size);

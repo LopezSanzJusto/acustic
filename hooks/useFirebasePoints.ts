@@ -1,8 +1,8 @@
 // hooks/useFirebasePoints.ts
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore'; 
-import { db } from '../services/firebaseConfig';
+import { collection, getDocs, query, orderBy } from '@react-native-firebase/firestore'; 
+import { db, firestoreReady } from '../services/firebaseConfig';
 import { PointOfInterest } from '../data/points';
 
 export function useFirebasePoints(tourId: string) { 
@@ -11,8 +11,8 @@ export function useFirebasePoints(tourId: string) {
 
   useEffect(() => {
     async function fetchPoints() {
-      if (!tourId) return; 
-
+      if (!tourId) return;
+      await firestoreReady;
       try {
         // Accedemos a la ruta: tours -> {tourId} -> points
         const pointsRef = collection(db, "tours", tourId, "points");

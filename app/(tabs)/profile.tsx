@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { signOut } from '@react-native-firebase/auth';
+import { doc, getDoc } from '@react-native-firebase/firestore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { auth, db } from '../../services/firebaseConfig';
+import { auth, db, firestoreReady } from '../../services/firebaseConfig';
 import { COLORS } from '../../utils/theme';
 import { MenuItem } from '../../components/menuItem';
 
@@ -21,7 +21,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (!user) return;
-    getDoc(doc(db, 'users', user.uid)).then((snap) => {
+    firestoreReady.then(() => getDoc(doc(db, 'users', user.uid))).then((snap) => {
       if (snap.exists()) {
         const name = snap.data().name;
         if (name) setFirstName(name);

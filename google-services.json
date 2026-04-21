@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "230109414866",
+    "project_id": "acustic-tfg",
+    "storage_bucket": "acustic-tfg.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230109414866:android:2c57b19da86de47754f40b",
+        "android_client_info": {
+          "package_name": "com.acustic.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "230109414866-pv7vh90o094c3aocfbj4rurrq9rmplmn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABQohRshq-OI1BSD9O1NB2CpfJ8dKtRHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "230109414866-pv7vh90o094c3aocfbj4rurrq9rmplmn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -40,7 +40,7 @@ export default function LoginScreen() {
       return;
     }
     Keyboard.dismiss();
-    const user = await loginWithEmail(email, password);
+    const user = await loginWithEmail(email.trim().toLowerCase(), password);
     if (user) {
       router.replace('/(tabs)');
     }

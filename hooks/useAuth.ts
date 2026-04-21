@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   signOut,
-} from 'firebase/auth';
+} from '@react-native-firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { useAuthDB, UserProfileData } from './useAuthDB';
 
@@ -24,6 +24,7 @@ export const useAuth = () => {
       await createUserInDB(userCredential.user.uid, profile);
       return userCredential.user;
     } catch (err: any) {
+      console.log('🔴 REGISTER ERROR →', { code: err?.code, message: err?.message, full: err });
       if (err.code === 'auth/email-already-in-use') setError('El correo ya está registrado.');
       else if (err.code === 'auth/weak-password') setError('La contraseña es muy débil (mínimo 6 caracteres).');
       else if (err.code === 'auth/invalid-email') setError('El correo no es válido.');
@@ -42,6 +43,7 @@ export const useAuth = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return userCredential.user;
     } catch (err: any) {
+      console.log('🔴 LOGIN ERROR →', { code: err?.code, message: err?.message, full: err });
       setError('Correo o contraseña incorrectos.');
       return null;
     } finally {
@@ -57,6 +59,7 @@ export const useAuth = () => {
       await sendPasswordResetEmail(auth, email);
       return true;
     } catch (err: any) {
+      console.log('🔴 RESET ERROR →', { code: err?.code, message: err?.message, full: err });
       if (err.code === 'auth/user-not-found') setError('No existe ninguna cuenta con este correo.');
       else if (err.code === 'auth/invalid-email') setError('El correo no es válido.');
       else if (err.code === 'auth/too-many-requests') setError('Demasiados intentos. Espera unos minutos.');
