@@ -46,8 +46,13 @@ export default function TourMapScreen() {
   }, [id]);
 
   const handleStartRoute = async () => {
-    // Evitamos ejecutar nada si el precio aún no se ha cargado
     if (tourPrice === undefined) return;
+
+    const { auth } = await import('../../../services/firebaseConfig');
+    if (!auth.currentUser) {
+      router.push('/welcome' as any);
+      return;
+    }
 
     if (tourPrice === 0) {
       const success = await addTourToMyList(id as string);

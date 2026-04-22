@@ -72,7 +72,13 @@ export const useAuth = () => {
 
   // 4. LOGOUT
   const logOut = async () => {
-    await signOut(auth);
+    if (!auth.currentUser) return;
+    try {
+      await signOut(auth);
+    } catch (err: any) {
+      if (err?.code === 'auth/no-current-user') return;
+      console.log('🔴 LOGOUT ERROR →', { code: err?.code, message: err?.message });
+    }
   };
 
   return { registerWithEmail, loginWithEmail, sendPasswordReset, logOut, loading, error };

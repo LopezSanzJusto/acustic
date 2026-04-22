@@ -33,12 +33,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (initializing) return;
 
-    const inAuthGroup = segments[0] === 'auth';
+    const inAuthGroup = segments[0] === 'auth' || segments[0] === 'welcome';
+    const inTabGroup = segments[0] === '(tabs)';
+    // Rutas que un invitado también puede visitar sin sesión (solo salta el welcome al pulsar "Comenzar" o "Comprar")
+    const isGuestAllowed = segments[0] === 'tour' || segments[0] === 'modal';
 
     if (user && inAuthGroup) {
       router.replace('/(tabs)' as any);
-    } else if (!user && !inAuthGroup) {
-      router.replace('/auth/register' as any);
+    } else if (!user && !inAuthGroup && !inTabGroup && !isGuestAllowed) {
+      router.replace('/welcome' as any);
     }
   }, [user, initializing, segments]);
 
@@ -57,6 +60,7 @@ export default function RootLayout() {
         <RouteProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="welcome" options={{ headerShown: false, animation: 'fade' }} />
             <Stack.Screen name="auth/login" options={{ headerShown: false }} />
             <Stack.Screen name="auth/register" options={{ headerShown: false }} />
             <Stack.Screen name="auth/user-info" options={{ headerShown: false }} />

@@ -32,7 +32,22 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     Alert.alert('Cerrar Sesión', '¿Estás seguro de que quieres salir?', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Salir', style: 'destructive', onPress: async () => await signOut(auth) },
+      {
+        text: 'Salir',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            if (auth.currentUser) {
+              await signOut(auth);
+            }
+          } catch (err: any) {
+            if (err?.code !== 'auth/no-current-user') {
+              console.log('🔴 LOGOUT ERROR →', err?.code, err?.message);
+            }
+          }
+          router.replace('/welcome' as any);
+        },
+      },
     ]);
   };
 

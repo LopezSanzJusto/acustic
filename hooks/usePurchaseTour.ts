@@ -2,16 +2,17 @@
 import { useState } from 'react';
 import { doc, updateDoc, arrayUnion } from '@react-native-firebase/firestore';
 import { db, auth } from '../services/firebaseConfig';
-import { Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export function usePurchaseTour() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
 
   const addTourToMyList = async (tourId: string): Promise<boolean> => {
     const userId = auth.currentUser?.uid;
-    
+
     if (!userId) {
-      Alert.alert("Error", "Debes iniciar sesión para guardar o realizar rutas.");
+      router.push('/welcome' as any);
       return false;
     }
 

@@ -74,10 +74,19 @@ export default function TourDetailScreen() {
 
   const handleStartRoute = async () => {
     if (!tour) return;
+
+    // Invitado → al welcome, tanto si es gratis como si es de pago
+    const { auth } = await import('../../services/firebaseConfig');
+    if (!auth.currentUser) {
+      router.push('/welcome' as any);
+      return;
+    }
+
     if (hasAccess) {
       // Si la ruta es gratuita y aún no está en "mis rutas", la añadimos antes de navegar
       if (isFree && !isPurchased) {
-        await addTourToMyList(tour.id);
+        const ok = await addTourToMyList(tour.id);
+        if (!ok) return;
       }
       router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any);
       return;
