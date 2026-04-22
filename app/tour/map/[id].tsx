@@ -76,11 +76,11 @@ export default function TourMapScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={[styles.mapContainer, { backgroundColor: 'red' }]}>
-        <MapDisplay 
-            location={null} 
-            points={points} 
-            showGeofence={false} 
+      <View style={styles.mapContainer}>
+        <MapDisplay
+            location={null}
+            points={points}
+            showGeofence={false}
         />
       </View>
 
