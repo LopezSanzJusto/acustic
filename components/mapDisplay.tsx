@@ -2,8 +2,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { StyleSheet, View, Image, Text } from "react-native";
-// ✨ QUÍTAMOS PROVIDER_GOOGLE. Dejamos que el SO decida el mapa nativo.
-import MapView, { Marker, Circle, Polyline, UrlTile } from "react-native-maps";
+import MapView, { Marker, Circle, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { PointOfInterest } from "../data/points";
 import { COLORS } from "../utils/theme";
 import { useSortedPoints } from "../hooks/useMapLogic";
@@ -54,9 +53,26 @@ export const MapDisplay = ({
     [key: string]: boolean;
   }>({});
 
+  // ✨ MEJORA DE RENDIMIENTO: Pre-marcar los puntos que no necesitan cargar imagen externa
   useEffect(() => {
-    setLoadedImages({});
+    if (markerType === 'image') {
+      const loaded: { [key: string]: boolean } = {};
+      points.forEach(p => {
+        // Si el punto no tiene imagen, evitamos que tracksViewChanges se quede en true eternamente
+        if (!p.image) {
+          loaded[p.id] = true;
+        }
+      });
+      if (Object.keys(loaded).length > 0) {
+        setLoadedImages(prev => ({ ...prev, ...loaded }));
+      }
+    }
+  }, [points, markerType]);
+
+  useEffect(() => {
+    // Evitamos resetear si estamos en markerType 'image' para no machacar el useEffect anterior
     if (markerType === 'number') {
+      setLoadedImages({});
       const timer = setTimeout(() => {
         const loaded: { [key: string]: boolean } = {};
         points.forEach(p => { loaded[p.id] = true; });
@@ -93,24 +109,16 @@ export const MapDisplay = ({
   };
 
   return (
-    <View style={styles.mapContainer}>
+    <View style={[styles.mapContainer, { backgroundColor: 'red' }]}>
       <MapView
         ref={mapRef}
-        // ✨ mapType="none" oculta los tiles de Google; los pinta UrlTile (OSM).
-        mapType="none"
         style={styles.map}
+        provider={PROVIDER_DEFAULT}
         initialRegion={initialRegion}
         showsUserLocation={false}
         showsMyLocationButton={false}
         onLayout={handleMapLayout}
       >
-        <UrlTile
-          urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maximumZ={19}
-          flipY={false}
-          zIndex={-1}
-        />
-
         {routeCoords.length > 1 && (
           <Polyline
             coordinates={routeCoords}
@@ -194,17 +202,25 @@ export const MapDisplay = ({
 
 const styles = StyleSheet.create({
   mapContainer: { 
-    // ✨ FORZAMOS POSICIÓN ABSOLUTA para evitar que el mapContainer mida 0x0
-    ...StyleSheet.absoluteFillObject, 
+    // ✨ Reemplazo de absoluteFillObject
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: '#E6E6E6',
     overflow: "hidden" 
   },
   map: { 
-    // ✨ EL MAPA TAMBIÉN DEBE SER ABSOLUTO para renderizar en Fabric
-    ...StyleSheet.absoluteFillObject 
+    // ✨ Reemplazo de absoluteFillObject
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 
-  // ... (el resto de tus estilos se mantienen igual)
+  // ... (El resto se mantiene igual)
   markerBorder: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: COLORS.white, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: COLORS.white, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 4, elevation: 6 },
   markerImage: { width: 41, height: 41, borderRadius: 20.5 },
   numberMarkerOuter: { width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', borderWidth: 2.5, borderColor: 'white', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 },

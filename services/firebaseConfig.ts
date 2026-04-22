@@ -14,13 +14,13 @@ export const auth = getAuth(app);
 // Cache de tours compartido: el warmup lo rellena, useFirebaseTours lo consume.
 export let warmupTours: { id: string; [key: string]: any }[] = [];
 
-let _resolveReady: () => void;
+let _resolveReady!: () => void;
 export const firestoreReady = new Promise<void>(resolve => { _resolveReady = resolve; });
 
 (async function warmup() {
   try {
     const snap = await getDocs(collection(db, 'tours'));
-    warmupTours = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    warmupTours = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
     console.log(`✅ Firestore listo — ${warmupTours.length} tours`);
     _resolveReady();
   } catch (e) {
@@ -28,7 +28,7 @@ export const firestoreReady = new Promise<void>(resolve => { _resolveReady = res
     setTimeout(() => (async () => {
       try {
         const snap = await getDocs(collection(db, 'tours'));
-        warmupTours = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        warmupTours = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
         _resolveReady();
       } catch { _resolveReady(); }
     })(), 1000);

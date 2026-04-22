@@ -27,17 +27,19 @@ export default function TourMapScreen() {
   useEffect(() => {
     let isMounted = true;
     const fetchPrice = async () => {
-        try {
-          await firestoreReady;
-          const docRef = doc(db, "tours", id as string);
-          const snap = await getDoc(docRef);
-          if (snap.exists() && isMounted) {
-            // ✅ Aseguramos que si no tiene precio, sea 0
-            setTourPrice(snap.data().price || 0); 
-          }
-        } catch(e) { 
-          console.error("Error fetching price for map:", e);
+      try {
+        await firestoreReady;
+        const docRef = doc(db, "tours", id as string);
+        const snap = await getDoc(docRef);
+        if (snap.exists() && isMounted) {
+          // Obtenemos los datos de forma segura
+          const data = snap.data();
+          // Si data o price son undefined, asignamos 0
+          setTourPrice(data?.price ?? 0); 
         }
+      } catch(e) { 
+        console.error("Error fetching price for map:", e);
+      }
     };
     fetchPrice();
     return () => { isMounted = false; }
@@ -74,7 +76,7 @@ export default function TourMapScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={styles.mapContainer}>
+      <View style={[styles.mapContainer, { backgroundColor: 'red' }]}>
         <MapDisplay 
             location={null} 
             points={points} 
