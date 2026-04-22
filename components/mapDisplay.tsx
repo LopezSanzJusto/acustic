@@ -109,7 +109,7 @@ export const MapDisplay = ({
   };
 
   return (
-    <View style={[styles.mapContainer, { backgroundColor: 'red' }]}>
+    <View style={styles.mapContainer}>
       <MapView
         ref={mapRef}
         style={styles.map}
