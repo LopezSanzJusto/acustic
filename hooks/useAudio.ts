@@ -1,29 +1,30 @@
 // hooks/useAudio.ts
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { PointOfInterest } from "../data/points";
+import { registerActiveAudio, unregisterActiveAudio } from "../utils/audioRegistry";
 
 export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = false) {
   const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
   const [playbackRate, setPlaybackRate] = useState(1.0);
+  const regVersion = useRef(0);
 
   const activePoint = activePointIndex !== null ? points[activePointIndex] : null;
 
-  // 1. Cargamos el reproductor de forma nativa. Si no hay audio, le pasamos null.
   const audioUri = activePoint?.audio || null;
   const player = useAudioPlayer(audioUri);
-  
-  // 2. Este hook mágico nos da el estado en tiempo real sin tener que hacer callbacks manuales
   const status = useAudioPlayerStatus(player);
 
-  // 3. Adaptamos los tiempos (expo-audio usa SEGUNDOS, tu MiniPlayer usa MILISEGUNDOS)
   const positionMillis = (status.currentTime || 0) * 1000;
   const durationMillis = (status.duration || 0) * 1000;
-  
-  // Si tenemos un URI pero la duración es 0, significa que el audio está "cargando"
   const isPreloading = audioUri !== null && status.duration === 0;
   const isPlaying = status.playing;
+
+  // Limpieza al desmontarse
+  useEffect(() => {
+    return () => { unregisterActiveAudio(regVersion.current); };
+  }, []);
 
   /* =========================
    * AUTOSELECCIÓN INICIAL
@@ -38,8 +39,8 @@ export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = f
    * REPRODUCCIÓN AUTOMÁTICA
    * ========================= */
   useEffect(() => {
-    // Al cambiar de punto o de URI, le decimos al reproductor que arranque solo
     if (audioUri && player) {
+      regVersion.current = registerActiveAudio(() => player.pause());
       player.play();
     }
   }, [audioUri, player]);
@@ -48,12 +49,16 @@ export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = f
    * CONTROLES
    * ========================= */
   const togglePlayPause = () => {
-    if (isPlaying) player.pause();
-    else player.play();
+    if (isPlaying) {
+      player.pause();
+    } else {
+      regVersion.current = registerActiveAudio(() => player.pause());
+      player.play();
+    }
   };
 
   const seekTo = (millis: number) => {
-    player.seekTo(millis / 1000); // expo-audio pide segundos
+    player.seekTo(millis / 1000);
   };
 
   const skipBy = (millis: number) => {

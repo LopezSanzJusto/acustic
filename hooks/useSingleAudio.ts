@@ -1,25 +1,25 @@
 // hooks/useSingleAudio.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { registerActiveAudio, unregisterActiveAudio } from '../utils/audioRegistry';
 
 export function useSingleAudio(audioUrl?: string) {
-  // ✨ LAZY LOAD: Empezamos en null para no consumir RAM ni datos hasta pulsar Play
   const [source, setSource] = useState<string | null>(null);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
+  const regVersion = useRef(0);
 
-  // 1. Cargamos el reproductor de forma nativa (si source es null, no hace nada)
   const player = useAudioPlayer(source);
-  
-  // 2. Este hook mágico nos da el estado en tiempo real (adiós al setOnPlaybackStatusUpdate)
   const status = useAudioPlayerStatus(player);
 
   const isPlaying = status.playing;
-  // Adaptamos los tiempos (expo-audio usa SEGUNDOS, tu app espera MILISEGUNDOS)
   const positionMillis = (status.currentTime || 0) * 1000;
   const durationMillis = (status.duration || 0) * 1000;
-
-  // ✨ Está cargando si ya le dimos la URL pero el motor aún no ha decodificado la duración
   const isLoading = source !== null && status.duration === 0;
+
+  // Limpieza al desmontarse: si somos el activo, dejamos el registry libre
+  useEffect(() => {
+    return () => { unregisterActiveAudio(regVersion.current); };
+  }, []);
 
   // Reseteamos el estado si la URL original cambia
   useEffect(() => {
@@ -27,9 +27,10 @@ export function useSingleAudio(audioUrl?: string) {
     setShouldAutoPlay(false);
   }, [audioUrl]);
 
-  // Efecto para auto-reproducir justo en el momento en el que el Lazy Load termina de cargar
+  // Auto-reproducir cuando el lazy load termina de cargar
   useEffect(() => {
     if (shouldAutoPlay && player && status.duration > 0) {
+      regVersion.current = registerActiveAudio(() => player.pause());
       player.play();
       setShouldAutoPlay(false);
     }
@@ -39,15 +40,16 @@ export function useSingleAudio(audioUrl?: string) {
     if (!audioUrl) return;
 
     if (!source) {
-      // CASO 1: LAZY LOAD - Es la primera vez que pulsa Play
-      setSource(audioUrl); // Disparamos la carga del audio
-      setShouldAutoPlay(true); // Le decimos que suene en cuanto esté listo
+      // LAZY LOAD: paramos al reproductor anterior ya, y guardamos una stop-fn
+      // que además cancela el autoplay si nos paran antes de que cargue
+      regVersion.current = registerActiveAudio(() => { player.pause(); setShouldAutoPlay(false); });
+      setSource(audioUrl);
+      setShouldAutoPlay(true);
     } else {
-      // CASO 2: El audio ya estaba cargado en memoria
       if (isPlaying) {
         player.pause();
       } else {
-        // Si el audio llegó al final (con un pequeño margen de 0.5s), lo reiniciamos
+        regVersion.current = registerActiveAudio(() => player.pause());
         if (status.duration > 0 && status.currentTime >= status.duration - 0.5) {
           player.seekTo(0);
         }
@@ -58,7 +60,7 @@ export function useSingleAudio(audioUrl?: string) {
 
   const seekTo = (millis: number) => {
     if (!player) return;
-    player.seekTo(millis / 1000); // Recordamos dividir por 1000 para expo-audio
+    player.seekTo(millis / 1000);
   };
 
   return { isPlaying, isLoading, positionMillis, durationMillis, togglePlayPause, seekTo };
