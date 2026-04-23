@@ -12,6 +12,7 @@ import { FloatingButton } from '../../../components/floatingButton';
 import { COLORS, COMMON_STYLES } from '../../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePurchaseTour } from '../../../hooks/usePurchaseTour';
+import { stopActiveAudio } from '../../../utils/audioRegistry';
 
 export default function TourMapScreen() {
   const { id } = useLocalSearchParams();
@@ -50,6 +51,7 @@ export default function TourMapScreen() {
 
     const { auth } = await import('../../../services/firebaseConfig');
     if (!auth.currentUser) {
+      stopActiveAudio();
       router.push('/welcome' as any);
       return;
     }

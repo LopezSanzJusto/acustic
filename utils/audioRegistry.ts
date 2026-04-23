@@ -23,3 +23,10 @@ export function unregisterActiveAudio(version: number) {
   // Solo limpiamos si seguimos siendo el reproductor activo (no otro que haya tomado el relevo)
   if (version === currentVersion) currentStop = null;
 }
+
+export function stopActiveAudio() {
+  if (currentStop) {
+    try { currentStop(); } catch { /* player ya liberado */ }
+    currentStop = null;
+  }
+}

@@ -13,6 +13,7 @@ import { useFavorites } from '../../hooks/useFavorites';
 import { useFirebasePoints } from '../../hooks/useFirebasePoints';
 import { usePurchaseTour } from '../../hooks/usePurchaseTour';
 import { useMyTours } from '../../hooks/useMyTours';
+import { stopActiveAudio } from '../../utils/audioRegistry';
 
 // Componentes Modulares
 import { TourHeader } from '../../components/tourDetails/tourHeader';
@@ -78,6 +79,7 @@ export default function TourDetailScreen() {
     // Invitado → al welcome, tanto si es gratis como si es de pago
     const { auth } = await import('../../services/firebaseConfig');
     if (!auth.currentUser) {
+      stopActiveAudio();
       router.push('/welcome' as any);
       return;
     }
