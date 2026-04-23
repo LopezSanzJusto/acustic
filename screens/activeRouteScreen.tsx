@@ -24,6 +24,7 @@ import { useTourProgress } from "../hooks/useTourProgress";
 import { PointReachedModal } from "../components/pointReachedModal";
 import { notifyPointReached, ensureNotificationPermission } from "../services/notificationService";
 import { PointOfInterest } from "../data/points";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 
 const RADIUS = 15;
 
@@ -55,6 +56,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   
   // ✨ Instanciamos el hook que guarda en Firebase
   const { saveProgress } = useTourProgress();
+  const { prefs } = useUserPreferences();
 
   useEffect(() => {
     if (points && points.length > 0) {
@@ -88,9 +90,11 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   }, []);
 
   const handlePointReached = useCallback((index: number, point: PointOfInterest) => {
-    setPendingPoint({ index, point });
+    if (prefs.popupNearPoi) {
+      setPendingPoint({ index, point });
+    }
     notifyPointReached(point.name);
-  }, []);
+  }, [prefs.popupNearPoi]);
 
   const { gpsActivePoint } = useGeoAudioSync({
     location,
