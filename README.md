@@ -1,50 +1,159 @@
-# Welcome to your Expo app 👋
+# Acustic
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil de audioguías turísticas. Descubre rutas, escucha audios en puntos de interés y sigue recorridos en un mapa interactivo.
 
-## Get started
+---
 
-1. Install dependencies
+## Requisitos previos
 
-   ```bash
-   npm install
-   ```
+- Node.js 18+
+- npm 9+
+- Para Android: Android Studio con un emulador configurado (o dispositivo físico con depuración USB activada)
+- Para iOS: macOS con Xcode 15+ instalado (solo en Mac)
+- Java 17 (para Android). Verifica con `java -version`
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Instalación
 
 ```bash
-npm run reset-project
+git clone <url-del-repo>
+cd acustic
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Crea el fichero `.env` en la raíz con las claves (pídelas al equipo):
 
-## Learn more
+```
+GOOGLE_MAPS_API_KEY_ANDROID=...
+GOOGLE_MAPS_API_KEY_IOS=...
+GOOGLE_MAPS_API_KEY_DIRECTIONS=...
+FIREBASE_API_KEY=...
+FIREBASE_AUTH_DOMAIN=...
+FIREBASE_PROJECT_ID=...
+FIREBASE_STORAGE_BUCKET=...
+FIREBASE_MESSAGING_SENDER_ID=...
+FIREBASE_APP_ID=...
+FIREBASE_MEASUREMENT_ID=...
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Development Build (obligatorio — la app NO funciona en Expo Go)
 
-## Join the community
+Esta app usa módulos nativos (`@react-native-firebase`, `expo-location`, `expo-audio`, etc.) que Expo Go no soporta. Hay que compilar un **development build** la primera vez.
 
-Join our community of developers creating universal apps.
+### Android
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Opción A — Emulador (Android Studio)**
+
+1. Abre Android Studio → `Device Manager` → arranca un emulador (API 33+ recomendado).
+2. Compila e instala en el emulador:
+   ```bash
+   npx expo run:android
+   ```
+3. Una vez instalado, para futuros arranques solo necesitas:
+   ```bash
+   npx expo start --dev-client
+   ```
+   y pulsar `a` para abrir en el emulador.
+
+**Opción B — Dispositivo físico**
+
+1. Activa **Opciones de desarrollador** y **Depuración USB** en tu Android.
+2. Conecta el cable USB y acepta el par de claves cuando lo pida el móvil.
+3. Verifica que el dispositivo es visible:
+   ```bash
+   adb devices
+   ```
+4. Compila e instala:
+   ```bash
+   npx expo run:android
+   ```
+5. Arranques posteriores:
+   ```bash
+   npx expo start --dev-client
+   ```
+
+### iOS (solo macOS)
+
+**Opción A — Simulador (Xcode)**
+
+1. Abre Xcode al menos una vez para que descargue los simuladores.
+2. Compila e instala:
+   ```bash
+   npx expo run:ios
+   ```
+3. Arranques posteriores:
+   ```bash
+   npx expo start --dev-client
+   ```
+   y pulsar `i`.
+
+**Opción B — Dispositivo físico**
+
+1. Necesitas una cuenta de desarrollador Apple (gratuita sirve para pruebas locales).
+2. Conecta el iPhone por USB, confía en el ordenador cuando lo pida.
+3. Registra el dispositivo en Xcode: `Window → Devices and Simulators`.
+4. Compila:
+   ```bash
+   npx expo run:ios --device
+   ```
+5. Si hay error de firma, abre `ios/acustic.xcworkspace` en Xcode y asigna tu Apple ID en `Signing & Capabilities`.
+
+---
+
+## Comandos útiles
+
+```bash
+# Arrancar Metro (requiere dev build ya instalado)
+npx expo start --dev-client
+
+# Recompilar tras cambios en app.json o instalación de nuevos módulos nativos
+npx expo run:android
+npx expo run:ios
+
+# Limpiar caché de Metro si algo va raro
+npx expo start --dev-client --clear
+
+# Lint
+npx expo lint
+```
+
+---
+
+## Stack tecnológico
+
+| Categoría | Tecnología |
+|---|---|
+| Framework | Expo SDK ~55 |
+| Runtime | React Native 0.83.4 + React 19.2.0 |
+| Lenguaje | TypeScript |
+| Routing | Expo Router (file-based) |
+| Mapas | react-native-maps + react-native-maps-directions |
+| Audio | expo-audio |
+| Localización | expo-location |
+| Auth | Firebase + Google Sign-In + Apple Authentication |
+| Backend/DB | Firebase (Firestore + Storage) |
+| Animaciones | react-native-reanimated |
+
+---
+
+## Estructura de carpetas
+
+```
+acustic/
+├── app/                  # Rutas Expo Router
+│   ├── (tabs)/           # Tabs principales
+│   ├── active-tour/      # Pantalla de tour activo
+│   ├── auth/             # Flujo de autenticación
+│   ├── tour/             # Detalle de tour
+│   └── profile/          # Pantallas de perfil
+├── screens/              # Pantallas principales
+├── components/           # Componentes reutilizables
+├── hooks/                # Custom hooks
+├── services/             # Lógica de negocio / APIs
+├── utils/                # Utilidades
+├── constants/            # Constantes globales
+└── data/                 # Datos estáticos / mocks
+```
