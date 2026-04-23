@@ -93,7 +93,7 @@ export default function ProfileScreen() {
             iconBgColor="#FFF8E1"
             iconColor="#F5A623"
             title="Notificaciones y permisos"
-            onPress={() => soon('Notificaciones y permisos')}
+            onPress={() => router.push('/profile/notifications' as any)}
             showBorder={false}
           />
         </View>
