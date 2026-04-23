@@ -70,10 +70,15 @@ export default function TripsScreen() {
               params: { id: item.id, fromTrips: 'true' }
             } as any);
 
+            const handleStartRoute = () => router.push({
+              pathname: '/active-tour/[id]',
+              params: { id: item.id },
+            } as any);
+
             // Compradas → tarjeta con progreso (ActiveTourCard)
             // Favoritas → misma tarjeta que Explora (TourCard, con intro y favorito)
             return activeTab === 'purchased'
-              ? <ActiveTourCard tour={item} onPress={handlePress} />
+              ? <ActiveTourCard tour={item} onPress={handlePress} onStartRoute={handleStartRoute} />
               : <TourCard tour={item} onPress={handlePress} />;
           }}
         />

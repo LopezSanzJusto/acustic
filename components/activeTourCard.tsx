@@ -17,9 +17,10 @@ type CardState = 'not_started' | 'in_progress' | 'completed';
 interface ActiveTourCardProps {
   tour: any;
   onPress: () => void;
+  onStartRoute: () => void;
 }
 
-export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
+export const ActiveTourCard = ({ tour, onPress, onStartRoute }: ActiveTourCardProps) => {
   const progress: number = tour.progressPercentage || 0;
   const [pointsCount, setPointsCount] = useState(0);
 
@@ -91,7 +92,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
 
           {/* Botón de acción */}
           {cardState !== 'completed' && (
-            <TouchableOpacity style={styles.actionButton} onPress={onPress} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.actionButton} onPress={onStartRoute} activeOpacity={0.8}>
               <Text style={styles.actionText}>
                 {cardState === 'in_progress' ? 'Continuar la ruta' : 'Empezar la ruta'}
               </Text>
