@@ -93,8 +93,11 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     if (prefs.popupNearPoi) {
       setPendingPoint({ index, point });
     }
+    if (prefs.autoPlayNearPoi) {
+      setActivePointIndex(index);
+    }
     notifyPointReached(point.name);
-  }, [prefs.popupNearPoi]);
+  }, [prefs.popupNearPoi, prefs.autoPlayNearPoi, setActivePointIndex]);
 
   const { gpsActivePoint } = useGeoAudioSync({
     location,

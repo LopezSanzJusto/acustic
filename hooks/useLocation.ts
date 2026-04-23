@@ -73,7 +73,7 @@ export const useLocation = (simulate = false) => {
         console.log(`📍 Simulación paso ${index}:`, nextPoint);
         setLocation(nextPoint);
 
-      }, 30000);
+      }, 15000);
 
       return () => clearInterval(interval);
     }
