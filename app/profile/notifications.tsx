@@ -42,6 +42,20 @@ export default function NotificationsScreen() {
     </View>
   );
 
+  // Fila sin implementar: texto y switch en gris claro, no interactuable
+  const renderComingSoonRow = (label: string) => (
+    <View style={[styles.row, styles.rowComingSoon]}>
+      <Text style={styles.labelComingSoon}>{label}</Text>
+      <Switch
+        value={false}
+        onValueChange={() => {}}
+        disabled
+        trackColor={{ false: '#E8E8E8', true: '#E8E8E8' }}
+        thumbColor='#C0C0C0'
+      />
+    </View>
+  );
+
   const renderDivider = () => <View style={styles.divider} />;
 
   return (
@@ -71,6 +85,10 @@ export default function NotificationsScreen() {
             {renderRow('Permite ubicación', fgGranted, toggleForegroundLocation)}
             {renderDivider()}
 
+            {/* #2 — Notificaciones (próximamente) */}
+            {renderComingSoonRow('Permite notificaciones')}
+            {renderDivider()}
+
             {/* #3 — Pop-up cerca de POI */}
             {renderRow(
               'Pop-up cerca de un punto de interés',
@@ -93,6 +111,10 @@ export default function NotificationsScreen() {
               prefs.autoDownload,
               () => updatePref('autoDownload', !prefs.autoDownload),
             )}
+            {renderDivider()}
+
+            {/* #6 — Notificaciones en segundo plano (próximamente) */}
+            {renderComingSoonRow('Notificaciones en segundo plano')}
             {renderDivider()}
 
             {/* #7 — Ubicación en segundo plano (permiso del SO) */}
@@ -182,6 +204,16 @@ const styles = StyleSheet.create({
   },
   labelDisabled: {
     color: COLORS.muted,
+  },
+
+  rowComingSoon: {
+    backgroundColor: '#FAFAFA',
+  },
+  labelComingSoon: {
+    flex: 1,
+    fontSize: 15,
+    color: '#C0C0C0',
+    lineHeight: 21,
   },
 
   divider: {
