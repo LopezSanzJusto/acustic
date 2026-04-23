@@ -18,6 +18,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
+import { useSocialAuth } from '../../hooks/useSocialAuth';
 
 const PURPLE_BG = '#3D3E8C';
 const PURPLE_BUTTON = '#A39BF8';
@@ -29,6 +30,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { loginWithEmail, loading, error } = useAuth();
+  const { loginWithGoogle, loginWithApple, loading: socialLoading, error: socialError } = useSocialAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +55,16 @@ export default function LoginScreen() {
 
   const handleForgotPassword = () => {
     router.push('/auth/forgot-password');
+  };
+
+  const handleGoogleLogin = async () => {
+    const user = await loginWithGoogle();
+    if (user) router.replace('/(tabs)');
+  };
+
+  const handleAppleLogin = async () => {
+    const user = await loginWithApple();
+    if (user) router.replace('/(tabs)');
   };
 
   return (
@@ -84,6 +96,35 @@ export default function LoginScreen() {
           <Ionicons name="happy-outline" size={24} color="#6FB8FF" style={styles.faceIdIcon} />
           <Text style={styles.faceIdText}>Inicia sesión usando biometría</Text>
         </TouchableOpacity>
+
+        {/* Google */}
+        <TouchableOpacity
+          style={styles.socialButton}
+          onPress={handleGoogleLogin}
+          disabled={socialLoading}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="logo-google" size={20} color="#EA4335" style={styles.socialIcon} />
+          <Text style={styles.socialText}>Continuar con Google</Text>
+        </TouchableOpacity>
+
+        {/* Apple — solo en iOS */}
+        {Platform.OS === 'ios' && (
+          <TouchableOpacity
+            style={[styles.socialButton, styles.appleButton]}
+            onPress={handleAppleLogin}
+            disabled={socialLoading}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="logo-apple" size={22} color="#FFFFFF" style={styles.socialIcon} />
+            <Text style={[styles.socialText, styles.appleText]}>Continuar con Apple</Text>
+          </TouchableOpacity>
+        )}
+
+        {socialLoading && (
+          <ActivityIndicator color="#FFFFFF" style={{ marginTop: 8 }} />
+        )}
+        {socialError && <Text style={styles.errorText}>{socialError}</Text>}
 
         {/* Separador */}
         <View style={styles.dividerContainer}>
@@ -208,6 +249,30 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+
+  // Botones sociales
+  socialButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    marginBottom: 12,
+  },
+  appleButton: {
+    backgroundColor: '#000000',
+  },
+  socialIcon: { marginRight: 10 },
+  socialText: {
+    color: '#1F1F1F',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  appleText: {
+    color: '#FFFFFF',
   },
 
   // Divider

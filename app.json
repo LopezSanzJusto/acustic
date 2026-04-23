@@ -58,12 +58,12 @@
       "expo-web-browser",
       "expo-audio",
       "expo-apple-authentication",
-      // [
-      //   "@react-native-google-signin/google-signin",
-      //   {
-      //     "iosUrlScheme": "com.googleusercontent.apps.XXX"
-      //   }
-      // ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.230109414866-u533nltjkldq2f411vju5pu3qke0orna"
+        }
+      ],
       [
         "expo-local-authentication",
         {
