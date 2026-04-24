@@ -51,6 +51,7 @@ export const useSocialAuth = () => {
     setError(null);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      await GoogleSignin.signOut();
       const userInfo: any = await GoogleSignin.signIn();
       const idToken = userInfo?.data?.idToken ?? userInfo?.idToken;
       if (!idToken) throw new Error('No se obtuvo el idToken de Google');
