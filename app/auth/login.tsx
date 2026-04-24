@@ -19,22 +19,36 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocialAuth } from '../../hooks/useSocialAuth';
+import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 
-const PURPLE_BG = '#3D3E8C';
+const PURPLE_BG    = '#3D3E8C';
 const PURPLE_BUTTON = '#A39BF8';
-const INPUT_BORDER = 'rgba(255,255,255,0.35)';
-const PLACEHOLDER = 'rgba(255,255,255,0.55)';
+const INPUT_BORDER  = 'rgba(255,255,255,0.35)';
+const PLACEHOLDER   = 'rgba(255,255,255,0.55)';
 const LINK_HIGHLIGHT = '#F5A623';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { loginWithEmail, loading, error } = useAuth();
-  const { loginWithGoogle, loginWithApple, loading: socialLoading, error: socialError } = useSocialAuth();
+  const { loginWithGoogleSilently } = useSocialAuth();
+  const { available, enabled, enableBiometricEmail, authenticateAndGetCredentials } = useBiometricAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail]             = useState('');
+  const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const offerBiometric = (onAccept: () => Promise<void>) => {
+    if (!available || enabled) return;
+    Alert.alert(
+      'Acceso rápido',
+      '¿Quieres usar biometría para entrar la próxima vez?',
+      [
+        { text: 'Ahora no', style: 'cancel', onPress: () => router.replace('/(tabs)') },
+        { text: 'Activar', onPress: async () => { await onAccept(); router.replace('/(tabs)'); } },
+      ]
+    );
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -43,28 +57,26 @@ export default function LoginScreen() {
     }
     Keyboard.dismiss();
     const user = await loginWithEmail(email.trim().toLowerCase(), password);
-    if (user) {
+    if (!user) return;
+
+    if (available && !enabled) {
+      offerBiometric(() => enableBiometricEmail(email.trim().toLowerCase(), password));
+    } else {
       router.replace('/(tabs)');
     }
   };
 
-  // TODO: activar cuando se haga el build nativo con expo-local-authentication
-  const handleBiometric = () => {
-    Alert.alert('Próximamente', 'El inicio de sesión por biometría se activará en una próxima versión.');
-  };
+  const handleBiometric = async () => {
+    const credentials = await authenticateAndGetCredentials();
+    if (!credentials) return;
 
-  const handleForgotPassword = () => {
-    router.push('/auth/forgot-password');
-  };
-
-  const handleGoogleLogin = async () => {
-    const user = await loginWithGoogle();
-    if (user) router.replace('/(tabs)');
-  };
-
-  const handleAppleLogin = async () => {
-    const user = await loginWithApple();
-    if (user) router.replace('/(tabs)');
+    if (credentials.method === 'google') {
+      const user = await loginWithGoogleSilently();
+      if (user) router.replace('/(tabs)');
+    } else {
+      const user = await loginWithEmail(credentials.email, credentials.password);
+      if (user) router.replace('/(tabs)');
+    }
   };
 
   return (
@@ -81,57 +93,30 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Título */}
         <Text style={styles.title}>Unlock your journey</Text>
         <Text style={styles.subtitle}>
           Start exploring{'\n'}the world{'\n'}through sound
         </Text>
 
-        {/* Biometría */}
-        <TouchableOpacity
-          style={styles.faceIdButton}
-          onPress={handleBiometric}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="happy-outline" size={24} color="#6FB8FF" style={styles.faceIdIcon} />
-          <Text style={styles.faceIdText}>Inicia sesión usando biometría</Text>
-        </TouchableOpacity>
-
-        {/* Google */}
-        <TouchableOpacity
-          style={styles.socialButton}
-          onPress={handleGoogleLogin}
-          disabled={socialLoading}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="logo-google" size={20} color="#EA4335" style={styles.socialIcon} />
-          <Text style={styles.socialText}>Continuar con Google</Text>
-        </TouchableOpacity>
-
-        {/* Apple — solo en iOS */}
-        {Platform.OS === 'ios' && (
+        {/* Botón biometría — solo si disponible y activada */}
+        {available && enabled && (
           <TouchableOpacity
-            style={[styles.socialButton, styles.appleButton]}
-            onPress={handleAppleLogin}
-            disabled={socialLoading}
+            style={styles.bioButton}
+            onPress={handleBiometric}
             activeOpacity={0.85}
           >
-            <Ionicons name="logo-apple" size={22} color="#FFFFFF" style={styles.socialIcon} />
-            <Text style={[styles.socialText, styles.appleText]}>Continuar con Apple</Text>
+            <Ionicons name="finger-print-outline" size={24} color="#6FB8FF" style={styles.bioIcon} />
+            <Text style={styles.bioText}>Inicia sesión con biometría</Text>
           </TouchableOpacity>
         )}
 
-        {socialLoading && (
-          <ActivityIndicator color="#FFFFFF" style={{ marginTop: 8 }} />
+        {available && enabled && (
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>o si lo prefieres</Text>
+            <View style={styles.dividerLine} />
+          </View>
         )}
-        {socialError && <Text style={styles.errorText}>{socialError}</Text>}
-
-        {/* Separador */}
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>o si lo prefieres</Text>
-          <View style={styles.dividerLine} />
-        </View>
 
         {/* Email */}
         <View style={styles.inputWrapper}>
@@ -161,45 +146,33 @@ export default function LoginScreen() {
             autoCapitalize="none"
           />
           <TouchableOpacity
-            onPress={() => setShowPassword((prev) => !prev)}
+            onPress={() => setShowPassword(p => !p)}
             style={styles.eyeButton}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons
-              name={showPassword ? 'eye' : 'eye-off'}
-              size={20}
-              color="#9EEDD6"
-            />
+            <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#9EEDD6" />
           </TouchableOpacity>
         </View>
 
-        {/* Olvidaste contraseña */}
         <TouchableOpacity
-          onPress={handleForgotPassword}
+          onPress={() => router.push('/auth/forgot-password')}
           style={styles.forgotWrapper}
           activeOpacity={0.7}
         >
           <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        {/* Error */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* Botón login */}
         <TouchableOpacity
           style={styles.mainButton}
           onPress={handleLogin}
           disabled={loading}
           activeOpacity={0.85}
         >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.mainButtonText}>Iniciar sesión</Text>
-          )}
+          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.mainButtonText}>Iniciar sesión</Text>}
         </TouchableOpacity>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>¿Aún no tienes cuenta con nosotros? </Text>
           <TouchableOpacity onPress={() => router.push('/auth/register')} activeOpacity={0.7}>
@@ -213,163 +186,47 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: PURPLE_BG },
-  scrollContent: {
-    paddingHorizontal: 26,
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 10,
-  },
+  scrollContent: { paddingHorizontal: 26, flexGrow: 1 },
+  title: { fontSize: 30, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', marginBottom: 10 },
   subtitle: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 20,
-    fontStyle: 'italic',
-    fontWeight: '400',
-    textAlign: 'center',
-    marginBottom: 34,
-    lineHeight: 26,
+    color: 'rgba(255,255,255,0.75)', fontSize: 20, fontStyle: 'italic',
+    fontWeight: '400', textAlign: 'center', marginBottom: 34, lineHeight: 26,
   },
-
-  // Face ID
-  faceIdButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: PURPLE_BUTTON,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    marginBottom: 20,
+  bioButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: PURPLE_BUTTON, borderRadius: 14,
+    paddingVertical: 14, paddingHorizontal: 18, marginBottom: 20,
   },
-  faceIdIcon: { marginRight: 10 },
-  faceIdText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-
-  // Botones sociales
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    marginBottom: 12,
-  },
-  appleButton: {
-    backgroundColor: '#000000',
-  },
-  socialIcon: { marginRight: 10 },
-  socialText: {
-    color: '#1F1F1F',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  appleText: {
-    color: '#FFFFFF',
-  },
-
-  // Divider
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-  },
-  dividerText: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 14,
-    marginHorizontal: 12,
-  },
-
-  // Inputs
+  bioIcon: { marginRight: 10 },
+  bioText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.25)' },
+  dividerText: { color: 'rgba(255,255,255,0.85)', fontSize: 14, marginHorizontal: 12 },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: INPUT_BORDER,
-    borderRadius: 30,
-    paddingHorizontal: 18,
-    paddingVertical: 4,
-    marginBottom: 14,
+    flexDirection: 'row', alignItems: 'center', borderWidth: 1.5,
+    borderColor: INPUT_BORDER, borderRadius: 30,
+    paddingHorizontal: 18, paddingVertical: 4, marginBottom: 14,
   },
   inputLeftIcon: { marginRight: 10 },
-  input: {
-    flex: 1,
-    color: '#FFFFFF',
-    fontSize: 15,
-    paddingVertical: 12,
-  },
+  input: { flex: 1, color: '#FFFFFF', fontSize: 15, paddingVertical: 12 },
   eyeButton: { paddingLeft: 8 },
-
-  // Forgot password
-  forgotWrapper: {
-    alignSelf: 'flex-end',
-    marginTop: 2,
-    marginBottom: 6,
-  },
+  forgotWrapper: { alignSelf: 'flex-end', marginTop: 2, marginBottom: 6 },
   forgotText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    backgroundColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    overflow: 'hidden',
+    color: '#FFFFFF', fontSize: 12, fontWeight: '600',
+    backgroundColor: LINK_HIGHLIGHT, paddingHorizontal: 6,
+    paddingVertical: 2, borderRadius: 4, overflow: 'hidden',
   },
-
-  errorText: {
-    color: '#FFB4B4',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 12,
-  },
-
-  // Main button
+  errorText: { color: '#FFB4B4', fontSize: 14, textAlign: 'center', marginTop: 12 },
   mainButton: {
-    backgroundColor: PURPLE_BUTTON,
-    paddingVertical: 18,
-    borderRadius: 30,
-    alignItems: 'center',
-    marginTop: 38,
+    backgroundColor: PURPLE_BUTTON, paddingVertical: 18,
+    borderRadius: 30, alignItems: 'center', marginTop: 38,
   },
-  mainButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  // Footer
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 30,
-    flexWrap: 'wrap',
-  },
-  footerText: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 13,
-  },
+  mainButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 30, flexWrap: 'wrap' },
+  footerText: { color: 'rgba(255,255,255,0.9)', fontSize: 13 },
   footerLink: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-    backgroundColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    overflow: 'hidden',
+    color: '#FFFFFF', fontSize: 13, fontWeight: '700',
+    backgroundColor: LINK_HIGHLIGHT, paddingHorizontal: 6,
+    paddingVertical: 2, borderRadius: 4, overflow: 'hidden',
   },
 });

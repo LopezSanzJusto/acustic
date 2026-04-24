@@ -80,6 +80,26 @@ export const useSocialAuth = () => {
     }
   };
 
+  const loginWithGoogleSilently = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: false });
+      const userInfo: any = await GoogleSignin.signInSilently();
+      const idToken = userInfo?.data?.idToken ?? userInfo?.idToken;
+      if (!idToken) throw new Error('No idToken en silent sign-in');
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
+      await ensureUserDocument(result.user.uid, result.user.email || '', result.user.displayName);
+      return result.user;
+    } catch (err: any) {
+      setError('No se pudo autenticar con Google.');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loginWithApple = async () => {
     if (Platform.OS !== 'ios') {
       setError('El inicio de sesión con Apple solo está disponible en iOS.');
@@ -128,5 +148,5 @@ export const useSocialAuth = () => {
     }
   };
 
-  return { loginWithGoogle, loginWithApple, loading, error };
+  return { loginWithGoogle, loginWithGoogleSilently, loginWithApple, loading, error };
 };

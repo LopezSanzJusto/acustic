@@ -12,10 +12,13 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSocialAuth } from '../../hooks/useSocialAuth';
+import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 
 const PURPLE_BG = '#3D3E8C';
 const PURPLE_BUTTON = '#A39BF8';
@@ -27,6 +30,8 @@ const LINK_HIGHLIGHT = '#F5A623';
 export default function RegisterScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { loginWithGoogle, loginWithApple, loading: socialLoading, error: socialError } = useSocialAuth();
+  const { available, enabled, enableBiometricGoogle } = useBiometricAuth();
 
   const [email, setEmail] = useState('');
   const [emailConfirm, setEmailConfirm] = useState('');
@@ -64,13 +69,27 @@ export default function RegisterScreen() {
     });
   };
 
-  // TODO: implementar cuando se haga el build nativo con Google/Apple
-  const handleGoogle = () => {
-    Alert.alert('Próximamente', 'El registro con Google se activará en una próxima versión.');
+  const handleGoogle = async () => {
+    const user = await loginWithGoogle();
+    if (!user) return;
+
+    if (available && !enabled) {
+      Alert.alert(
+        'Acceso rápido',
+        '¿Quieres usar biometría para entrar la próxima vez?',
+        [
+          { text: 'Ahora no', style: 'cancel', onPress: () => router.replace('/(tabs)') },
+          { text: 'Activar', onPress: async () => { await enableBiometricGoogle(); router.replace('/(tabs)'); } },
+        ]
+      );
+    } else {
+      router.replace('/(tabs)');
+    }
   };
 
-  const handleApple = () => {
-    Alert.alert('Próximamente', 'El registro con Apple se activará en una próxima versión.');
+  const handleApple = async () => {
+    const user = await loginWithApple();
+    if (user) router.replace('/(tabs)');
   };
 
   return (
@@ -95,6 +114,7 @@ export default function RegisterScreen() {
           <TouchableOpacity
             style={styles.socialButton}
             onPress={handleGoogle}
+            disabled={socialLoading}
             activeOpacity={0.85}
           >
             <Ionicons name="logo-google" size={22} color="#DB4437" style={styles.socialIcon} />
@@ -103,14 +123,18 @@ export default function RegisterScreen() {
 
           {Platform.OS === 'ios' && (
             <TouchableOpacity
-              style={styles.socialButton}
+              style={[styles.socialButton, styles.appleButton]}
               onPress={handleApple}
+              disabled={socialLoading}
               activeOpacity={0.85}
             >
-              <Ionicons name="logo-apple" size={22} color="#000000" style={styles.socialIcon} />
-              <Text style={styles.socialText}>Continuar con Apple</Text>
+              <Ionicons name="logo-apple" size={22} color="#FFFFFF" style={styles.socialIcon} />
+              <Text style={[styles.socialText, styles.appleText]}>Continuar con Apple</Text>
             </TouchableOpacity>
           )}
+
+          {socialLoading && <ActivityIndicator color="#FFFFFF" />}
+          {socialError ? <Text style={styles.errorText}>{socialError}</Text> : null}
         </View>
 
         {/* Separador */}
@@ -223,6 +247,13 @@ const styles = StyleSheet.create({
     color: '#3A3A3A',
     fontSize: 15,
     fontWeight: '500',
+  },
+  appleButton: { backgroundColor: '#000000' },
+  appleText: { color: '#FFFFFF' },
+  errorText: {
+    color: '#FFB4B4',
+    fontSize: 13,
+    textAlign: 'center',
   },
 
   // Divider

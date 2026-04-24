@@ -57,6 +57,7 @@ export function usePermissions() {
 
   const toggleBackgroundLocation = async () => {
     if (perms.locationBackground === 'granted') {
+      // Ya concedido → Ajustes para revocarlo
       Linking.openSettings();
       return;
     }
@@ -66,16 +67,15 @@ export function usePermissions() {
       setPerms(p => ({ ...p, locationForeground: fgRes.status as PermStatus }));
       if (fgRes.status !== 'granted') return;
     }
-    if (perms.locationBackground === 'denied') {
-      // Ya fue denegado → solo Ajustes puede cambiarlo
-      Linking.openSettings();
-      return;
-    }
+    // Intentamos pedir el permiso siempre — Android decide si muestra diálogo o manda a Ajustes
     try {
       const { status } = await Location.requestBackgroundPermissionsAsync();
+      if (status !== 'granted') {
+        // Android denegó o requiere ir a Ajustes → "Permitir siempre"
+        Linking.openSettings();
+      }
       setPerms(p => ({ ...p, locationBackground: status as PermStatus }));
     } catch {
-      // Manifest sin ACCESS_BACKGROUND_LOCATION → mandamos a Ajustes
       Linking.openSettings();
     }
   };

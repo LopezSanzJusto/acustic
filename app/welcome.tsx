@@ -17,7 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HANDLE_SIZE = 54;
+// Imagen 1024×1536 → ratio 2:3. La altura en pantalla es ancho × 1.5
+const IMAGE_HEIGHT = SCREEN_WIDTH * (1536 / 1024);
+
+const HANDLE_SIZE = 42;
 const SLIDER_PADDING = 5;
 const SLIDER_WIDTH = SCREEN_WIDTH - 48;
 const MAX_TRANSLATE = SLIDER_WIDTH - HANDLE_SIZE - SLIDER_PADDING * 2;
@@ -60,22 +63,16 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Imagen con altura exacta según su ratio natural */}
       <Image
         source={require('../assets/images/welcome-bg.png')}
-        style={StyleSheet.absoluteFillObject}
+        style={styles.heroImage}
         contentFit="cover"
         contentPosition="top center"
       />
 
-      <View style={styles.overlay} />
-
+      {/* Contenido flotante en la franja inferior */}
       <View style={[styles.bottomContent, { paddingBottom: insets.bottom + 32 }]}>
-        <Text style={styles.description}>
-          Escucha historias sobre cultura y rincones{'\n'}
-          ocultos con nuestras{' '}
-          <Text style={styles.bold}>audio-guías de viaje</Text>
-        </Text>
-
         <View style={styles.sliderTrack}>
           <Animated.Text style={[styles.sliderLabel, labelOpacity]}>
             Descubre tu primer destino
@@ -106,10 +103,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#7B5EA7',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    top: '52%',
-    backgroundColor: 'rgba(15, 5, 35, 0.72)',
+  heroImage: {
+    width: SCREEN_WIDTH,
+    height: IMAGE_HEIGHT,
   },
   bottomContent: {
     position: 'absolute',
@@ -120,19 +116,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 22,
   },
-  description: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 25,
-  },
-  bold: {
-    fontWeight: 'bold',
-    color: '#fff',
-  },
   sliderTrack: {
     width: SLIDER_WIDTH,
-    height: 62,
+    height: 50,
     backgroundColor: 'rgba(123, 94, 167, 0.88)',
     borderRadius: 31,
     justifyContent: 'center',
@@ -164,9 +150,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   registerText: {
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.9)',
     fontSize: 14,
     textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   registerLink: {
     color: '#fff',
