@@ -59,6 +59,14 @@
       "expo-audio",
       "expo-apple-authentication",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#7B5EA7",
+          "sounds": []
+        }
+      ],
+      [
         "@react-native-google-signin/google-signin",
         {
           "iosUrlScheme": "com.googleusercontent.apps.230109414866-u533nltjkldq2f411vju5pu3qke0orna"

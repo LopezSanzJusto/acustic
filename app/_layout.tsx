@@ -1,6 +1,6 @@
 // app/_layout.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { onAuthStateChanged, FirebaseAuthTypes } from '@react-native-firebase/auth';
@@ -8,9 +8,8 @@ import { auth } from '../services/firebaseConfig';
 import { COLORS } from '../utils/theme';
 import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { RouteProvider } from '../hooks/useCustomRoute'; 
-
-// ✨ NUEVO: Importamos el motor de gestos
+import { RouteProvider } from '../hooks/useCustomRoute';
+import * as Notifications from 'expo-notifications';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
@@ -21,6 +20,23 @@ export default function RootLayout() {
   
   const router = useRouter();
   const segments = useSegments();
+  const notifListener = useRef<Notifications.EventSubscription>();
+  const responseListener = useRef<Notifications.EventSubscription>();
+
+  useEffect(() => {
+    // Escucha notificaciones en primer plano
+    notifListener.current = Notifications.addNotificationReceivedListener(_notification => {
+      // notificación recibida — el handler en notificationService ya la muestra
+    });
+    // Escucha tap en notificación
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(_response => {
+      // aquí se podría navegar a una ruta según el payload
+    });
+    return () => {
+      notifListener.current?.remove();
+      responseListener.current?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

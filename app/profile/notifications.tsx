@@ -18,11 +18,12 @@ const SWITCH_OFF = '#D1D5DB';
 export default function NotificationsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { perms, toggleForegroundLocation, toggleBackgroundLocation } = usePermissions();
+  const { perms, toggleForegroundLocation, toggleBackgroundLocation, toggleNotifications } = usePermissions();
   const { prefs, loading, updatePref } = useUserPreferences();
 
-  const fgGranted = perms.locationForeground === 'granted';
-  const bgGranted = perms.locationBackground === 'granted';
+  const fgGranted     = perms.locationForeground === 'granted';
+  const bgGranted     = perms.locationBackground === 'granted';
+  const notifGranted  = perms.notifications === 'granted';
 
   const renderRow = (
     label: string,
@@ -85,8 +86,8 @@ export default function NotificationsScreen() {
             {renderRow('Permite ubicación', fgGranted, toggleForegroundLocation)}
             {renderDivider()}
 
-            {/* #2 — Notificaciones (próximamente) */}
-            {renderComingSoonRow('Permite notificaciones')}
+            {/* #2 — Notificaciones */}
+            {renderRow('Permite notificaciones', notifGranted, toggleNotifications)}
             {renderDivider()}
 
             {/* #3 — Pop-up cerca de POI */}
