@@ -114,8 +114,12 @@ export default function NotificationsScreen() {
             )}
             {renderDivider()}
 
-            {/* #6 — Notificaciones en segundo plano (próximamente) */}
-            {renderComingSoonRow('Notificaciones en segundo plano')}
+            {/* #6 — Notificaciones en segundo plano */}
+            {renderRow(
+              'Notificaciones en segundo plano',
+              prefs.bgNotifications,
+              () => updatePref('bgNotifications', !prefs.bgNotifications),
+            )}
             {renderDivider()}
 
             {/* #7 — Ubicación en segundo plano (permiso del SO) */}

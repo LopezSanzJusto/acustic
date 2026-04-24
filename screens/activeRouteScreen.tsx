@@ -25,6 +25,14 @@ import { PointReachedModal } from "../components/pointReachedModal";
 import { notifyPointReached, ensureNotificationPermission } from "../services/notificationService";
 import { PointOfInterest } from "../data/points";
 import { useUserPreferences } from "../hooks/useUserPreferences";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
+import {
+  BACKGROUND_LOCATION_TASK,
+  ACTIVE_POIS_KEY,
+  BG_PLAYED_POINTS_KEY,
+  BG_NOTIF_ENABLED_KEY,
+} from "../tasks/backgroundLocationTask";
 
 const RADIUS = 15;
 
@@ -65,6 +73,63 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   }, [points, setInitialPoints]);
 
   const routeToUse = activeRoutePoints.length > 0 ? activeRoutePoints : (points || []);
+
+  // ── Background location task ────────────────────────────────────────────────
+  // Persiste los POIs en AsyncStorage para que la tarea pueda leerlos incluso
+  // cuando el proceso de React esté suspendido (pantalla apagada).
+  useEffect(() => {
+    if (!routeToUse || routeToUse.length === 0) return;
+
+    const slimPois = routeToUse.map(({ id, name, latitude, longitude }) => ({
+      id, name, latitude, longitude,
+    }));
+
+    const startBgTask = async () => {
+      await AsyncStorage.setItem(ACTIVE_POIS_KEY, JSON.stringify(slimPois));
+      await AsyncStorage.setItem(BG_PLAYED_POINTS_KEY, JSON.stringify([]));
+      await AsyncStorage.setItem(BG_NOTIF_ENABLED_KEY, String(prefs.bgNotifications));
+
+      const { status } = await Location.getBackgroundPermissionsAsync().catch(() => ({ status: 'denied' }));
+      console.log('[BgTask] background location status:', status);
+      if (status !== 'granted') {
+        console.warn('[BgTask] no background location permission — task not started');
+        return;
+      }
+
+      const running = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).catch(() => false);
+      console.log('[BgTask] already running:', running);
+      if (running) return;
+
+      console.log('[BgTask] starting...');
+      await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, {
+        accuracy: Location.Accuracy.Balanced,
+        distanceInterval: 10,
+        timeInterval: 15000,
+        showsBackgroundLocationIndicator: true,
+        foregroundService: {
+          notificationTitle: 'Acustic',
+          notificationBody: 'Guiándote por la ruta',
+          notificationColor: '#7B5EA7',
+        },
+      });
+      console.log('[BgTask] started OK ✓');
+    };
+
+    startBgTask().catch((e) => console.warn('[BgTask] startBgTask failed:', e));
+  }, [routeToUse]);
+
+  // Para la tarea y limpia AsyncStorage al salir del tour
+  useEffect(() => {
+    return () => {
+      Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK)
+        .then((running) => {
+          if (running) Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
+        })
+        .catch(() => {});
+      AsyncStorage.multiRemove([ACTIVE_POIS_KEY, BG_PLAYED_POINTS_KEY, BG_NOTIF_ENABLED_KEY]).catch(() => {});
+    };
+  }, []);
+  // ── Fin background location task ────────────────────────────────────────────
 
   const {
     activePoint,

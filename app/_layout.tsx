@@ -1,5 +1,8 @@
 // app/_layout.tsx
 
+// Registra la tarea de localización en segundo plano ANTES de que el SO la invoque
+import '../tasks/backgroundLocationTask';
+
 import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -11,6 +14,16 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { RouteProvider } from '../hooks/useCustomRoute';
 import * as Notifications from 'expo-notifications';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { setAudioModeAsync } from 'expo-audio';
+
+// Configura la sesión de audio ANTES de que cualquier player se cree.
+// staysActiveInBackground mantiene el audio al apagar la pantalla (iOS) y
+// solicita AUDIOFOCUS_GAIN en Android para no ceder el foco a otros procesos.
+setAudioModeAsync({
+  playsInSilentModeIOS: true,
+  staysActiveInBackground: true,
+  shouldDuckAndroid: false,
+}).catch((e) => console.warn('[AudioMode] setAudioModeAsync failed:', e));
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

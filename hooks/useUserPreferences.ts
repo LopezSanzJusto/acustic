@@ -7,6 +7,7 @@ export interface UserPreferences {
   popupNearPoi: boolean;
   autoPlayNearPoi: boolean;
   autoDownload: boolean;
+  bgNotifications: boolean;
   newsletter: boolean;
   promos: boolean;
 }
@@ -15,6 +16,7 @@ const DEFAULTS: UserPreferences = {
   popupNearPoi: false,
   autoPlayNearPoi: false,
   autoDownload: true,
+  bgNotifications: true,
   newsletter: false,
   promos: false,
 };
