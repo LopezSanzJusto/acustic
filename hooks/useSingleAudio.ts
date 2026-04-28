@@ -1,66 +1,38 @@
 // hooks/useSingleAudio.ts
-import { useState, useEffect, useRef } from 'react';
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import { registerActiveAudio, unregisterActiveAudio } from '../utils/audioRegistry';
+import TrackPlayer, { usePlaybackState, useProgress, useActiveTrack, State } from 'react-native-track-player';
 
 export function useSingleAudio(audioUrl?: string) {
-  const [source, setSource] = useState<string | null>(null);
-  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
-  const regVersion = useRef(0);
+  const activeTrack = useActiveTrack();
+  const playbackState = usePlaybackState();
+  const progress = useProgress();
 
-  const player = useAudioPlayer(source);
-  const status = useAudioPlayerStatus(player);
+  const isOwner = !!audioUrl && activeTrack?.url === audioUrl;
+  const isPlaying = isOwner && playbackState.state === State.Playing;
+  const isLoading = isOwner && (playbackState.state === State.Loading || playbackState.state === State.Buffering);
+  const positionMillis = isOwner ? progress.position * 1000 : 0;
+  const durationMillis = isOwner ? progress.duration * 1000 : 0;
 
-  const isPlaying = status.playing;
-  const positionMillis = (status.currentTime || 0) * 1000;
-  const durationMillis = (status.duration || 0) * 1000;
-  const isLoading = source !== null && status.duration === 0;
-
-  // Limpieza al desmontarse: si somos el activo, dejamos el registry libre
-  useEffect(() => {
-    return () => { unregisterActiveAudio(regVersion.current); };
-  }, []);
-
-  // Reseteamos el estado si la URL original cambia
-  useEffect(() => {
-    setSource(null);
-    setShouldAutoPlay(false);
-  }, [audioUrl]);
-
-  // Auto-reproducir cuando el lazy load termina de cargar
-  useEffect(() => {
-    if (shouldAutoPlay && player && status.duration > 0) {
-      regVersion.current = registerActiveAudio(() => player.pause());
-      player.play();
-      setShouldAutoPlay(false);
-    }
-  }, [player, status.duration, shouldAutoPlay]);
-
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     if (!audioUrl) return;
 
-    if (!source) {
-      // LAZY LOAD: paramos al reproductor anterior ya, y guardamos una stop-fn
-      // que además cancela el autoplay si nos paran antes de que cargue
-      regVersion.current = registerActiveAudio(() => { player.pause(); setShouldAutoPlay(false); });
-      setSource(audioUrl);
-      setShouldAutoPlay(true);
+    if (!isOwner) {
+      await TrackPlayer.reset();
+      await TrackPlayer.add({ url: audioUrl, title: '', artist: 'Acustic' });
+      await TrackPlayer.play();
     } else {
       if (isPlaying) {
-        player.pause();
+        await TrackPlayer.pause();
       } else {
-        regVersion.current = registerActiveAudio(() => player.pause());
-        if (status.duration > 0 && status.currentTime >= status.duration - 0.5) {
-          player.seekTo(0);
+        if (progress.duration > 0 && progress.position >= progress.duration - 0.5) {
+          await TrackPlayer.seekTo(0);
         }
-        player.play();
+        await TrackPlayer.play();
       }
     }
   };
 
-  const seekTo = (millis: number) => {
-    if (!player) return;
-    player.seekTo(millis / 1000);
+  const seekTo = async (millis: number) => {
+    if (isOwner) await TrackPlayer.seekTo(millis / 1000);
   };
 
   return { isPlaying, isLoading, positionMillis, durationMillis, togglePlayPause, seekTo };

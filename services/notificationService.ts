@@ -1,15 +1,17 @@
 // services/notificationService.ts
 
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { doc, updateDoc } from '@react-native-firebase/firestore';
 import { db, auth } from './firebaseConfig';
+
+const PROXIMITY_CHANNEL_ID = 'proximity';
 
 const EAS_PROJECT_ID = 'ed2edee7-8731-4647-af8b-d3b988bb050f';
 
 // Muestra la notificación aunque la app esté en primer plano
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
@@ -62,14 +64,33 @@ export async function ensureNotificationPermission(): Promise<boolean> {
   return token !== null;
 }
 
+export async function ensureProximityChannel(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  await Notifications.setNotificationChannelAsync(PROXIMITY_CHANNEL_ID, {
+    name: 'Puntos de interés cercanos',
+    importance: Notifications.AndroidImportance.MAX,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#7B5EA7',
+    showBadge: false,
+  });
+}
+
 export async function notifyPointReached(pointName: string): Promise<void> {
   try {
+    await ensureProximityChannel();
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Punto de interés cercano',
         body: `Estás cerca de ${pointName}. ¡Escucha la audioguía!`,
+        sound: true,
       },
-      trigger: null,
+      trigger: Platform.OS === 'android'
+        ? {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: new Date(Date.now() + 100),
+            channelId: PROXIMITY_CHANNEL_ID,
+          }
+        : null,
     });
   } catch { /* no-op si no hay permiso */ }
 }

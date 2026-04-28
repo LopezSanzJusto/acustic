@@ -4,7 +4,7 @@
 import '../tasks/backgroundLocationTask';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { Platform, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { onAuthStateChanged, FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { auth } from '../services/firebaseConfig';
@@ -13,35 +13,46 @@ import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { RouteProvider } from '../hooks/useCustomRoute';
 import * as Notifications from 'expo-notifications';
+import { ensureProximityChannel } from '../services/notificationService';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { setAudioModeAsync } from 'expo-audio';
+import TrackPlayer, { Capability } from 'react-native-track-player';
+import { PlaybackService } from '../services/playbackService';
 
-// Configura la sesión de audio ANTES de que cualquier player se cree.
-// staysActiveInBackground mantiene el audio al apagar la pantalla (iOS) y
-// solicita AUDIOFOCUS_GAIN en Android para no ceder el foco a otros procesos.
-setAudioModeAsync({
-  playsInSilentModeIOS: true,
-  staysActiveInBackground: true,
-  shouldDuckAndroid: false,
-}).catch((e) => console.warn('[AudioMode] setAudioModeAsync failed:', e));
+// Registra el servicio de reproducción antes de que el SO lo invoque en segundo plano
+TrackPlayer.registerPlaybackService(() => PlaybackService);
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  
+
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
-  
+
   const router = useRouter();
   const segments = useSegments();
   const notifListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
 
   useEffect(() => {
-    // Escucha notificaciones en primer plano
+    TrackPlayer.setupPlayer({ autoHandleInterruptions: true })
+      .then(() => TrackPlayer.updateOptions({
+        capabilities: [
+          Capability.Play,
+          Capability.Pause,
+          Capability.SeekTo,
+          Capability.JumpForward,
+          Capability.JumpBackward,
+        ],
+        compactCapabilities: [Capability.Play, Capability.Pause],
+        progressUpdateEventInterval: 1,
+      }))
+      .catch((e) => console.warn('[RNTP] setup failed:', e));
+  }, []);
+
+  useEffect(() => {
+    ensureProximityChannel();
     notifListener.current = Notifications.addNotificationReceivedListener(_notification => {
       // notificación recibida — el handler en notificationService ya la muestra
     });
-    // Escucha tap en notificación
     responseListener.current = Notifications.addNotificationResponseReceivedListener(_response => {
       // aquí se podría navegar a una ruta según el payload
     });
@@ -64,7 +75,6 @@ export default function RootLayout() {
 
     const inAuthGroup = segments[0] === 'auth' || segments[0] === 'welcome';
     const inTabGroup = segments[0] === '(tabs)';
-    // Rutas que un invitado también puede visitar sin sesión (solo salta el welcome al pulsar "Comenzar" o "Comprar")
     const isGuestAllowed = segments[0] === 'tour' || segments[0] === 'modal';
 
     if (user && inAuthGroup) {
@@ -83,7 +93,6 @@ export default function RootLayout() {
   }
 
   return (
-    // ✨ NUEVO: Envolvemos TODO con el GestureHandler (OBLIGATORIO para Drag & Drop)
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <RouteProvider>

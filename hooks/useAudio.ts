@@ -1,79 +1,64 @@
 // hooks/useAudio.ts
 
-import { useEffect, useRef, useState } from "react";
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { PointOfInterest } from "../data/points";
-import { registerActiveAudio, unregisterActiveAudio } from "../utils/audioRegistry";
+import { useState, useEffect } from 'react';
+import TrackPlayer, { usePlaybackState, useProgress, State } from 'react-native-track-player';
+import { PointOfInterest } from '../data/points';
 
 export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = false) {
   const [activePointIndex, setActivePointIndex] = useState<number | null>(null);
   const [playbackRate, setPlaybackRate] = useState(1.0);
-  const regVersion = useRef(0);
+
+  const playbackState = usePlaybackState();
+  const progress = useProgress();
 
   const activePoint = activePointIndex !== null ? points[activePointIndex] : null;
-
   const audioUri = activePoint?.audio || null;
-  const player = useAudioPlayer(audioUri);
-  const status = useAudioPlayerStatus(player);
 
-  const positionMillis = (status.currentTime || 0) * 1000;
-  const durationMillis = (status.duration || 0) * 1000;
-  const isPreloading = audioUri !== null && status.duration === 0;
-  const isPlaying = status.playing;
+  const isPlaying = playbackState.state === State.Playing;
+  const isPreloading = playbackState.state === State.Loading || playbackState.state === State.Buffering;
+  const positionMillis = progress.position * 1000;
+  const durationMillis = progress.duration * 1000;
 
-  // Limpieza al desmontarse
-  useEffect(() => {
-    return () => { unregisterActiveAudio(regVersion.current); };
-  }, []);
-
-  /* =========================
-   * AUTOSELECCIÓN INICIAL
-   * ========================= */
   useEffect(() => {
     if (autoSelectFirst && points && points.length > 0 && activePointIndex === null) {
       setActivePointIndex(0);
     }
   }, [points, activePointIndex, autoSelectFirst]);
 
-  /* =========================
-   * REPRODUCCIÓN AUTOMÁTICA
-   * ========================= */
   useEffect(() => {
-    if (audioUri && player) {
-      regVersion.current = registerActiveAudio(() => player.pause());
-      player.play();
-    }
-  }, [audioUri, player]);
+    if (!audioUri) return;
+    const load = async () => {
+      await TrackPlayer.reset();
+      await TrackPlayer.add({ url: audioUri, title: activePoint?.name ?? '', artist: 'Acustic' });
+      await TrackPlayer.play();
+    };
+    load();
+  }, [audioUri]);
 
-  /* =========================
-   * CONTROLES
-   * ========================= */
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     if (isPlaying) {
-      player.pause();
+      await TrackPlayer.pause();
     } else {
-      regVersion.current = registerActiveAudio(() => player.pause());
-      player.play();
+      await TrackPlayer.play();
     }
   };
 
-  const seekTo = (millis: number) => {
-    player.seekTo(millis / 1000);
+  const seekTo = async (millis: number) => {
+    await TrackPlayer.seekTo(millis / 1000);
   };
 
-  const skipBy = (millis: number) => {
+  const skipBy = async (millis: number) => {
     const newPos = Math.max(0, Math.min(positionMillis + millis, durationMillis));
-    player.seekTo(newPos / 1000);
+    await TrackPlayer.seekTo(newPos / 1000);
   };
 
-  const toggleSpeed = () => {
+  const toggleSpeed = async () => {
     let newRate = 1.0;
     if (playbackRate === 1.0) newRate = 1.25;
     else if (playbackRate === 1.25) newRate = 1.5;
     else if (playbackRate === 1.5) newRate = 2.0;
-
     setPlaybackRate(newRate);
-    player.setPlaybackRate(newRate);
+    await TrackPlayer.setRate(newRate);
   };
 
   const playNext = () => {
