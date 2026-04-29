@@ -4,11 +4,11 @@
 import '../tasks/backgroundLocationTask';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Platform, View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { onAuthStateChanged, FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { auth } from '../services/firebaseConfig';
-import { COLORS } from '../utils/theme';
 import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { RouteProvider } from '../hooks/useCustomRoute';
@@ -17,6 +17,8 @@ import { ensureProximityChannel } from '../services/notificationService';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackPlayer, { Capability } from 'react-native-track-player';
 import { PlaybackService } from '../services/playbackService';
+
+SplashScreen.preventAutoHideAsync();
 
 // Registra el servicio de reproducción antes de que el SO lo invoque en segundo plano
 TrackPlayer.registerPlaybackService(() => PlaybackService);
@@ -81,7 +83,10 @@ export default function RootLayout() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (initializing) setInitializing(false);
+      if (initializing) {
+        setInitializing(false);
+        SplashScreen.hideAsync();
+      }
     });
     return unsubscribe;
   }, []);
@@ -102,8 +107,12 @@ export default function RootLayout() {
 
   if (initializing) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={StyleSheet.absoluteFill}>
+        <Image
+          source={require('../assets/images/splash.png')}
+          style={styles.splashImage}
+          resizeMode="cover"
+        />
       </View>
     );
   }
@@ -135,5 +144,5 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
+  splashImage: { width: '100%', height: '100%' },
 });

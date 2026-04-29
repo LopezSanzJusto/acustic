@@ -17,8 +17,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-// Imagen 1024×1536 → ratio 2:3. La altura en pantalla es ancho × 1.5
-const IMAGE_HEIGHT = SCREEN_WIDTH * (1536 / 1024);
 
 const HANDLE_SIZE = 42;
 const SLIDER_PADDING = 5;
@@ -63,10 +61,9 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Imagen con altura exacta según su ratio natural */}
       <Image
         source={require('../assets/images/welcome-bg.png')}
-        style={styles.heroImage}
+        style={StyleSheet.absoluteFill}
         contentFit="cover"
         contentPosition="top center"
       />
@@ -102,10 +99,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#7B5EA7',
-  },
-  heroImage: {
-    width: SCREEN_WIDTH,
-    height: IMAGE_HEIGHT,
   },
   bottomContent: {
     position: 'absolute',

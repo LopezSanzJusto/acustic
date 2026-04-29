@@ -36,6 +36,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [emailConfirm, setEmailConfirm] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const isFormValid = useMemo(
     () =>
@@ -183,9 +184,12 @@ export default function RegisterScreen() {
             placeholderTextColor={PLACEHOLDER}
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!showPassword}
             autoCapitalize="none"
           />
+          <TouchableOpacity onPress={() => setShowPassword(v => !v)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color={PLACEHOLDER} />
+          </TouchableOpacity>
         </View>
 
         {/* Botón crear cuenta (continúa al siguiente paso de onboarding) */}

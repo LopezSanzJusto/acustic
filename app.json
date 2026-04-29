@@ -54,7 +54,19 @@
         {
           "image": "./assets/images/splash.png",
           "resizeMode": "cover",
-          "backgroundColor": "#7B5EA7"
+          "backgroundColor": "#7B5EA7",
+          "imageWidth": 1284,
+          "android": {
+            "image": "./assets/images/splash.png",
+            "resizeMode": "cover",
+            "backgroundColor": "#7B5EA7",
+            "imageWidth": 1284
+          },
+          "ios": {
+            "image": "./assets/images/splash.png",
+            "resizeMode": "cover",
+            "backgroundColor": "#7B5EA7"
+          }
         }
       ],
       "expo-font",
