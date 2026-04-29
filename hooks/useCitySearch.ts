@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 export interface CityResult {
   id: string;
   name: string;
+  region: string;
   country: string;
 }
 
@@ -54,6 +55,7 @@ export function useCitySearch(query: string) {
           .map((item: any) => ({
             id: item.place_id.toString(),
             name: item.address?.city || item.address?.town || item.address?.village || item.name,
+            region: item.address?.state || item.address?.county || '',
             country: item.address?.country || '',
           }))
           // El nombre de la ciudad tiene que EMPEZAR por lo que escribió el usuario

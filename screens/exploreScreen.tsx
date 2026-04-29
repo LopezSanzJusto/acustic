@@ -88,14 +88,22 @@ export default function ExploreScreen() {
   // Actualizado para usar selectedLocation
   const showAutocomplete = searchQuery.length > 0 && !selectedLocation;
 
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSelectedLocation(null);
+  };
+
   return (
     <View style={styles.container}>
       {/* Buscador */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <View style={styles.searchIconWrapper}>
-            <Ionicons name="search" size={18} color="#FFFFFF" />
-          </View>
+      <View style={styles.searchRow}>
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={clearSearch} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={22} color={COLORS.textDark} />
+          </TouchableOpacity>
+        )}
+        <View style={[styles.searchBar, searchQuery.length > 0 && styles.searchBarActive]}>
+          <Ionicons name="search" size={18} color="#8C77ED" style={styles.searchIcon} />
           <TextInput
             value={searchQuery}
             onChangeText={(text) => {
@@ -108,10 +116,7 @@ export default function ExploreScreen() {
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => { 
-              setSearchQuery(''); 
-              setSelectedLocation(null); // Limpiamos filtro
-            }}>
+            <TouchableOpacity onPress={clearSearch}>
               <Ionicons name="close-circle" size={20} color={COLORS.placeholder} />
             </TouchableOpacity>
           )}
@@ -121,67 +126,60 @@ export default function ExploreScreen() {
       {/* Renderizado Condicional */}
       {showAutocomplete ? (
         <View style={styles.searchResultsContainer}>
+          <Text style={styles.suggestionsTitle}>Sugerencias para tu búsqueda</Text>
           {loadingSearch ? (
             <ActivityIndicator size="small" color="#8C77ED" style={{ marginTop: 20 }} />
           ) : (
             <FlatList
               data={searchResults}
               keyExtractor={(item) => item.id}
-              keyboardShouldPersistTaps="handled" 
+              keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => {
-                // ✨ ACTUALIZADO: Normalizamos los datos que vienen de la API (Search)
                 const apiCity = normalizeText(item.name);
                 const apiCountry = normalizeText(item.country);
 
-                // ✨ ACTUALIZADO: Validación flexible para detectar las guías en base de datos
                 const hasAudioGuide = availableLocationsInDB.some((loc) => {
                   const cityMatch = loc.city === apiCity;
-                  const countryMatch = 
-                    !loc.country || 
-                    loc.country === apiCountry || 
-                    apiCountry.includes(loc.country) || 
+                  const countryMatch =
+                    !loc.country ||
+                    loc.country === apiCountry ||
+                    apiCountry.includes(loc.country) ||
                     loc.country.includes(apiCountry) ||
                     (loc.country === 'espana' && apiCountry === 'spain') ||
                     (loc.country === 'spain' && apiCountry === 'espana');
-
                   return cityMatch && countryMatch;
                 });
 
+                const label = [item.name, item.region, item.country].filter(Boolean).join(', ');
+
                 return (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.searchResultItem}
-                    activeOpacity={hasAudioGuide ? 0.2 : 1}
+                    activeOpacity={hasAudioGuide ? 0.2 : 0.6}
                     onPress={() => {
                       if (hasAudioGuide) {
-                        // Guardamos el par ciudad/país normalizado en el estado
                         setSelectedLocation({ city: apiCity, country: apiCountry });
                         setSearchQuery(item.name);
                       }
                     }}
                   >
-                    <View style={styles.searchResultTextContainer}>
-                      <Ionicons name="location-outline" size={20} color={COLORS.text} style={{ marginRight: 10 }} />
-                      <Text style={styles.searchResultCity}>{item.name}</Text>
-                      <Text style={styles.searchResultCountry}>, {item.country}</Text>
-                    </View>
-                    
+                    <Ionicons name="search" size={18} color="#8C77ED" style={styles.resultSearchIcon} />
+                    <Text style={styles.searchResultText} numberOfLines={1}>{label}</Text>
                     {hasAudioGuide && (
-                      <View style={styles.audioBadge}>
-                        <Image 
-                          source={require('../assets/images/logo.png')} 
-                          style={styles.badgeLogo} 
-                          resizeMode="contain" 
-                        />
-                      </View>
+                      <Image
+                        source={require('../assets/images/logo.png')}
+                        style={styles.audioIcon}
+                        resizeMode="contain"
+                      />
                     )}
                   </TouchableOpacity>
                 );
               }}
-              ListEmptyComponent={() => (
+              ListEmptyComponent={() =>
                 searchQuery.length >= 3 && !loadingSearch ? (
-                   <Text style={styles.noResultsText}>No se encontraron ciudades.</Text>
+                  <Text style={styles.noResultsText}>No se encontraron ciudades.</Text>
                 ) : null
-              )}
+              }
             />
           )}
         </View>
@@ -249,18 +247,25 @@ const styles = StyleSheet.create({
     color: '#8C77ED', 
     fontWeight: '600' 
   },
-  searchContainer: { 
-    paddingHorizontal: 20, 
-    marginBottom: 20, 
-    zIndex: 1 
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    gap: 10,
+    zIndex: 1,
+  },
+  backButton: {
+    padding: 4,
   },
   searchBar: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 30,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -269,64 +274,46 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#DDD8F5',
   },
-  searchIconWrapper: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#8C77ED',
-    justifyContent: 'center',
-    alignItems: 'center',
+  searchBarActive: {
+    borderColor: '#8C77ED',
+  },
+  searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.text
+    color: COLORS.text,
   },
   searchResultsContainer: {
     flex: 1,
     paddingHorizontal: 20,
   },
+  suggestionsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 8,
+    marginTop: 4,
+  },
   searchResultItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    paddingVertical: 14,
   },
-  searchResultTextContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  resultSearchIcon: {
+    marginRight: 14,
+  },
+  searchResultText: {
     flex: 1,
-  },
-  searchResultCity: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  searchResultCountry: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.muted,
   },
-  audioBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#8C77ED', 
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8, 
-  },
-  audioBadgeText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  badgeLogo: {
-    width: 16,  // Ajusta este tamaño según lo grande que quieras el logo
-    height: 16,
-    tintColor: COLORS.white, // 💡 IMPORTANTE: Si tu logo original es negro/color, pero el fondo del badge es oscuro y quieres que el logo se vuelva blanco puro (como el icono de antes), descomenta esta línea.
+  audioIcon: {
+    width: 20,
+    height: 20,
+    tintColor: '#8C77ED',
+    marginLeft: 8,
   },
   noResultsText: {
     textAlign: 'center',
