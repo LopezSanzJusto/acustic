@@ -13,7 +13,11 @@ export function useMyTours() {
     let cancelled = false;
     let unsubscribe: (() => void) | null = null;
 
-    const fetchToursByIds = async (ids: string[], progressMap: Record<string, number>) => {
+    const fetchToursByIds = async (
+      ids: string[],
+      progressMap: Record<string, number>,
+      downloadedSet: Set<string>,
+    ) => {
       if (ids.length === 0) return [];
       const q = query(collection(db, 'tours'), where(documentId(), 'in', ids));
       const snapshot = await getDocs(q);
@@ -21,6 +25,7 @@ export function useMyTours() {
         id: d.id,
         ...d.data(),
         progressPercentage: progressMap[d.id] || 0,
+        isDownloaded: downloadedSet.has(d.id),
       }));
     };
 
@@ -38,9 +43,10 @@ export function useMyTours() {
           if (userDoc.exists()) {
             const data = userDoc.data();
             const progressMap = data.progress || {};
+            const downloadedSet = new Set<string>(data.downloadedTours || []);
             const [purchases, favorites] = await Promise.all([
-              fetchToursByIds(data.purchasedTours || [], progressMap),
-              fetchToursByIds(data.favoriteTours || [], progressMap),
+              fetchToursByIds(data.purchasedTours || [], progressMap, downloadedSet),
+              fetchToursByIds(data.favoriteTours || [], progressMap, downloadedSet),
             ]);
             if (!cancelled) {
               setPurchasedTours(purchases);

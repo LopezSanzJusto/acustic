@@ -2,17 +2,12 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { collection, getDocs } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../services/firebaseConfig';
 import { COLORS } from '../utils/theme';
-import { CircularProgress } from './circularProgress';
 
-const { width } = Dimensions.get('window');
-const CARD_MARGIN = 15;
-const IMAGE_SIZE = 80;
-
-type CardState = 'not_started' | 'in_progress' | 'completed';
+const IMAGE_SIZE = 88;
 
 interface ActiveTourCardProps {
   tour: any;
@@ -20,9 +15,10 @@ interface ActiveTourCardProps {
   onStartRoute: () => void;
 }
 
-export const ActiveTourCard = ({ tour, onPress, onStartRoute }: ActiveTourCardProps) => {
+export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
   const progress: number = tour.progressPercentage || 0;
   const [pointsCount, setPointsCount] = useState(0);
+  const isDownloaded: boolean = tour.isDownloaded || false;
 
   useEffect(() => {
     async function getPointsCount() {
@@ -38,14 +34,12 @@ export const ActiveTourCard = ({ tour, onPress, onStartRoute }: ActiveTourCardPr
     getPointsCount();
   }, [tour.id]);
 
-  // Determinamos el estado de la tarjeta
-  const cardState: CardState =
-    progress >= 100 ? 'completed' : progress > 0 ? 'in_progress' : 'not_started';
-
-  // "Parada Y/Z": estimamos la parada actual a partir del porcentaje
+  const hasProgress = progress > 0 && pointsCount > 0;
   const currentStop = pointsCount > 0 ? Math.round((progress / 100) * pointsCount) : 0;
+  const progressPct = `${Math.min(Math.max(Math.round(progress), 0), 100)}%`;
 
-  // Imagen: usamos la primera de imageUrls o el campo image como fallback
+  const location = [tour.city, tour.country].filter(Boolean).join(', ');
+
   const imageSource =
     tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0
       ? { uri: tour.imageUrls[0] }
@@ -53,10 +47,24 @@ export const ActiveTourCard = ({ tour, onPress, onStartRoute }: ActiveTourCardPr
       ? { uri: tour.image }
       : null;
 
+  const formatDuration = (d: any): string => {
+    if (!d && d !== 0) return '—';
+    if (typeof d === 'number') return `${d} min`;
+    const n = Number(d);
+    if (!isNaN(n)) return `${n} min`;
+    return String(d);
+  };
+
+  const bottomText = hasProgress
+    ? `${Math.round(progress)}% completado · Parada ${currentStop}/${pointsCount}`
+    : pointsCount > 0
+    ? `${formatDuration(tour.duration)} · ${pointsCount} paradas`
+    : formatDuration(tour.duration);
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.row}>
-        {/* ── Imagen pequeña izquierda ── */}
+        {/* Imagen */}
         <View style={styles.imageWrapper}>
           {imageSource ? (
             <Image source={imageSource} style={styles.image} resizeMode="cover" />
@@ -67,111 +75,66 @@ export const ActiveTourCard = ({ tour, onPress, onStartRoute }: ActiveTourCardPr
           )}
         </View>
 
-        {/* ── Contenido central ── */}
+        {/* Contenido central */}
         <View style={styles.content}>
-          {/* Fila: Título + Badge de estado */}
+          {/* Título + badge de descarga */}
           <View style={styles.titleRow}>
-            <Text style={styles.title} numberOfLines={2}>
-              {tour.title}
-            </Text>
-            <StateBadge state={cardState} price={tour.price} />
+            <Text style={styles.title} numberOfLines={1}>{tour.title}</Text>
+            {isDownloaded ? (
+              <View style={styles.badge}>
+                <Ionicons name="checkmark" size={11} color="#22C55E" />
+                <Text style={[styles.badgeText, { color: '#22C55E' }]}>Descargado</Text>
+              </View>
+            ) : (
+              <View style={[styles.badge, styles.badgeDownload]}>
+                <Ionicons name="arrow-down" size={11} color="#4E4FA5" />
+                <Text style={[styles.badgeText, { color: '#4E4FA5' }]}>Descargar</Text>
+              </View>
+            )}
           </View>
 
           {/* Localización */}
-          <View style={styles.metaRow}>
+          <View style={styles.locationRow}>
             <Ionicons name="location-sharp" size={12} color={COLORS.error} />
-            <Text style={styles.metaText}>{tour.city}</Text>
+            <Text style={styles.locationText}>{location}</Text>
           </View>
 
-          {/* Progreso (solo si está en curso) */}
-          {cardState === 'in_progress' && pointsCount > 0 && (
-            <Text style={styles.progressText}>
-              {Math.round(progress)}% completado · Parada {currentStop}/{pointsCount}
-            </Text>
-          )}
+          {/* Barra de progreso */}
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, { width: progressPct }]} />
+          </View>
 
-          {/* Botón de acción */}
-          {cardState !== 'completed' && (
-            <TouchableOpacity style={styles.actionButton} onPress={onStartRoute} activeOpacity={0.8}>
-              <Text style={styles.actionText}>
-                {cardState === 'in_progress' ? 'Continuar la ruta' : 'Empezar la ruta'}
-              </Text>
-              <Ionicons name="chevron-forward" size={13} color={COLORS.white} />
-            </TouchableOpacity>
-          )}
-
-          {/* Completado: texto con check */}
-          {cardState === 'completed' && (
-            <View style={styles.completedRow}>
-              <Ionicons name="checkmark-circle" size={14} color="#22C55E" />
-              <Text style={styles.completedText}>Ruta completada</Text>
-            </View>
-          )}
+          {/* Texto inferior */}
+          <Text style={styles.bottomText}>{bottomText}</Text>
         </View>
 
-        {/* ── Anillo de progreso (solo si está en curso) ── */}
-        {cardState === 'in_progress' && (
-          <View style={styles.progressRing}>
-            <CircularProgress percentage={progress} size={54} strokeWidth={5} />
-          </View>
-        )}
+        {/* Chevron */}
+        <Ionicons name="chevron-forward" size={18} color="#C8C8D0" />
       </View>
     </TouchableOpacity>
   );
 };
 
-// ── Sub-componente: Badge de estado ──────────────────────────────────────────
-const StateBadge = ({ state, price }: { state: CardState; price?: number }) => {
-  if (state === 'not_started') {
-    return (
-      <View style={[styles.badge, styles.badgeNotStarted]}>
-        <Text style={[styles.badgeText, styles.badgeTextDark]}>Sin empezar</Text>
-      </View>
-    );
-  }
-  if (state === 'completed') {
-    return (
-      <View style={[styles.badge, styles.badgeCompleted]}>
-        <Ionicons name="checkmark" size={10} color="#fff" />
-        <Text style={styles.badgeText}>Completado</Text>
-      </View>
-    );
-  }
-  // En progreso: mostramos precio o "Gratis"
-  const label = price === 0 || price == null ? 'Gratis' : `${price}€`;
-  return (
-    <View style={[styles.badge, styles.badgeFree]}>
-      <Text style={styles.badgeText}>{label}</Text>
-    </View>
-  );
-};
-
-// ── Estilos ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    marginBottom: 12,
-    marginHorizontal: CARD_MARGIN,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    // Sombra iOS
+    marginBottom: 10,
+    marginHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    // Sombra Android
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    elevation: 2,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-
-  // Imagen
-  imageWrapper: {
-    marginRight: 12,
-  },
+  imageWrapper: {},
   image: {
     width: IMAGE_SIZE,
     height: IMAGE_SIZE,
@@ -182,18 +145,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // Contenido
   content: {
     flex: 1,
-    gap: 4,
+    gap: 5,
   },
   titleRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 6,
-    marginBottom: 2,
   },
   title: {
     flex: 1,
@@ -202,86 +161,45 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
     lineHeight: 18,
   },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  metaText: {
-    fontSize: 12,
-    color: COLORS.muted,
-  },
-  progressText: {
-    fontSize: 11,
-    color: COLORS.primary,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-
-  // Botón de acción
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginTop: 6,
-    gap: 2,
-  },
-  actionText: {
-    color: COLORS.white,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-
-  // Completado
-  completedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  completedText: {
-    fontSize: 12,
-    color: '#22C55E',
-    fontWeight: '600',
-  },
-
-  // Anillo de progreso
-  progressRing: {
-    marginLeft: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Badges
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 2,
+  },
+  badgeDownload: {
+    backgroundColor: '#EAE7FB',
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 20,
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  locationText: {
+    fontSize: 12,
+    color: COLORS.muted,
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: '#E8E4F5',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 1,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#4E4FA5',
+    borderRadius: 3,
+  },
+  bottomText: {
+    fontSize: 12,
+    color: '#4E4FA5',
     fontWeight: '700',
-    color: COLORS.white,
-  },
-  badgeTextDark: {
-    color: '#92400E',
-  },
-  badgeNotStarted: {
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-  },
-  badgeCompleted: {
-    backgroundColor: '#22C55E',
-  },
-  badgeFree: {
-    backgroundColor: '#22C55E',
   },
 });
