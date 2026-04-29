@@ -252,7 +252,19 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
 
           <View style={[styles.topBarWrapper, { paddingTop: insets.top }]}>
             <View style={styles.topHeader}>
-              <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => {
+                  if (currentProgress >= 100) {
+                    router.replace({
+                      pathname: '/tour/rate/[id]',
+                      params: { id: tourId, completed: 'true' },
+                    } as any);
+                  } else {
+                    router.back();
+                  }
+                }}
+              >
                 <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
               </TouchableOpacity>
               <Text style={styles.headerTitle} numberOfLines={1}>{tourName}</Text>

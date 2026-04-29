@@ -1,7 +1,7 @@
 // hooks/useReviews.ts
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, query } from '@react-native-firebase/firestore';
+import { collection, onSnapshot, orderBy, query } from '@react-native-firebase/firestore';
 import { db, auth, firestoreReady } from '../services/firebaseConfig';
 import { Review } from '../services/reviewService';
 
@@ -13,33 +13,36 @@ export function useReviews(tourId: string) {
   const [userReview, setUserReview] = useState<ReviewWithId | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    const fetch = async () => {
-      try {
-        await firestoreReady;
-        const q = query(
-          collection(db, 'tours', tourId, 'reviews'),
-          orderBy('updatedAt', 'desc'),
-        );
-        const snap = await getDocs(q);
-        if (cancelled) return;
+    if (!tourId) return;
 
-        const all: ReviewWithId[] = snap.docs.map(d => ({
-          docId: d.id,
-          ...(d.data() as Review),
-        }));
+    let unsubscribe: (() => void) | null = null;
 
-        const uid = auth.currentUser?.uid;
-        setUserReview(all.find(r => r.docId === uid) ?? null);
-        setReviews(all);
-      } catch (e) {
-        console.warn('useReviews error:', e);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    fetch();
-    return () => { cancelled = true; };
+    firestoreReady.then(() => {
+      const q = query(
+        collection(db, 'tours', tourId, 'reviews'),
+        orderBy('updatedAt', 'desc'),
+      );
+
+      unsubscribe = onSnapshot(
+        q,
+        snap => {
+          const all: ReviewWithId[] = snap.docs.map(d => ({
+            docId: d.id,
+            ...(d.data() as Review),
+          }));
+          const uid = auth.currentUser?.uid;
+          setUserReview(all.find(r => r.docId === uid) ?? null);
+          setReviews(all);
+          setLoading(false);
+        },
+        e => {
+          console.warn('useReviews snapshot error:', e);
+          setLoading(false);
+        },
+      );
+    });
+
+    return () => { unsubscribe?.(); };
   }, [tourId]);
 
   return { reviews, userReview, loading };

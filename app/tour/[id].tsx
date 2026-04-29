@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc } from '@react-native-firebase/firestore';
+import { doc, onSnapshot } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../../services/firebaseConfig';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -51,22 +51,24 @@ export default function TourDetailScreen() {
   }, [tour]);
 
   useEffect(() => {
-    async function fetchTourDetails() {
-      if (!id) return;
-      try {
-        await firestoreReady;
-        const docRef = doc(db, "tours", id as string);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setTour({ id: docSnap.id, ...docSnap.data() });
-        }
-      } catch (error) {
-        console.error("Error al obtener detalles del tour:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchTourDetails();
+    if (!id) return;
+    let unsubscribe: (() => void) | null = null;
+
+    firestoreReady.then(() => {
+      unsubscribe = onSnapshot(
+        doc(db, 'tours', id as string),
+        snap => {
+          if (snap.exists()) setTour({ id: snap.id, ...snap.data() });
+          setLoading(false);
+        },
+        error => {
+          console.error('Error al obtener detalles del tour:', error);
+          setLoading(false);
+        },
+      );
+    });
+
+    return () => { unsubscribe?.(); };
   }, [id]);
 
   const isFree = tour?.price === 0 || tour?.price === "0" || String(tour?.price).toLowerCase() === 'gratis';
