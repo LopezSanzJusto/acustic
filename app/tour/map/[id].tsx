@@ -87,6 +87,7 @@ export default function TourMapScreen() {
         <MapDisplay
             location={null}
             points={points}
+            markerType="number"
             showGeofence={false}
         />
       </View>

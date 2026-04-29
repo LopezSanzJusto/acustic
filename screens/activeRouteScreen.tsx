@@ -300,5 +300,5 @@ const styles = StyleSheet.create({
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: 'bold', color: COLORS.primary },
   progressRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 10 },
   progressText: { fontSize: 13, fontWeight: 'bold', color: COLORS.primary, width: 42, textAlign: 'left' },
-  barWrapper: { flex: 1, marginLeft: 6 }
+  barWrapper: { flex: 1, marginLeft: 6 },
 });

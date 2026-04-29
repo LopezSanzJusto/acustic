@@ -1,16 +1,14 @@
 // components/mapDisplay.tsx
 
-import React, { useRef, useState, useMemo, useEffect } from "react";
+import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { StyleSheet, View, Image, Text } from "react-native";
 import MapView, { Marker, Circle, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
-import Constants from "expo-constants";
 import { PointOfInterest } from "../data/points";
 import { COLORS } from "../utils/theme";
-import { useSortedPoints, useRouteDirections } from "../hooks/useMapLogic";
+import { useSortedPoints } from "../hooks/useMapLogic";
+import { useOsrmRoute } from "../hooks/useOsrmRoute";
 import { getDistanceInMeters } from "../utils/geo";
 
-const DIRECTIONS_API_KEY = Constants.expoConfig?.extra?.directionsApiKey as string | undefined;
 
 interface MapDisplayProps {
   location: { latitude: number; longitude: number } | null;
@@ -29,33 +27,19 @@ export const MapDisplay = ({
   radius = 15,
   showGeofence = true,
   onRouteCalculated,
-  markerType = "image", 
+  markerType = "image",
   dashedRoute = false,
   onMarkerPress,
 }: MapDisplayProps) => {
   const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
-  const routeDirections = useRouteDirections(sortedPoints);
-  const canUseDirections = !!DIRECTIONS_API_KEY && !!routeDirections;
-
-  const routeCoords = useMemo(
-    () => sortedPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude })),
-    [sortedPoints]
-  );
+  const { routeCoords, routeDistance } = useOsrmRoute(sortedPoints);
 
   useEffect(() => {
-    // Si hay Directions API disponible, la distancia la fija su callback onReady
-    if (canUseDirections) return;
-    if (!onRouteCalculated || sortedPoints.length < 2) return;
-    let meters = 0;
-    for (let i = 0; i < sortedPoints.length - 1; i++) {
-      meters += getDistanceInMeters(
-        sortedPoints[i].latitude, sortedPoints[i].longitude,
-        sortedPoints[i + 1].latitude, sortedPoints[i + 1].longitude
-      );
+    if (routeDistance && onRouteCalculated) {
+      onRouteCalculated(routeDistance);
     }
-    onRouteCalculated(`${(meters / 1000).toFixed(2)} km`);
-  }, [sortedPoints, onRouteCalculated, canUseDirections]);
+  }, [routeDistance, onRouteCalculated]);
 
   const [loadedImages, setLoadedImages] = useState<{
     [key: string]: boolean;
@@ -107,14 +91,27 @@ export const MapDisplay = ({
     };
   }, [sortedPoints]);
 
-  const handleMapLayout = () => {
-    if (sortedPoints.length > 1 && mapRef.current) {
-      mapRef.current.fitToCoordinates(sortedPoints, {
-        edgePadding: { top: 120, right: 80, bottom: 120, left: 80 },
-        animated: false,
-      });
+  // Ref guard: solo hacemos fitToCoordinates una vez por carga de puntos
+  const hasFittedRef = useRef(false);
+
+  useEffect(() => {
+    // Reseteamos cuando cambia el array de puntos (nuevo tour)
+    hasFittedRef.current = false;
+  }, [points]);
+
+  useEffect(() => {
+    if (sortedPoints.length > 1 && !hasFittedRef.current) {
+      hasFittedRef.current = true;
+      // Pequeño delay para que el MapView esté completamente montado
+      const timer = setTimeout(() => {
+        mapRef.current?.fitToCoordinates(sortedPoints, {
+          edgePadding: { top: 140, right: 80, bottom: 180, left: 80 },
+          animated: true,
+        });
+      }, 400);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [sortedPoints]);
 
   return (
     <View style={styles.mapContainer}>
@@ -125,34 +122,26 @@ export const MapDisplay = ({
         initialRegion={initialRegion}
         showsUserLocation={false}
         showsMyLocationButton={false}
-        onLayout={handleMapLayout}
       >
-        {canUseDirections && routeDirections ? (
-          <MapViewDirections
-            origin={{ latitude: routeDirections.origin.latitude, longitude: routeDirections.origin.longitude }}
-            destination={{ latitude: routeDirections.destination.latitude, longitude: routeDirections.destination.longitude }}
-            waypoints={routeDirections.waypoints}
-            apikey={DIRECTIONS_API_KEY as string}
-            mode="WALKING"
-            strokeWidth={4}
-            strokeColor={COLORS.primary}
-            lineDashPattern={dashedRoute ? [10, 10] : undefined}
-            precision="high"
-            onReady={(result) => {
-              if (onRouteCalculated) {
-                onRouteCalculated(`${result.distance.toFixed(2)} km`);
-              }
-            }}
-            onError={(err) => console.warn("MapViewDirections error:", err)}
-          />
-        ) : routeCoords.length > 1 ? (
-          <Polyline
-            coordinates={routeCoords}
-            strokeWidth={4}
-            strokeColor={COLORS.primary}
-            lineDashPattern={dashedRoute ? [10, 10] : undefined}
-          />
-        ) : null}
+        {routeCoords.length > 1 && (
+          <>
+            {/* Calzada: línea morada gruesa */}
+            <Polyline
+              coordinates={routeCoords}
+              strokeWidth={10}
+              strokeColor="#4E4FA5"
+              zIndex={1}
+            />
+            {/* Marcas viales: línea discontinua blanca central */}
+            <Polyline
+              coordinates={routeCoords}
+              strokeWidth={2}
+              strokeColor="#FFFFFF"
+              lineDashPattern={[12, 10]}
+              zIndex={2}
+            />
+          </>
+        )}
 
         {location && (
           <Marker
