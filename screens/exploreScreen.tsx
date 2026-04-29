@@ -40,7 +40,13 @@ export default function ExploreScreen() {
   
   const { results: searchResults, loadingSearch } = useCitySearch(searchQuery);
 
-  const categories = ["Todos", "Historia", "Arte", "Gastronomía", "Cultura"];
+  const categories = [
+    { label: 'Todos',       icon: null },
+    { label: 'Historia',    icon: '🏛' },
+    { label: 'Arte',        icon: '🎨' },
+    { label: 'Gastronomía', icon: '🍽' },
+    { label: 'Cultura',     icon: '🎭' },
+  ];
 
   // ✨ ACTUALIZADO: Optimizamos la extracción usando textos normalizados
   const availableLocationsInDB = useMemo(() => {
@@ -192,12 +198,12 @@ export default function ExploreScreen() {
                 <Text style={{ color: COLORS.text, fontWeight: '500' }}>🌐 Idioma</Text>
               </TouchableOpacity>
               {categories.map((cat, index) => (
-                <TouchableOpacity 
-                  key={index} 
-                  style={[styles.categoryCard, cat === "Todos" && styles.activeCategoryCard]}
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.categoryCard, cat.label === 'Todos' && styles.activeCategoryCard]}
                 >
-                  <Text style={[styles.categoryText, cat === "Todos" && styles.activeCategoryText]}>
-                    {cat}
+                  <Text style={[styles.categoryText, cat.label === 'Todos' && styles.activeCategoryText]}>
+                    {cat.icon ? `${cat.icon} ${cat.label}` : cat.label}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -209,7 +215,7 @@ export default function ExploreScreen() {
             keyExtractor={(item) => item.id}
             ListHeaderComponent={() => (
               <Text style={styles.sectionTitle}>
-                {selectedLocation ? `Resultados en ${searchQuery}` : 'Audioguías más próximas'}
+                {selectedLocation ? `Audioguías en ${searchQuery}` : 'Audioguías más próximas'}
               </Text>
             )}
             contentContainerStyle={styles.listContent}
@@ -339,33 +345,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   categoryCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10, 
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#EAEAEA', 
+    borderColor: '#EAEAEA',
   },
   activeCategoryCard: {
-    backgroundColor: '#8C77ED', 
+    backgroundColor: '#8C77ED',
     borderColor: '#8C77ED',
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.text,
     fontWeight: '500',
   },
   activeCategoryText: {
     color: COLORS.white,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  sectionTitle: { 
-    fontSize: 22, 
-    fontWeight: 'bold', 
-    marginHorizontal: 20, 
-    marginBottom: 16, 
-    marginTop: 10,
-    color: COLORS.primary
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginHorizontal: 20,
+    marginBottom: 14,
+    marginTop: 8,
+    color: COLORS.primary,
   },
   listContent: { 
     paddingBottom: 100 
