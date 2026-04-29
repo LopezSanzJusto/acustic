@@ -26,14 +26,14 @@ export const TourMapPreview = ({ tourId, points, onPress, onRouteCalculated }: T
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.touchable}>
         <View style={styles.mapWrapper} pointerEvents="none">
-          <MapDisplay 
-            location={null} 
-            // ✨ PASAMOS LOS PUNTOS FILTRADOS AL MINI MAPA
-            points={displayPoints} 
-            showGeofence={false} 
-            onRouteCalculated={onRouteCalculated} 
+          <MapDisplay
+            location={null}
+            points={displayPoints}
+            showGeofence={false}
+            onRouteCalculated={onRouteCalculated}
             markerType="number"
             dashedRoute={true}
+            fitPadding={{ top: 30, right: 30, bottom: 30, left: 30 }}
           />
         </View>
         <View style={styles.overlay} />

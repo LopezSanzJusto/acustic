@@ -89,6 +89,7 @@ export default function TourMapScreen() {
             points={points}
             markerType="number"
             showGeofence={false}
+            fitPadding={{ top: 80, right: 60, bottom: 100, left: 60 }}
         />
       </View>
 

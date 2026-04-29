@@ -89,18 +89,23 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
       await AsyncStorage.setItem(BG_PLAYED_POINTS_KEY, JSON.stringify([]));
       await AsyncStorage.setItem(BG_NOTIF_ENABLED_KEY, String(prefs.bgNotifications));
 
+      // En dev, expo-task-manager pierde el Context de Android en cada hot-reload
+      // y SharedPreferences queda null → NPE inevitable. El foreground tracking
+      // ya cubre la detección de proximidad cuando la app está abierta.
+      if (__DEV__) {
+        console.log('[BgTask] dev mode — background task omitida (foreground tracking activo)');
+        return;
+      }
+
       const { status } = await Location.getBackgroundPermissionsAsync().catch(() => ({ status: 'denied' }));
-      console.log('[BgTask] background location status:', status);
       if (status !== 'granted') {
         console.warn('[BgTask] no background location permission — task not started');
         return;
       }
 
       const running = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).catch(() => false);
-      console.log('[BgTask] already running:', running);
       if (running) return;
 
-      console.log('[BgTask] starting...');
       await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, {
         accuracy: Location.Accuracy.Balanced,
         distanceInterval: 10,

@@ -33,19 +33,34 @@ export default function RootLayout() {
   const responseListener = useRef<Notifications.EventSubscription>();
 
   useEffect(() => {
-    TrackPlayer.setupPlayer({ autoHandleInterruptions: true })
-      .then(() => TrackPlayer.updateOptions({
-        capabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SeekTo,
-          Capability.JumpForward,
-          Capability.JumpBackward,
-        ],
-        compactCapabilities: [Capability.Play, Capability.Pause],
-        progressUpdateEventInterval: 1,
-      }))
-      .catch((e) => console.warn('[RNTP] setup failed:', e));
+    const initPlayer = async () => {
+      try {
+        await TrackPlayer.setupPlayer({ autoHandleInterruptions: true });
+      } catch (e: any) {
+        // "already been initialized" es esperado en hot-reloads — no es un error real
+        if (!e?.message?.includes('already been initialized')) {
+          console.warn('[RNTP] setup failed:', e);
+          return;
+        }
+      }
+      // updateOptions siempre se ejecuta, tanto en primera carga como en re-init
+      try {
+        await TrackPlayer.updateOptions({
+          capabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SeekTo,
+            Capability.JumpForward,
+            Capability.JumpBackward,
+          ],
+          compactCapabilities: [Capability.Play, Capability.Pause],
+          progressUpdateEventInterval: 1,
+        });
+      } catch (e) {
+        console.warn('[RNTP] updateOptions failed:', e);
+      }
+    };
+    initPlayer();
   }, []);
 
   useEffect(() => {

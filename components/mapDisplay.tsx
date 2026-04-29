@@ -16,9 +16,10 @@ interface MapDisplayProps {
   radius?: number;
   showGeofence?: boolean;
   onRouteCalculated?: (distanceText: string) => void;
-  markerType?: "image" | "number"; 
+  markerType?: "image" | "number";
   dashedRoute?: boolean;
   onMarkerPress?: (id: string) => void;
+  fitPadding?: { top: number; right: number; bottom: number; left: number };
 }
 
 export const MapDisplay = ({
@@ -30,6 +31,7 @@ export const MapDisplay = ({
   markerType = "image",
   dashedRoute = false,
   onMarkerPress,
+  fitPadding = { top: 140, right: 80, bottom: 180, left: 80 },
 }: MapDisplayProps) => {
   const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
@@ -105,7 +107,7 @@ export const MapDisplay = ({
       // Pequeño delay para que el MapView esté completamente montado
       const timer = setTimeout(() => {
         mapRef.current?.fitToCoordinates(sortedPoints, {
-          edgePadding: { top: 140, right: 80, bottom: 180, left: 80 },
+          edgePadding: fitPadding,
           animated: true,
         });
       }, 400);
