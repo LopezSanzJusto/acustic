@@ -80,8 +80,8 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   useEffect(() => {
     if (!routeToUse || routeToUse.length === 0) return;
 
-    const slimPois = routeToUse.map(({ id, name, latitude, longitude }) => ({
-      id, name, latitude, longitude,
+    const slimPois = routeToUse.map(({ id, name, latitude, longitude, image, order }) => ({
+      id, name, latitude, longitude, imageUrl: image, order,
     }));
 
     const startBgTask = async () => {
@@ -166,7 +166,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     if (prefs.autoPlayNearPoi) {
       setActivePointIndex(index);
     }
-    notifyPointReached(point.name);
+    notifyPointReached({ name: point.name, imageUrl: point.image, order: point.order });
   }, [prefs.popupNearPoi, prefs.autoPlayNearPoi, setActivePointIndex]);
 
   const { gpsActivePoint } = useGeoAudioSync({

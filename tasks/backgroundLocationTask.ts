@@ -41,7 +41,7 @@ TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }: any) =>
     const poisJson = await AsyncStorage.getItem(ACTIVE_POIS_KEY);
     if (!poisJson) return;
 
-    const pois: Array<{ id: string; name: string; latitude: number; longitude: number }> =
+    const pois: Array<{ id: string; name: string; latitude: number; longitude: number; imageUrl?: string; order?: number }> =
       JSON.parse(poisJson);
 
     const playedJson = await AsyncStorage.getItem(BG_PLAYED_POINTS_KEY);
@@ -56,7 +56,7 @@ TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }: any) =>
       if (dist <= RADIUS_M) {
         played.push(poi.id);
         await AsyncStorage.setItem(BG_PLAYED_POINTS_KEY, JSON.stringify(played));
-        if (shouldNotify) await notifyPointReached(poi.name);
+        if (shouldNotify) await notifyPointReached({ name: poi.name, imageUrl: poi.imageUrl, order: poi.order });
         break; // una notificación por tick de localización
       }
     }

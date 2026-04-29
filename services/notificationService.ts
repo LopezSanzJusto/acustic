@@ -2,6 +2,7 @@
 
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import * as FileSystem from 'expo-file-system';
 import { doc, updateDoc } from '@react-native-firebase/firestore';
 import { db, auth } from './firebaseConfig';
 
@@ -75,14 +76,45 @@ export async function ensureProximityChannel(): Promise<void> {
   });
 }
 
-export async function notifyPointReached(pointName: string): Promise<void> {
+type StopNotifInfo = {
+  name: string;
+  imageUrl?: string;
+  order?: number;
+};
+
+async function downloadImageToCache(url: string, stopId: string): Promise<string | null> {
+  try {
+    const ext = url.includes('.png') ? 'png' : 'jpg';
+    const localUri = `${FileSystem.cacheDirectory}notif_stop_${stopId}.${ext}`;
+    const info = await FileSystem.getInfoAsync(localUri);
+    if (!info.exists) {
+      await FileSystem.downloadAsync(url, localUri);
+    }
+    return localUri;
+  } catch {
+    return null;
+  }
+}
+
+export async function notifyPointReached({ name, imageUrl, order }: StopNotifInfo): Promise<void> {
   try {
     await ensureProximityChannel();
+
+    let localImageUri: string | null = null;
+    if (Platform.OS === 'ios' && imageUrl) {
+      const cacheKey = order != null ? String(order) : encodeURIComponent(name);
+      localImageUri = await downloadImageToCache(imageUrl, cacheKey);
+    }
+
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Punto de interés cercano',
-        body: `Estás cerca de ${pointName}. ¡Escucha la audioguía!`,
+        title: `Has llegado a: ${name}`,
+        subtitle: 'Alerta de proximidad',
+        body: 'Pulsa aquí para escuchar',
         sound: true,
+        ...(localImageUri
+          ? { attachments: [{ url: localImageUri, identifier: `stop-${order ?? name}` }] }
+          : {}),
       },
       trigger: Platform.OS === 'android'
         ? {

@@ -141,7 +141,7 @@ export default function TourDetailScreen() {
   // ✅ 2. Extraemos todo el contenido INFERIOR a otra función
   const renderFooter = () => (
     <View style={styles.content}>
-      <TourReviews />
+      <TourReviews tourId={id as string} />
     </View>
   );
 
@@ -164,7 +164,7 @@ export default function TourDetailScreen() {
           />
         </View>
 
-        <TourFooter price={tour.price} onStart={handleStartRoute} isLoading={isProcessing} />
+        <TourFooter price={tour.price} hasAccess={hasAccess} onStart={handleStartRoute} isLoading={isProcessing} />
       </View>
     </>
   );

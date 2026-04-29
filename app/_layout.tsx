@@ -53,7 +53,8 @@ export default function RootLayout() {
             Capability.JumpForward,
             Capability.JumpBackward,
           ],
-          compactCapabilities: [Capability.Play, Capability.Pause],
+          compactCapabilities: [Capability.JumpBackward, Capability.Play, Capability.Pause, Capability.JumpForward],
+          jumpInterval: 15,
           progressUpdateEventInterval: 1,
         });
       } catch (e) {
