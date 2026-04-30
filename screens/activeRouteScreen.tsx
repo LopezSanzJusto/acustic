@@ -8,6 +8,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { doc, getDoc } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../services/firebaseConfig';
+import NetInfo from '@react-native-community/netinfo';
+import { readManifest } from '../services/offlineManifest';
 
 import { useLocation } from "../hooks/useLocation";
 import { useFirebasePoints } from "../hooks/useFirebasePoints";
@@ -17,6 +19,7 @@ import { MapDisplay } from "../components/mapDisplay";
 import { AudioMiniPlayer } from "../components/audioMiniPlayer";
 import { COLORS } from "../utils/theme";
 import { useCustomRoute } from "../hooks/useCustomRoute";
+import { useOfflineAssets } from "../hooks/useOfflineAssets";
 
 import { RouteProgressBar } from "../components/routeProgressBar";
 import { calculateRealTimeProgress } from "../utils/geo";
@@ -50,14 +53,27 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   const [tourName, setTourName] = useState('');
   useEffect(() => {
     async function fetchTourName() {
+      const netState = await NetInfo.fetch();
+      const offline = !(netState.isConnected ?? true);
+
+      if (offline) {
+        const manifest = await readManifest(tourId);
+        if (manifest) setTourName(manifest.meta.title);
+        return;
+      }
+
       try {
         await firestoreReady;
-        const docSnap = await getDoc(doc(db, "tours", tourId));
+        const docSnap = await getDoc(doc(db, 'tours', tourId));
         if (docSnap.exists()) {
           const data = docSnap.data();
           setTourName(data.name || data.title || '');
         }
-      } catch {}
+      } catch {
+        // Red disponible pero Firestore falló — intentar manifest como fallback
+        const manifest = await readManifest(tourId);
+        if (manifest) setTourName(manifest.meta.title);
+      }
     }
     fetchTourName();
   }, [tourId]);
@@ -73,6 +89,10 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   }, [points, setInitialPoints]);
 
   const routeToUse = activeRoutePoints.length > 0 ? activeRoutePoints : (points || []);
+
+  // Si el tour está descargado, sustituye las URLs remotas por rutas file:// locales.
+  // Solo se usa para reproducción de audio e imágenes; GPS/mapa siguen con routeToUse.
+  const { resolvedPoints: resolvedRoutePoints } = useOfflineAssets(tourId, routeToUse);
 
   // ── Background location task ────────────────────────────────────────────────
   // Persiste los POIs en AsyncStorage para que la tarea pueda leerlos incluso
@@ -149,7 +169,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     seekTo,
     playbackRate,
     toggleSpeed
-  } = useAudio(routeToUse); 
+  } = useAudio(resolvedRoutePoints);
 
   // Popup state
   const [pendingPoint, setPendingPoint] = useState<{ index: number; point: PointOfInterest } | null>(null);
@@ -294,8 +314,8 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
               positionMillis={positionMillis}
               durationMillis={durationMillis}
               playbackRate={playbackRate}
-              points={routeToUse} 
-              onSelectAudio={setActivePointIndex} 
+              points={resolvedRoutePoints}
+              onSelectAudio={setActivePointIndex}
               onToggleSpeed={toggleSpeed}
               onPlayPause={togglePlayPause}
               onNext={playNext}

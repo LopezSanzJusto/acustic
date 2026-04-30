@@ -1,5 +1,6 @@
 // hooks/usePurchaseTour.ts
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import { doc, updateDoc, arrayUnion } from '@react-native-firebase/firestore';
 import { db, auth } from '../services/firebaseConfig';
 import { useRouter } from 'expo-router';

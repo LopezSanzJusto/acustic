@@ -12,6 +12,7 @@ import { auth } from '../services/firebaseConfig';
 import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { RouteProvider } from '../hooks/useCustomRoute';
+import { DownloadsProvider } from '../hooks/useDownloads';
 import * as Notifications from 'expo-notifications';
 import { ensureProximityChannel } from '../services/notificationService';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -120,6 +121,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <DownloadsProvider>
         <RouteProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -138,6 +140,7 @@ export default function RootLayout() {
             <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
           </Stack>
         </RouteProvider>
+        </DownloadsProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

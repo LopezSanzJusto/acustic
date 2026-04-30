@@ -5,11 +5,14 @@ import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, Touchable
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, onSnapshot } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../../services/firebaseConfig';
+import NetInfo from '@react-native-community/netinfo';
+import { readManifest } from '../../services/offlineManifest';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 // Hooks
 import { useFavorites } from '../../hooks/useFavorites';
+import { useOfflineAssets } from '../../hooks/useOfflineAssets';
 import { useFirebasePoints } from '../../hooks/useFirebasePoints';
 import { usePurchaseTour } from '../../hooks/usePurchaseTour';
 import { useMyTours } from '../../hooks/useMyTours';
@@ -53,23 +56,69 @@ export default function TourDetailScreen() {
   useEffect(() => {
     if (!id) return;
     let unsubscribe: (() => void) | null = null;
+    let cancelled = false;
 
-    firestoreReady.then(() => {
+    const buildTourFromManifest = async () => {
+      const manifest = await readManifest(id as string);
+      if (!cancelled && manifest) {
+        setTour({
+          id: manifest.tourId,
+          title: manifest.meta.title,
+          city: manifest.meta.city,
+          country: manifest.meta.country,
+          duration: manifest.meta.duration,
+          distance: manifest.meta.distance,
+          rating: manifest.meta.rating,
+          reviews: manifest.meta.reviews,
+          introAudioUrl: manifest.introAudioUrl,
+          imageUrls: manifest.coverImageUrls,
+          // Si hay manifest descargado el usuario ya tiene acceso
+          price: 0,
+        });
+      }
+      if (!cancelled) setLoading(false);
+    };
+
+    const init = async () => {
+      const netState = await NetInfo.fetch();
+      const offline = !(netState.isConnected ?? true);
+
+      if (offline) {
+        await buildTourFromManifest();
+        return;
+      }
+
+      await firestoreReady;
+      if (cancelled) return;
+
       unsubscribe = onSnapshot(
         doc(db, 'tours', id as string),
-        snap => {
-          if (snap.exists()) setTour({ id: snap.id, ...snap.data() });
-          setLoading(false);
+        (snap) => {
+          if (!cancelled) {
+            if (snap.exists()) setTour({ id: snap.id, ...snap.data() });
+            setLoading(false);
+          }
         },
-        error => {
+        async (error) => {
           console.error('Error al obtener detalles del tour:', error);
-          setLoading(false);
+          await buildTourFromManifest();
         },
       );
-    });
+    };
 
-    return () => { unsubscribe?.(); };
+    init();
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, [id]);
+
+  const { resolvedPoints, resolvedIntroAudioUrl, resolvedCoverImages } = useOfflineAssets(
+    id as string,
+    points,
+    tour?.introAudioUrl,
+    tourImages,
+  );
 
   const isFree = tour?.price === 0 || tour?.price === "0" || String(tour?.price).toLowerCase() === 'gratis';
   const isPurchased = purchasedTours.some((t: any) => t.id === id);
@@ -117,12 +166,16 @@ export default function TourDetailScreen() {
   // ✅ 1. Extraemos todo el contenido SUPERIOR a una función
   const renderHeader = () => (
     <>
-      <ImageSlider images={tourImages} height={280} width={width} />
+      <ImageSlider images={resolvedCoverImages.length > 0 ? resolvedCoverImages : tourImages} height={280} width={width} />
       <View style={styles.content}>
         <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
         <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />
-        <TourIntroAudio title={tour.title} image={tourImages[0]} audioUrl={tour.introAudioUrl} />
-        <TourAudioPreview points={points} price={tour.price || 0} />
+        <TourIntroAudio
+            title={tour.title}
+            image={resolvedCoverImages[0] ?? tourImages[0]}
+            audioUrl={resolvedIntroAudioUrl}
+          />
+        <TourAudioPreview points={resolvedPoints} price={tour.price || 0} />
         
         <Text style={styles.sectionTitle}>Mapa del tour</Text>
         <TourMapPreview tourId={id as string} points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
@@ -157,10 +210,10 @@ export default function TourDetailScreen() {
         {/* ✅ AÑADIDO: Envolvemos la lista en un View con flex: 1. 
             Esto obliga a la lista a quedarse en el centro y respetar el espacio del footer */}
         <View style={{ flex: 1 }}>
-          <TourPointList 
-            tourId={id as string} 
-            points={points} 
-            hasAccess={hasAccess} 
+          <TourPointList
+            tourId={id as string}
+            points={resolvedPoints}
+            hasAccess={hasAccess}
             headerComponent={renderHeader()} 
             footerComponent={renderFooter()} 
           />
