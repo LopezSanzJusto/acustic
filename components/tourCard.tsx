@@ -97,8 +97,8 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
             <View style={styles.ratingRow}>
               <Ionicons name="star" size={13} color={COLORS.gold} />
               <Text style={styles.ratingText}>{tour.rating}</Text>
-              {tour.reviewCount != null && (
-                <Text style={styles.reviewCount}>({tour.reviewCount})</Text>
+              {tour.reviews != null && (
+                <Text style={styles.reviewCount}>({tour.reviews})</Text>
               )}
             </View>
           )}

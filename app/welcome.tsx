@@ -65,7 +65,7 @@ export default function WelcomeScreen() {
         source={require('../assets/images/welcome-bg.png')}
         style={StyleSheet.absoluteFill}
         contentFit="cover"
-        contentPosition="top center"
+        contentPosition="center"
       />
 
       {/* Contenido flotante en la franja inferior */}
