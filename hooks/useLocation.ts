@@ -10,49 +10,16 @@ type Coords = {
 
 // ✅ TU RUTA HARDCODEADA (Añade o modifica puntos aquí según necesites)
 const SIMULATED_PATH: Coords[] = [
-  // ---------------------------------------------------------
-  // ORDEN 1: Monumento a Beatriz Galindo 
-  // Ubicación real: Plaza de la Puerta de los Moros
-  // ---------------------------------------------------------
-  { latitude: 40.4153, longitude: -3.7239 }, // 1. EXACTO — Monumento a Beatriz Galindo
-
-  // // ---------------------------------------------------------
-  // // ORDEN 2: Mayrit Alcázar Madrid
-  // // ---------------------------------------------------------
-  { latitude: 40.416228, longitude: -3.706381 }, // 2. EXACTO
-
-  // // ---------------------------------------------------------
-  // // ORDEN 3: Calle Toledo
-  // // ---------------------------------------------------------
-  { latitude: 40.4130, longitude: -3.7075 }, // Bajando...
-  { latitude: 40.4116, longitude: -3.7078 }, // 3. EXACTO
-
-  // // ---------------------------------------------------------
-  // // ORDEN 4: Plaza de la Paja
-  // // ---------------------------------------------------------
-  { latitude: 40.4125, longitude: -3.7100 }, // Caminando...
-  { latitude: 40.41293, longitude: -3.71163 }, // 4. EXACTO
-
-  // // ---------------------------------------------------------
-  // // ORDEN 5: San Andrés
-  // // ---------------------------------------------------------
-  { latitude: 40.41198, longitude: -3.71101 }, // 5. EXACTO
-
-  // // ---------------------------------------------------------
-  // // ORDEN 6: Mercado de la Cebada
-  // // ---------------------------------------------------------
-  { latitude: 40.4115, longitude: -3.7093 },   // 6. EXACTO
-
-  // // ---------------------------------------------------------
-  // // ORDEN 7: Ribera de Curtidores
-  // // ---------------------------------------------------------
-  { latitude: 40.4080, longitude: -3.7075 }, // Bajando...
-  { latitude: 40.4058, longitude: -3.7071 },   // 7. EXACTO
-
-  // // ---------------------------------------------------------
-  // // ORDEN 8: Rastro
-  // // ---------------------------------------------------------
-  { latitude: 40.4086, longitude: -3.7073 },   // 8. EXACTO
+  { latitude: 40.4113, longitude: -3.7088 }, // 1. Monumento a Beatriz Galindo
+  { latitude: 40.4143, longitude: -3.7133 }, // 2. Mayrit Alcázar Madrid
+  { latitude: 40.4130, longitude: -3.7110 }, // intermedio
+  { latitude: 40.4116, longitude: -3.7078 }, // 3. Calle Toledo
+  { latitude: 40.4122, longitude: -3.7097 }, // 4. Plaza de la Paja
+  { latitude: 40.41198, longitude: -3.71101 }, // 5. San Andrés / San Isidro
+  { latitude: 40.4115, longitude: -3.7093 }, // 6. Mercado de la Cebada
+  { latitude: 40.4080, longitude: -3.7075 }, // intermedio
+  { latitude: 40.4058, longitude: -3.7071 }, // 7. Ribera de Curtidores
+  { latitude: 40.4072, longitude: -3.7073 }, // 8. El Rastro
 ];
 
 export const useLocation = (simulate = false) => {
@@ -62,17 +29,12 @@ export const useLocation = (simulate = false) => {
   useEffect(() => {
     // === MODO SIMULACIÓN ===
     if (simulate) {
-      console.log("⚠️ MODO SIMULACIÓN ACTIVADO");
       let index = 0;
-      setLocation(SIMULATED_PATH[0]); // Establecemos la posición inicial inmediatamente
-      
-      const interval = setInterval(() => {
-        index = (index + 1) % SIMULATED_PATH.length; // Bucle infinito
-        const nextPoint = SIMULATED_PATH[index];
-        
-        console.log(`📍 Simulación paso ${index}:`, nextPoint);
-        setLocation(nextPoint);
+      setLocation(SIMULATED_PATH[0]);
 
+      const interval = setInterval(() => {
+        index = (index + 1) % SIMULATED_PATH.length;
+        setLocation(SIMULATED_PATH[index]);
       }, 15000);
 
       return () => clearInterval(interval);

@@ -64,11 +64,38 @@ export const useCustomRoute = (tourId: string) => {
   const customPoints = context.routes[tourId] || [];
 
   const setInitialPoints = useCallback((points: PointOfInterest[]) => {
-    if (context.loaded && customPoints.length === 0 && points.length > 0) {
-      const sorted = [...points].sort((a, b) => (a.order || 0) - (b.order || 0));
+    if (!context.loaded || points.length === 0) return;
+
+    const sorted = [...points].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    if (customPoints.length === 0) {
       context.setRoutePoints(tourId, sorted.map(p => ({ ...p, isHidden: false })));
+      return;
     }
-  }, [context.loaded, customPoints.length, tourId, context]);
+
+    // Sincroniza solo si algo cambió realmente — evita bucle infinito
+    const freshById = new Map(sorted.map(p => [p.id, p]));
+    const hasChanges = customPoints.some(cp => {
+      const fresh = freshById.get(cp.id);
+      if (!fresh) return false;
+      return (
+        cp.latitude !== fresh.latitude ||
+        cp.longitude !== fresh.longitude ||
+        cp.audio !== fresh.audio ||
+        cp.image !== fresh.image ||
+        cp.name !== fresh.name
+      );
+    });
+
+    if (!hasChanges) return;
+
+    const synced = customPoints.map(cp => {
+      const fresh = freshById.get(cp.id);
+      if (!fresh) return cp;
+      return { ...cp, latitude: fresh.latitude, longitude: fresh.longitude, audio: fresh.audio, image: fresh.image, name: fresh.name };
+    });
+    context.setRoutePoints(tourId, synced);
+  }, [context.loaded, customPoints, tourId, context]);
 
   const togglePointVisibility = useCallback((id: string) => {
     const updated = customPoints.map(p => p.id === id ? { ...p, isHidden: !p.isHidden } : p);

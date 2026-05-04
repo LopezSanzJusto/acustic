@@ -28,14 +28,18 @@ export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = f
   useEffect(() => {
     if (!audioUri) return;
     const load = async () => {
-      await TrackPlayer.reset();
-      await TrackPlayer.add({
-        url: audioUri,
-        title: activePoint?.name ?? '',
-        artist: 'Acustic',
-        artwork: activePoint?.image ?? undefined,
-      });
-      await TrackPlayer.play();
+      try {
+        await TrackPlayer.reset();
+        await TrackPlayer.add({
+          url: audioUri,
+          title: activePoint?.name ?? '',
+          artist: 'Acustic',
+          artwork: activePoint?.image ?? undefined,
+        });
+        await TrackPlayer.play();
+      } catch (e) {
+        console.error('[useAudio] TrackPlayer error:', e);
+      }
     };
     load();
   }, [audioUri]);

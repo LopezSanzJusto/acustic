@@ -47,13 +47,15 @@ export function useFirebasePoints(tourId: string) {
         const querySnapshot = await getDocs(q);
         const pointsArray: PointOfInterest[] = querySnapshot.docs.map((doc) => {
           const data = doc.data();
+          const audioField = data.audioUrl ?? data.audio ?? '';
+          const imageField = data.imageUrl ?? data.image ?? '';
           return {
             id: doc.id,
             name: String(data.name),
             latitude: Number(data.latitude),
             longitude: Number(data.longitude),
-            audio: String(data.audioUrl),
-            image: String(data.imageUrl),
+            audio: String(audioField),
+            image: String(imageField),
             order: Number(data.order),
           } as unknown as PointOfInterest;
         });

@@ -6,12 +6,14 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { doc, getDoc } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../../../services/firebaseConfig';
 import { useFirebasePoints } from '../../../hooks/useFirebasePoints';
+import { useCustomRoute } from '../../../hooks/useCustomRoute';
 import { MapDisplay } from '../../../components/mapDisplay';
 import { TourFooter } from '../../../components/tourDetails/tourFooter';
 import { FloatingButton } from '../../../components/floatingButton';
 import { COLORS, COMMON_STYLES } from '../../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePurchaseTour } from '../../../hooks/usePurchaseTour';
+import { useMyTours } from '../../../hooks/useMyTours';
 import TrackPlayer from 'react-native-track-player';
 
 export default function TourMapScreen() {
@@ -20,10 +22,19 @@ export default function TourMapScreen() {
   const insets = useSafeAreaInsets(); 
   
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
+  const { activeRoutePoints, setInitialPoints } = useCustomRoute(id as string);
+
+  useEffect(() => {
+    if (points.length > 0) setInitialPoints(points);
+  }, [points]);
   
   // ✅ Usamos undefined en vez de null para alinear con el tipado de TypeScript
   const [tourPrice, setTourPrice] = useState<number | undefined>(undefined);
   const { addTourToMyList, isProcessing } = usePurchaseTour();
+  const { purchasedTours } = useMyTours();
+  const isFree = tourPrice === 0;
+  const isPurchased = purchasedTours.some((t: any) => t.id === id);
+  const hasAccess = isFree || isPurchased;
 
   useEffect(() => {
     let isMounted = true;
@@ -86,7 +97,7 @@ export default function TourMapScreen() {
       <View style={styles.mapContainer}>
         <MapDisplay
             location={null}
-            points={points}
+            points={activeRoutePoints.length > 0 ? activeRoutePoints : points}
             markerType="number"
             showGeofence={false}
             fitPadding={{ top: 80, right: 60, bottom: 100, left: 60 }}
@@ -113,8 +124,9 @@ export default function TourMapScreen() {
       </View>
 
       <View style={[styles.footerContainer, { paddingBottom: insets.bottom }]}>
-        <TourFooter 
-            price={tourPrice} 
+        <TourFooter
+            price={tourPrice}
+            hasAccess={hasAccess}
             onStart={handleStartRoute}
             isLoading={isProcessing}
         />

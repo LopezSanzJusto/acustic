@@ -1,22 +1,12 @@
 // components/mapDisplay.tsx
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
-import {
-  Map as MapLibreMap,
-  Camera,
-  GeoJSONSource,
-  Layer,
-  ViewAnnotation,
-  type CameraRef,
-} from '@maplibre/maplibre-react-native';
+import MapView, { Marker, Circle, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { PointOfInterest } from '../data/points';
 import { COLORS } from '../utils/theme';
 import { useSortedPoints } from '../hooks/useMapLogic';
 import { useOsrmRoute } from '../hooks/useOsrmRoute';
-import { MAP_STYLE_URL } from '../services/offlineMapService';
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface MapDisplayProps {
   location: { latitude: number; longitude: number } | null;
@@ -30,22 +20,6 @@ interface MapDisplayProps {
   fitPadding?: { top: number; right: number; bottom: number; left: number };
 }
 
-// ─── GeoJSON helpers ──────────────────────────────────────────────────────────
-
-function circlePolygon(lon: number, lat: number, radiusM: number, steps = 32): number[][] {
-  const coords: number[][] = [];
-  for (let i = 0; i <= steps; i++) {
-    const angle = (i / steps) * 2 * Math.PI;
-    const dLat = (radiusM / 111320) * Math.cos(angle);
-    const dLon =
-      (radiusM / (111320 * Math.cos((lat * Math.PI) / 180))) * Math.sin(angle);
-    coords.push([lon + dLon, lat + dLat]);
-  }
-  return coords;
-}
-
-// ─── Componente ───────────────────────────────────────────────────────────────
-
 export const MapDisplay = ({
   location,
   points,
@@ -56,15 +30,13 @@ export const MapDisplay = ({
   onMarkerPress,
   fitPadding = { top: 140, right: 80, bottom: 180, left: 80 },
 }: MapDisplayProps) => {
-  const cameraRef = useRef<CameraRef>(null);
+  const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
   const { routeCoords, routeDistance } = useOsrmRoute(sortedPoints);
 
   useEffect(() => {
-    if (routeDistance && onRouteCalculated) {
-      onRouteCalculated(routeDistance);
-    }
-  }, [routeDistance, onRouteCalculated]);
+    if (routeDistance && onRouteCalculated) onRouteCalculated(routeDistance);
+  }, [routeDistance]);
 
   const hasFittedRef = useRef(false);
   useEffect(() => {
@@ -74,126 +46,73 @@ export const MapDisplay = ({
   useEffect(() => {
     if (sortedPoints.length < 1 || hasFittedRef.current) return;
     hasFittedRef.current = true;
-
+    const coordsToFit = routeCoords.length > 1
+      ? routeCoords
+      : sortedPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude }));
     const timer = setTimeout(() => {
-      if (sortedPoints.length === 1) {
-        cameraRef.current?.flyTo({
-          center: [sortedPoints[0].longitude, sortedPoints[0].latitude],
-          duration: 400,
-        });
-      } else {
-        const lons = sortedPoints.map((p) => p.longitude);
-        const lats = sortedPoints.map((p) => p.latitude);
-        // LngLatBounds = [west, south, east, north]
-        cameraRef.current?.fitBounds(
-          [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)],
-          { padding: fitPadding, duration: 400 },
-        );
-      }
+      mapRef.current?.fitToCoordinates(coordsToFit, { edgePadding: fitPadding, animated: true });
     }, 400);
     return () => clearTimeout(timer);
-  }, [sortedPoints]);
+  }, [sortedPoints, routeCoords]);
 
-  const routeGeoJSON = useMemo(
-    () => ({
-      type: 'FeatureCollection' as const,
-      features:
-        routeCoords.length > 1
-          ? [
-              {
-                type: 'Feature' as const,
-                geometry: {
-                  type: 'LineString' as const,
-                  coordinates: routeCoords.map((c) => [c.longitude, c.latitude]),
-                },
-                properties: {},
-              },
-            ]
-          : [],
-    }),
-    [routeCoords],
-  );
-
-  const geofenceGeoJSON = useMemo(
-    () => ({
-      type: 'FeatureCollection' as const,
-      features: showGeofence
-        ? sortedPoints.map((p) => ({
-            type: 'Feature' as const,
-            geometry: {
-              type: 'Polygon' as const,
-              coordinates: [circlePolygon(p.longitude, p.latitude, radius)],
-            },
-            properties: {},
-          }))
-        : [],
-    }),
-    [sortedPoints, showGeofence, radius],
-  );
-
-  const initialCenter: [number, number] =
-    sortedPoints.length > 0
-      ? [sortedPoints[0].longitude, sortedPoints[0].latitude]
-      : [-3.70379, 40.41677];
+  const initialRegion = {
+    latitude: sortedPoints[0]?.latitude ?? 40.41677,
+    longitude: sortedPoints[0]?.longitude ?? -3.70379,
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.02,
+  };
 
   return (
     <View style={styles.mapContainer}>
-      <MapLibreMap
+      <MapView
+        ref={mapRef}
         style={styles.map}
-        mapStyle={MAP_STYLE_URL}
-        touchPitch={false}
-        touchRotate={false}
-        attribution={false}
-        logo={false}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={initialRegion}
+        showsMyLocationButton={false}
+        toolbarEnabled={false}
       >
-        <Camera
-          ref={cameraRef}
-          initialViewState={{ center: initialCenter, zoom: 14 }}
-        />
-
-        {/* Círculos de geovalla */}
-        {showGeofence && geofenceGeoJSON.features.length > 0 && (
-          <GeoJSONSource id="geofences" data={geofenceGeoJSON as any}>
-            <Layer
-              id="geofence-fill"
-              type="fill"
-              paint={{ 'fill-color': COLORS.primaryLight, 'fill-opacity': 0.35 } as any}
+        {/* Ruta OSRM: calzada morada + guiones blancos */}
+        {routeCoords.length > 1 && (
+          <>
+            <Polyline
+              coordinates={routeCoords}
+              strokeColor="#4E4FA5"
+              strokeWidth={10}
+              zIndex={1}
             />
-            <Layer
-              id="geofence-border"
-              type="line"
-              paint={{ 'line-color': COLORS.primaryBorder, 'line-width': 1 } as any}
+            <Polyline
+              coordinates={routeCoords}
+              strokeColor="#FFFFFF"
+              strokeWidth={2}
+              lineDashPattern={[8, 8]}
+              zIndex={2}
             />
-          </GeoJSONSource>
+          </>
         )}
 
-        {/* Ruta: calzada morada + marcas viales blancas */}
-        {routeGeoJSON.features.length > 0 && (
-          <GeoJSONSource id="route" data={routeGeoJSON as any}>
-            <Layer
-              id="route-road"
-              type="line"
-              layout={{ 'line-join': 'round', 'line-cap': 'round' } as any}
-              paint={{ 'line-color': '#4E4FA5', 'line-width': 10 } as any}
-            />
-            <Layer
-              id="route-dashes"
-              type="line"
-              paint={{ 'line-color': '#FFFFFF', 'line-width': 2, 'line-dasharray': [2, 2] } as any}
-            />
-          </GeoJSONSource>
-        )}
+        {/* Geovallas */}
+        {showGeofence && sortedPoints.map(p => (
+          <Circle
+            key={`geo-${p.id}`}
+            center={{ latitude: p.latitude, longitude: p.longitude }}
+            radius={radius}
+            fillColor="rgba(139,92,246,0.18)"
+            strokeColor="rgba(139,92,246,0.45)"
+            strokeWidth={1}
+          />
+        ))}
 
         {/* Marcadores de paradas */}
         {sortedPoints.map((p, index) => (
-          <ViewAnnotation
+          <Marker
             key={p.id}
-            id={`poi-${p.id}`}
-            lngLat={[p.longitude, p.latitude]}
-            anchor="center"
+            coordinate={{ latitude: p.latitude, longitude: p.longitude }}
             onPress={() => onMarkerPress?.(p.id)}
+            anchor={{ x: 0.5, y: markerType === 'number' && index === 0 ? 0.9 : 0.5 }}
+            tracksViewChanges={false}
           >
-            <View collapsable={false} style={{ alignItems: 'center' }}>
+            <View style={{ alignItems: 'center' }} collapsable={false}>
               {markerType === 'number' && index === 0 && (
                 <View style={styles.startBadge}>
                   <Text style={styles.startText}>START</Text>
@@ -202,10 +121,7 @@ export const MapDisplay = ({
               <View
                 style={
                   markerType === 'number'
-                    ? [
-                        styles.numberMarkerOuter,
-                        { backgroundColor: index === 0 ? '#FF8533' : COLORS.primary },
-                      ]
+                    ? [styles.numberMarkerOuter, { backgroundColor: index === 0 ? '#FF8533' : COLORS.primary }]
                     : styles.markerBorder
                 }
                 collapsable={false}
@@ -213,37 +129,31 @@ export const MapDisplay = ({
                 {markerType === 'number' ? (
                   <Text style={styles.numberText}>{index + 1}</Text>
                 ) : p.image ? (
-                  <Image
-                    source={{ uri: p.image }}
-                    style={styles.markerImage}
-                    resizeMode="cover"
-                  />
+                  <Image source={{ uri: p.image }} style={styles.markerImage} resizeMode="cover" />
                 ) : (
                   <View style={[styles.markerImage, { backgroundColor: COLORS.primary }]} />
                 )}
               </View>
             </View>
-          </ViewAnnotation>
+          </Marker>
         ))}
 
-        {/* Punto azul del usuario */}
+        {/* Punto de ubicación del usuario */}
         {location && (
-          <ViewAnnotation
-            id="user-location"
-            lngLat={[location.longitude, location.latitude]}
-            anchor="center"
+          <Marker
+            coordinate={location}
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges={false}
           >
-            <View style={styles.userMarkerContainer}>
+            <View style={styles.userMarkerContainer} collapsable={false}>
               <View style={styles.userMarkerDot} />
             </View>
-          </ViewAnnotation>
+          </Marker>
         )}
-      </MapLibreMap>
+      </MapView>
     </View>
   );
 };
-
-// ─── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   mapContainer: {

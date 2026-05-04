@@ -1,5 +1,6 @@
 // hooks/useOsrmRoute.ts
-// Calcula la ruta real por calles usando OSRM (gratuito, sin API key, OpenStreetMap)
+// Calcula la ruta por calles usando OSRM, segmento a segmento (A→B, B→C, …)
+// para evitar desvíos por optimización global del grafo peatonal.
 
 import { useState, useEffect } from 'react';
 import { PointOfInterest } from '../data/points';
@@ -7,6 +8,26 @@ import { PointOfInterest } from '../data/points';
 interface Coord {
   latitude: number;
   longitude: number;
+}
+
+async function fetchSegment(
+  from: PointOfInterest,
+  to: PointOfInterest,
+  signal: AbortSignal,
+): Promise<Coord[]> {
+  const url =
+    `https://router.project-osrm.org/route/v1/foot/` +
+    `${from.longitude},${from.latitude};${to.longitude},${to.latitude}` +
+    `?overview=full&geometries=geojson`;
+
+  const res = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+  const data = await res.json();
+
+  if (!data.routes?.length) return [];
+  return data.routes[0].geometry.coordinates.map(
+    ([lng, lat]: [number, number]) => ({ latitude: lat, longitude: lng }),
+  );
 }
 
 export function useOsrmRoute(points: PointOfInterest[]) {
@@ -17,6 +38,7 @@ export function useOsrmRoute(points: PointOfInterest[]) {
   useEffect(() => {
     if (points.length < 2) {
       setRouteCoords([]);
+      setRouteDistance(null);
       return;
     }
 
@@ -25,34 +47,29 @@ export function useOsrmRoute(points: PointOfInterest[]) {
     const fetchRoute = async () => {
       setLoading(true);
       try {
-        // OSRM recibe coordenadas como lng,lat separadas por ;
-        const coords = points.map(p => `${p.longitude},${p.latitude}`).join(';');
-        const url =
-          `https://router.project-osrm.org/route/v1/foot/${coords}` +
-          `?overview=full&geometries=geojson`;
+        // Lanzamos todos los segmentos en paralelo
+        const segments = await Promise.all(
+          points.slice(0, -1).map((p, i) =>
+            fetchSegment(p, points[i + 1], controller.signal),
+          ),
+        );
 
-        const res = await fetch(url, {
-          signal: controller.signal,
-          headers: { 'Accept': 'application/json' },
-        });
-
-        if (!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
-        const data = await res.json();
-
-        if (data.routes?.length > 0) {
-          // OSRM devuelve [lng, lat] — invertimos a { latitude, longitude }
-          const coords: Coord[] = data.routes[0].geometry.coordinates.map(
-            ([lng, lat]: [number, number]) => ({ latitude: lat, longitude: lng })
-          );
-          setRouteCoords(coords);
-          const km = (data.routes[0].distance / 1000).toFixed(2);
-          setRouteDistance(`${km} km`);
+        const allCoords = segments.flat();
+        if (allCoords.length > 0) {
+          setRouteCoords(allCoords);
+          // Distancia aproximada sumando vuelo entre puntos (solo para el label)
+          let totalKm = 0;
+          for (let i = 0; i < points.length - 1; i++) {
+            const dx = points[i + 1].longitude - points[i].longitude;
+            const dy = points[i + 1].latitude - points[i].latitude;
+            totalKm += Math.sqrt(dx * dx + dy * dy) * 111;
+          }
+          setRouteDistance(`${totalKm.toFixed(2)} km`);
         }
       } catch (error: any) {
         if (error.name !== 'AbortError') {
-          console.warn('OSRM route error, usando línea recta como fallback:', error);
-          // Fallback: línea recta entre puntos
-          setRouteCoords(points.map(p => ({ latitude: p.latitude, longitude: p.longitude })));
+          console.warn('[OSRM] error:', error?.message ?? error);
+          setRouteCoords([]);
         }
       } finally {
         setLoading(false);
