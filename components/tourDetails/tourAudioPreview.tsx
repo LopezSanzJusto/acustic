@@ -47,15 +47,12 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.previewButton} onPress={toggleExpand} activeOpacity={0.8}>
-         <Ionicons name="headset" size={20} color="white" style={{ marginRight: 8 }} />
-         <Text style={styles.previewText}>Previsualización de audios</Text>
-         <Ionicons 
-            name={isExpanded ? "chevron-up" : "chevron-down"} 
-            size={20} 
-            color="white" 
-            style={styles.chevronIcon} 
-         />
+         <Ionicons name="headset" size={22} color="#6B6B6B" style={{ marginRight: 10 }} />
+         <Text style={styles.previewText}>Pre-view de la ruta</Text>
       </TouchableOpacity>
+      <Text style={styles.subtitleText}>
+        Escucha <Text style={styles.subtitleItalic}>gratis</Text> los primeros audios
+      </Text>
 
       {isExpanded && (
         <View style={styles.dropdownContainer}>
@@ -98,16 +95,16 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
 const styles = StyleSheet.create({
   container: { marginBottom: 30 },
   previewButton: {
-    backgroundColor: '#8B5CF6', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    paddingVertical: 14, borderRadius: 12, shadowColor: '#8B5CF6', shadowOffset: { width: 0, height: 4 }, 
-    shadowOpacity: 0.3, shadowRadius: 5, zIndex: 2,
+    backgroundColor: '#EDE9FE', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    paddingVertical: 10, paddingHorizontal: 20, borderRadius: 14, zIndex: 2, alignSelf: 'center',
   },
-  previewText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-  chevronIcon: { position: 'absolute', right: 20 },
+  previewText: { color: '#7C3AED', fontWeight: 'bold', fontSize: 16 },
+  subtitleText: { textAlign: 'center', fontSize: 16, fontWeight: '700', color: '#1a1a1a', marginTop: 12 },
+  subtitleItalic: { fontStyle: 'italic', fontWeight: '400' },
   dropdownContainer: {
-    backgroundColor: COLORS.surface, borderBottomLeftRadius: 12, borderBottomRightRadius: 12,
-    paddingTop: 20, paddingBottom: 10, paddingHorizontal: 15, marginTop: -10, borderWidth: 1,
-    borderColor: COLORS.border, borderTopWidth: 0,
+    backgroundColor: COLORS.surface, borderRadius: 12,
+    paddingTop: 10, paddingBottom: 10, paddingHorizontal: 15, marginTop: 12, borderWidth: 1,
+    borderColor: COLORS.border,
   },
   audioRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   audioInfo: { flex: 1, paddingRight: 10 },

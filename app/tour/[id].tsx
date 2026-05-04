@@ -175,13 +175,14 @@ export default function TourDetailScreen() {
             image={resolvedCoverImages[0] ?? tourImages[0]}
             audioUrl={resolvedIntroAudioUrl}
           />
-        <TourAudioPreview points={resolvedPoints} price={tour.price || 0} />
-        
+
         <Text style={styles.sectionTitle}>Mapa del tour</Text>
         <TourMapPreview tourId={id as string} points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
-            router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any); 
+            router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any);
           }}
         />
+
+        <TourAudioPreview points={resolvedPoints} price={tour.price || 0} />
 
         {!hasAccess && (
           <TouchableOpacity style={styles.premiumButton} onPress={handleStartRoute}>

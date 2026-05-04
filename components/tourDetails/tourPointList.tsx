@@ -49,14 +49,21 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
             isActive && styles.rowActive 
           ]}
         >
-          <Image 
-            source={{ uri: item.image }} 
-            style={[styles.image, item.isHidden && styles.imageHidden]} 
-          />
-          
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: item.image }}
+              style={[styles.image, item.isHidden && styles.imageHidden]}
+            />
+            {item.displayNumber && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{item.displayNumber}</Text>
+              </View>
+            )}
+          </View>
+
           <View style={styles.textContainer}>
             <Text style={[styles.pointName, item.isHidden && styles.textHidden]} numberOfLines={2}>
-              {item.displayNumber ? `${item.displayNumber}. ` : ''}{item.name}
+              {item.name}
             </Text>
           </View>
 
@@ -155,8 +162,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderColor: COLORS.primary
   },
-  image: { width: 50, height: 50, borderRadius: 8, marginRight: 15 },
+  imageContainer: { position: 'relative', marginRight: 17 },
+  image: { width: 50, height: 50, borderRadius: 8 },
   imageHidden: { opacity: 0.5 },
+  badge: {
+    position: 'absolute',
+    right: -14,
+    top: '50%',
+    marginTop: -14,
+    backgroundColor: '#4E4FA5',
+    width: 28,
+    height: 28,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  badgeText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
   textContainer: { flex: 1, justifyContent: 'center' },
   pointName: { fontSize: 15, fontWeight: '600', color: COLORS.textDark },
   textHidden: { color: COLORS.muted, textDecorationLine: 'line-through' },

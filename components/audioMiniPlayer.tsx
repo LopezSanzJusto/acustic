@@ -173,33 +173,31 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: "relative",
-    marginRight: 16, // ✨ MARGEN AUMENTADO PARA QUE QUEPA EL CÍRCULO
+    marginRight: 26,
   },
   thumbnail: {
-    width: 48, // ✨ UN POQUITO MÁS GRANDE PARA QUE DESTAQUE
-    height: 48,
+    width: 56,
+    height: 56,
     borderRadius: 8,
     backgroundColor: "#E5E7EB",
   },
   badge: {
     position: "absolute",
-    // ✨ LA MAGIA PARA CENTRARLO EN EL BORDE DERECHO:
-    right: -10,      // Lo empuja 10px fuera de la imagen (hacia la derecha)
-    top: "50%",      // Lo sitúa en la mitad vertical de la foto
-    marginTop: -10,  // Compensa su propia altura para que el centro sea exacto
-    // APARIENCIA VISUAL:
-    backgroundColor: COLORS.primary, 
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    right: -16,
+    top: "50%",
+    marginTop: -15,
+    backgroundColor: "#4E4FA5",
+    width: 30,
+    height: 30,
+    borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2, // ✨ Borde blanco clave para separar de la imagen
+    borderWidth: 2,
     borderColor: "#FFF",
   },
   badgeText: {
     color: "#FFF", 
-    fontSize: 10,
+    fontSize: 20,
     fontFamily: FONT_FAMILY,
     fontWeight: "700",
   },

@@ -46,30 +46,28 @@ const styles = StyleSheet.create({
     borderRadius: 20, // Bordes muy redondeados
     borderWidth: 1,
     borderColor: '#DDD6FE', // Morado claro (Tailwind violet-200)
-    padding: 12,
+    padding: 6,
     marginBottom: 12,
   },
   imageContainer: {
     position: 'relative',
-    marginRight: 16,
+    marginRight: 26,
   },
   image: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 10,
     backgroundColor: '#E5E7EB',
   },
   badge: {
     position: 'absolute',
-    // ✨ LA MAGIA PARA CENTRARLO AL MEDIO A LA DERECHA:
-    right: -10,      
-    top: '50%',      
-    marginTop: -10,  
-    // APARIENCIA IDÉNTICA AL REPRODUCTOR:
-    backgroundColor: COLORS.primary,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    right: -15,
+    top: '50%',
+    marginTop: -15,
+    backgroundColor: '#4E4FA5',
+    width: 28,
+    height: 28,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -77,7 +75,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#FFF',
-    fontSize: 10,
+    fontSize: 17,
     fontFamily: FONT_FAMILY,
     fontWeight: '700',
   },
