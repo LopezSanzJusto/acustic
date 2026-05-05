@@ -177,6 +177,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F2F2F7',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#8874F7',
     paddingHorizontal: 14,
     paddingVertical: Platform.OS === 'ios' ? 12 : 6,
   },

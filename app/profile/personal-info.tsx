@@ -31,10 +31,10 @@ export default function PersonalInfoScreen() {
     firestoreReady.then(() => getDoc(doc(db, 'users', user.uid))).then((snap) => {
       if (snap.exists()) {
         const d = snap.data();
-        setNombre(d.name || '');
-        setApellido(d.lastName || '');
-        setBirthDate(d.birthDate || '');
-        setCountry(d.country || '');
+        setNombre(d?.name || '');
+        setApellido(d?.lastName || '');
+        setBirthDate(d?.birthDate || '');
+        setCountry(d?.country || '');
       }
     }).finally(() => setLoading(false));
   }, []);
@@ -149,7 +149,7 @@ export default function PersonalInfoScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#FFFDFD' },
   centered: { justifyContent: 'center', alignItems: 'center' },
   scroll: { paddingHorizontal: 22, paddingBottom: 50 },
 
@@ -172,10 +172,11 @@ const styles = StyleSheet.create({
   halfField: { flex: 1 },
   field: { marginBottom: 14 },
   label: { fontSize: 14, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
-  input: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary },
+  input: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary,  borderColor: '#8874F7', borderWidth: 1 },
   inputDisabled: { color: COLORS.muted },
-
+  birthdate: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderColor: '#8874F7', borderWidth: 1 },
+  country: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderColor: '#8874F7', borderWidth: 1 },
   // Guardar
-  saveButton: { backgroundColor: COLORS.primary, borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 24 },
+  saveButton: { backgroundColor: '#7678ED', borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 24 },
   saveButtonText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
 });

@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { CountrySelector } from '../../components/countrySelector';
 import { DateInput } from '../../components/dateInput';
@@ -78,6 +79,13 @@ export default function UserInfoScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <TouchableOpacity
+        onPress={() => router.back()}
+        style={[styles.backBtn, { top: insets.top + 12 }]}
+      >
+        <Ionicons name="chevron-back" size={26} color="rgba(255,255,255,0.9)" />
+      </TouchableOpacity>
+
       <ScrollView
         style={styles.flex}
         contentContainerStyle={[
@@ -153,6 +161,12 @@ export default function UserInfoScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: PURPLE_BG },
   scrollContent: { paddingHorizontal: 26, flexGrow: 1 },
+  backBtn: {
+    position: 'absolute',
+    left: 16,
+    zIndex: 10,
+    padding: 4,
+  },
   title: {
     fontSize: 28,
     fontWeight: '800',

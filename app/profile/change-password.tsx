@@ -229,7 +229,7 @@ function PasswordField({
 const INPUT_BORDER_COLOR = '#C8C5F0';
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: COLORS.background },
+  flex: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 8, paddingVertical: 12,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   // Bloque superior
   block: { marginBottom: 28 },
   fieldWrapper: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: '#00000080', marginBottom: 6 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
     borderWidth: 1.5, borderColor: INPUT_BORDER_COLOR,
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
 
   // Botón
   btn: {
-    backgroundColor: PURPLE, borderRadius: 30,
+    backgroundColor: '#7678ED', borderRadius: 12,
     paddingVertical: 15, alignItems: 'center', marginTop: 6,
   },
   btnDisabled: { opacity: 0.55 },
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   // Bloque recuperación
   recoveryBlock: {},
   recoveryTitle: {
-    fontSize: 18, fontWeight: '700', color: PURPLE,
+    fontSize: 18, fontWeight: '700', color: '#8874F7',
     textAlign: 'center', marginBottom: 8,
   },
   recoveryDesc: {

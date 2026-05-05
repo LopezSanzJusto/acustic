@@ -57,8 +57,6 @@ export default function NotificationsScreen() {
     </View>
   );
 
-  const renderDivider = () => <View style={styles.divider} />;
-
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -84,11 +82,10 @@ export default function NotificationsScreen() {
           <View style={styles.card}>
             {/* #1 — Ubicación (permiso del SO) */}
             {renderRow('Permite ubicación', fgGranted, toggleForegroundLocation)}
-            {renderDivider()}
+
 
             {/* #2 — Notificaciones */}
             {renderRow('Permite notificaciones', notifGranted, toggleNotifications)}
-            {renderDivider()}
 
             {/* #3 — Pop-up cerca de POI */}
             {renderRow(
@@ -96,7 +93,6 @@ export default function NotificationsScreen() {
               prefs.popupNearPoi,
               () => updatePref('popupNearPoi', !prefs.popupNearPoi),
             )}
-            {renderDivider()}
 
             {/* #4 — Reproducción automática */}
             {renderRow(
@@ -104,7 +100,6 @@ export default function NotificationsScreen() {
               prefs.autoPlayNearPoi,
               () => updatePref('autoPlayNearPoi', !prefs.autoPlayNearPoi),
             )}
-            {renderDivider()}
 
             {/* #5 — Descargas automáticas */}
             {renderRow(
@@ -112,7 +107,6 @@ export default function NotificationsScreen() {
               prefs.autoDownload,
               () => updatePref('autoDownload', !prefs.autoDownload),
             )}
-            {renderDivider()}
 
             {/* #6 — Notificaciones en segundo plano */}
             {renderRow(
@@ -120,7 +114,6 @@ export default function NotificationsScreen() {
               prefs.bgNotifications,
               () => updatePref('bgNotifications', !prefs.bgNotifications),
             )}
-            {renderDivider()}
 
             {/* #7 — Ubicación en segundo plano (permiso del SO) */}
             {renderRow(
@@ -129,7 +122,6 @@ export default function NotificationsScreen() {
               toggleBackgroundLocation,
               !fgGranted, // deshabilitado si no tiene permiso foreground
             )}
-            {renderDivider()}
 
             {/* #8 — Newsletter */}
             {renderRow(
@@ -137,7 +129,6 @@ export default function NotificationsScreen() {
               prefs.newsletter,
               () => updatePref('newsletter', !prefs.newsletter),
             )}
-            {renderDivider()}
 
             {/* #9 — Promociones */}
             {renderRow(
@@ -173,7 +164,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: '#4E4FA5',
   },
 
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -183,14 +174,14 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    borderWidth: 0.8,
+    borderWidth: 0,
     borderColor: COLORS.primary + '40',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
-    elevation: 1,
+    elevation: 0,
   },
 
   row: {
@@ -198,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 18,
-    paddingVertical: 16,
+    paddingVertical: 10,
     gap: 16,
   },
   label: {
@@ -219,12 +210,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#C0C0C0',
     lineHeight: 21,
-  },
-
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: COLORS.border,
-    marginHorizontal: 18,
   },
 
   hint: {

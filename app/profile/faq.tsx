@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     borderColor: '#8874F7',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 0,
+    marginBottom: -1,
   },
   pillOpen: {
     borderColor: '#8874F7',

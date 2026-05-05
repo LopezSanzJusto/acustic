@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
   headerTitle: {
     flex: 1, textAlign: 'center', fontSize: 18,
-    fontWeight: '700', color: COLORS.primary,
+    fontWeight: '700', color: '#4E4FA5',
   },
 
   scroll: { paddingHorizontal: 16, paddingTop: 16 },

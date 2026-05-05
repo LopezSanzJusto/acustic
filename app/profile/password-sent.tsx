@@ -91,7 +91,7 @@ export default function PasswordSentScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: PURPLE_BG, paddingHorizontal: 26,
+    flex: 1, backgroundColor: '#39398A', paddingHorizontal: 26,
   },
   title: {
     fontSize: 22, fontWeight: '700', color: '#FFFFFF', textAlign: 'center',

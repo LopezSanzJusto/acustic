@@ -94,7 +94,6 @@ export default function ProfileScreen() {
             iconColor="#F5A623"
             title="Notificaciones y permisos"
             onPress={() => router.push('/profile/notifications' as any)}
-            showBorder={false}
           />
         </View>
 
@@ -107,7 +106,6 @@ export default function ProfileScreen() {
             iconColor="#E05C5C"
             title="Privacidad y términos de uso"
             onPress={() => router.push('/profile/privacy' as any)}
-            showBorder={false}
           />
         </View>
 
@@ -127,7 +125,6 @@ export default function ProfileScreen() {
             iconColor="#F5A623"
             title="Contáctanos"
             onPress={() => Linking.openURL('mailto:soporte@acustic.com')}
-            showBorder={false}
           />
         </View>
 
@@ -147,27 +144,17 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: 60 },
 
   // Cabecera
-  greeting: { fontSize: 20, fontWeight: '700', color: COLORS.primary, textAlign: 'center', marginTop: 24, marginBottom: 16 },
+  greeting: { fontSize: 20, fontWeight: '700', color: '#8C77ED', textAlign: 'center', marginTop: 24, marginBottom: 16 },
   avatarWrapper: { alignSelf: 'center', marginBottom: 28 },
   avatar: { width: 90, height: 90, borderRadius: 45 },
   avatarPlaceholder: { width: 90, height: 90, borderRadius: 45, backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' },
   avatarInitials: { fontSize: 34, fontWeight: 'bold', color: COLORS.white },
 
   // Secciones
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.primary, marginLeft: 20, marginBottom: 8, marginTop: 4 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#4E4FA5', marginLeft: 20, marginBottom: 8, marginTop: 4 },
   section: {
-    backgroundColor: COLORS.white,
     marginHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    overflow: 'hidden',
-    borderWidth: 0.8,
-    borderColor: COLORS.primary + '40',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    marginBottom: 12,
   },
 
   // Cerrar sesión
