@@ -25,7 +25,7 @@ import {
 } from '../services/offlineTourService';
 import { COLORS } from '../utils/theme';
 
-const IMAGE_SIZE = 88;
+const IMAGE_SIZE = 50;
 
 interface ActiveTourCardProps {
   tour: any;
@@ -299,7 +299,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
         </View>
 
         {/* Chevron */}
-        <Ionicons name="chevron-forward" size={18} color="#C8C8D0" />
+        <Ionicons name="chevron-forward" size={30} color="#C8C8D0" />
       </View>
     </TouchableOpacity>
   );
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginHorizontal: 16,
     paddingVertical: 0,
-    paddingRight: 14,
+    paddingRight: 5,
     paddingLeft: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -328,8 +328,8 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {},
   image: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 12,
   },
   imagePlaceholder: {
@@ -339,8 +339,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    gap: 5,
-    paddingVertical: 14,
+    gap: 3,
+    paddingVertical: 8,
   },
   titleRow: {
     flexDirection: 'row',

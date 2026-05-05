@@ -107,7 +107,7 @@ export default function FAQScreen() {
                 activeOpacity={0.7}
                 onPress={() => toggle(i)}
               >
-                <Text style={styles.question}>{item.q}</Text>
+                <Text style={[styles.question, isOpen && styles.questionOpen]}>{item.q}</Text>
                 <Ionicons
                   name={isOpen ? 'chevron-up' : 'chevron-down'}
                   size={20}
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
   headerTitle: {
     flex: 1, textAlign: 'center', fontSize: 18,
-    fontWeight: '700', color: COLORS.primary,
+    fontWeight: '700', color: '#4E4FA5',
   },
 
   scroll: { paddingHorizontal: 18, paddingTop: 8 },
@@ -144,15 +144,15 @@ const styles = StyleSheet.create({
   // Píldora
   pill: {
     backgroundColor: COLORS.white,
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: BORDER,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#8874F7',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 10,
+    marginBottom: 0,
   },
   pillOpen: {
-    borderColor: COLORS.primary,
+    borderColor: '#8874F7',
     paddingBottom: 16,
   },
   pillHeader: {
@@ -164,9 +164,12 @@ const styles = StyleSheet.create({
   question: {
     flex: 1,
     fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: '500',
+    color: '#1A1A1A',
+    fontWeight: '700',
     marginRight: 10,
+  },
+  questionOpen: {
+    color: '#7678ED',
   },
   answer: {
     fontSize: 13,

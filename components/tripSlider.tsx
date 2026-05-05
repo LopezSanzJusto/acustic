@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   sliderBackground: {
     flexDirection: 'row',
     backgroundColor: '#DDD8F5',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 4,
   },
   sliderButton: {
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 12,
   },
   sliderButtonActive: {
     backgroundColor: '#3A3980',

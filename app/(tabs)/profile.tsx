@@ -23,7 +23,7 @@ export default function ProfileScreen() {
     if (!user) return;
     firestoreReady.then(() => getDoc(doc(db, 'users', user.uid))).then((snap) => {
       if (snap.exists()) {
-        const name = snap.data().name;
+        const name = snap.data()?.name;
         if (name) setFirstName(name);
       }
     });
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 20,
     overflow: 'hidden',
     borderWidth: 0.8,
