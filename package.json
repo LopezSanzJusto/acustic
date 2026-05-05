@@ -12,6 +12,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@maplibre/maplibre-react-native": "^11.0.2",
@@ -32,7 +33,7 @@
     "expo-constants": "~55.0.14",
     "expo-dev-client": "~55.0.19",
     "expo-file-system": "~55.0.17",
-    "expo-font": "~55.0.4",
+    "expo-font": "~55.0.6",
     "expo-haptics": "~55.0.9",
     "expo-image": "~55.0.6",
     "expo-linking": "~55.0.9",

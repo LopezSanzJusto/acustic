@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   // ✨ Contenedor principal que se posiciona absolutamente al fondo
   paginationContainer: {
     position: 'absolute',
-    bottom: 12, // Margen inferior
+    bottom: 14, // Margen inferior
     width: '100%',
     alignItems: 'center', // Centrar horizontalmente el óvalo
     justifyContent: 'center',
@@ -80,19 +80,19 @@ const styles = StyleSheet.create({
   // ✨ Óvalo translúcido que envuelve todos los puntos
   dotsWrapper: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.65)', // Negro súper suave/translúcido
-    paddingVertical: 5, // Espacio arriba/abajo dentro del óvalo
-    paddingHorizontal: 9, // Espacio izquierda/derecha dentro del óvalo
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Negro súper suave/translúcido
+    paddingVertical: 2, // Espacio arriba/abajo dentro del óvalo
+    paddingHorizontal: 3, // Espacio izquierda/derecha dentro del óvalo
     borderRadius: 15, // Muy redondeado (píldora)
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7, // Separación entre puntos
+    gap: 3, // Separación entre puntos
   },
   // ✨ El puntito base (eliminamos sombras individuales para mejor rendimiento y limpieza)
   dot: {
     width: 7,  // Círculo perfecto
     height: 7, // Círculo perfecto
-    borderRadius: 3.5, // Mitad exacta para que sea círculo
+    borderRadius: 5, // Mitad exacta para que sea círculo
   },
   // ✨ Estilos de color para el activo/inactivo
   activeDot: {

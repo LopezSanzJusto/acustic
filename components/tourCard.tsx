@@ -35,7 +35,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
         const pointsRef = collection(db, 'tours', tour.id, 'points');
         const q = query(pointsRef, orderBy('order', 'asc'));
         const snapshot = await getDocs(q);
-        const pointsArray = snapshot.docs.map(doc => doc.data());
+        const pointsArray = snapshot.docs.map((doc: any) => doc.data());
 
         setRealPointsCount(pointsArray.length);
 
@@ -84,7 +84,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
           activeOpacity={0.8}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={22} color="#8C77ED" />
+          <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={22} color="#FFF" />
         </TouchableOpacity>
       </View>
 
@@ -147,12 +147,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 15,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: 9,
     zIndex: 10,
   },
-  badgeFree: { backgroundColor: '#22C55E' },
+  badgeFree: { backgroundColor: '#4ACB84' },
   badgePaid: { backgroundColor: '#FFFFFF' },
   badgeText: { fontWeight: 'bold', fontSize: 13 },
   badgeTextFree: { color: COLORS.white },
@@ -163,17 +163,12 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     zIndex: 10,
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    width: 40,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: 'rgba(140, 119, 237, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 4,
   },
 
   infoContainer: { paddingHorizontal: 14, paddingVertical: 12 },
@@ -195,10 +190,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
   },
-  ratingText: { fontSize: 12, fontWeight: '700', color: '#92711A' },
-  reviewCount: { fontSize: 12, color: '#92711A' },
+  ratingText: { fontSize: 12, fontWeight: '700', color: '#1A1A1A' },
+  reviewCount: { fontSize: 12, color: '#1A1A1A' },
 
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'center' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  metaText: { color: COLORS.textDark, fontSize: 12, fontWeight: '600' },
+  metaText: { color: COLORS.textDark, fontSize: 12, fontWeight: '400' },
 });

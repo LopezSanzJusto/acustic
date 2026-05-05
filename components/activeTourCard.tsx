@@ -73,7 +73,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
 
   const hasProgress = progress > 0 && pointsCount > 0;
   const currentStop = pointsCount > 0 ? Math.round((progress / 100) * pointsCount) : 0;
-  const progressPct = `${Math.min(Math.max(Math.round(progress), 0), 100)}%`;
+  const progressPct = Math.min(Math.max(Math.round(progress), 0), 100);
 
   const location = [tour.city, tour.country].filter(Boolean).join(', ');
 
@@ -107,7 +107,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
       const snapshot = await getDocs(
         query(collection(db, 'tours', tour.id, 'points'), orderBy('order', 'asc')),
       );
-      const pts = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const pts = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
 
       // 2. Comprobar espacio antes de empezar
       const { hasSpace, requiredBytes, freeBytes } = await checkDiskSpaceForTour(tour, pts as any);
@@ -291,7 +291,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
 
           {/* Barra de progreso */}
           <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: progressPct }]} />
+            <View style={[styles.progressBarFill, { width: `${progressPct}%` as any }]} />
           </View>
 
           {/* Texto inferior */}
@@ -308,16 +308,18 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 10,
     marginHorizontal: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: 0,
+    paddingRight: 14,
+    paddingLeft: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.07,
     shadowRadius: 6,
     elevation: 2,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
@@ -326,8 +328,8 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {},
   image: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
+    width: 100,
+    height: 100,
     borderRadius: 12,
   },
   imagePlaceholder: {
@@ -338,6 +340,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     gap: 5,
+    paddingVertical: 14,
   },
   titleRow: {
     flexDirection: 'row',
@@ -377,6 +380,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
+    color: '#7F86FF',
   },
   locationRow: {
     flexDirection: 'row',
@@ -388,16 +392,22 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
   progressBarBg: {
-    height: 6,
-    backgroundColor: '#E8E4F5',
-    borderRadius: 3,
+    height: 4,
+    backgroundColor: '#DDDEFF',
+    borderRadius: 2,
     overflow: 'hidden',
     marginTop: 1,
+    marginRight: 40,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#4E4FA5',
-    borderRadius: 3,
+    backgroundColor: '#7F86FF',
+    borderRadius: 2,
+    shadowColor: '#7F86FF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 5,
+    elevation: 4,
   },
   bottomText: {
     fontSize: 12,

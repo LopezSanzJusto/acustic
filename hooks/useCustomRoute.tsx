@@ -109,6 +109,11 @@ export const useCustomRoute = (tourId: string) => {
     context.setRoutePoints(tourId, result);
   }, [customPoints, tourId, context]);
 
+  const resetPoints = useCallback((originalPoints: PointOfInterest[]) => {
+    const sorted = [...originalPoints].sort((a, b) => (a.order || 0) - (b.order || 0));
+    context.setRoutePoints(tourId, sorted.map(p => ({ ...p, isHidden: false })));
+  }, [tourId, context]);
+
   const activeRoutePoints = useMemo(() => {
     return customPoints
       .filter(p => !p.isHidden)
@@ -118,5 +123,5 @@ export const useCustomRoute = (tourId: string) => {
       }));
   }, [customPoints]);
 
-  return { customPoints, activeRoutePoints, setInitialPoints, togglePointVisibility, reorderPoints };
+  return { customPoints, activeRoutePoints, setInitialPoints, togglePointVisibility, reorderPoints, resetPoints };
 };

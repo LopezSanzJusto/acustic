@@ -20,7 +20,7 @@ interface TourPointListProps {
 }
 
 export const TourPointList = ({ tourId, points, hasAccess = true, headerComponent, footerComponent }: TourPointListProps) => {
-  const { customPoints, setInitialPoints, togglePointVisibility, reorderPoints } = useCustomRoute(tourId);
+  const { customPoints, setInitialPoints, togglePointVisibility, reorderPoints, resetPoints } = useCustomRoute(tourId);
 
   useEffect(() => {
     if (points && points.length > 0) {
@@ -122,6 +122,11 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
               {!hasAccess && (
                 <Text style={styles.headerHint}>(disponible al comprar)</Text>
               )}
+              {hasAccess && (
+                <RNTouchableOpacity onPress={() => resetPoints(points)} style={styles.resetButton}>
+                  <Ionicons name="refresh" size={20} color={COLORS.primary} />
+                </RNTouchableOpacity>
+              )}
             </View>
 
             {hasAccess && (
@@ -147,13 +152,14 @@ const styles = StyleSheet.create({
   listHeaderContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 },
   itemWrapper: { paddingHorizontal: 20 },
   header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
-  headerRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', marginBottom: 10, gap: 8 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginBottom: 10, gap: 8, flex: 1 },
+  resetButton: { marginLeft: 'auto', padding: 4 },
   headerHint: { fontSize: 18, fontWeight: 'bold', color: COLORS.primary },
   infoBox: { flexDirection: 'row', backgroundColor: '#F3E8FF', padding: 12, borderRadius: 12, marginBottom: 15, alignItems: 'center', gap: 10 },
   infoText: { fontSize: 12, color: COLORS.primary, flex: 1, lineHeight: 18 },
-  row: { 
-    flexDirection: 'row', alignItems: 'center', padding: 10, marginBottom: 10,
-    backgroundColor: COLORS.surface, borderRadius: 16, borderWidth: 1, borderColor: COLORS.border 
+  row: {
+    flexDirection: 'row', alignItems: 'center', padding: 5, marginBottom: 10,
+    backgroundColor: COLORS.surface, borderRadius: 12, borderWidth: 1, borderColor: COLORS.border 
   },
   rowHidden: { backgroundColor: '#f9f9f9', borderColor: '#eaeaea' },
   rowActive: { 

@@ -1,6 +1,13 @@
 // utils/theme.ts
 import { StyleSheet } from 'react-native';
 
+export const FONTS = {
+  regular: 'Poppins_400Regular',
+  medium: 'Poppins_500Medium',
+  semiBold: 'Poppins_600SemiBold',
+  bold: 'Poppins_700Bold',
+};
+
 export const COLORS = {
   // Brand
   primary: '#4E4FA5E5',        // Púrpura principal

@@ -39,8 +39,8 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
   // Comprobamos si la ruta es gratuita
   const isFree = price === 0 || String(price).toLowerCase() === 'gratis';
   
-  // Si venimos de Mis Viajes Y la ruta es gratis, el componente se oculta (retorna null)
-  if (isFromTrips && isFree) {
+  // Solo se muestra en audioguías de pago
+  if (isFree) {
     return null;
   }
 

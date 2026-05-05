@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "acustic",
-    "slug": "acustic",
+    "slug": "acustis",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,7 +13,11 @@
       "bundleIdentifier": "com.acustic.app",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "UIBackgroundModes": ["audio", "location", "fetch"]
+        "UIBackgroundModes": [
+          "audio",
+          "location",
+          "fetch"
+        ]
       }
     },
     "android": {
@@ -47,7 +51,9 @@
       [
         "expo-build-properties",
         {
-          "ios": { "useFrameworks": "static" }
+          "ios": {
+            "useFrameworks": "static"
+          }
         }
       ],
       [
@@ -106,8 +112,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ed2edee7-8731-4647-af8b-d3b988bb050f"
+        "projectId": "4b7738d5-d94c-4912-b9fb-7b4909842da1"
       }
-    }
+    },
+    "owner": "justolopez"
   }
 }

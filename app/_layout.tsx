@@ -5,6 +5,7 @@ import '../tasks/backgroundLocationTask';
 
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
+import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { onAuthStateChanged, FirebaseAuthTypes } from '@react-native-firebase/auth';
@@ -27,6 +28,7 @@ TrackPlayer.registerPlaybackService(() => PlaybackService);
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold });
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
@@ -106,7 +108,7 @@ export default function RootLayout() {
     }
   }, [user, initializing, segments]);
 
-  if (initializing) {
+  if (initializing || !fontsLoaded) {
     return (
       <View style={StyleSheet.absoluteFill}>
         <Image

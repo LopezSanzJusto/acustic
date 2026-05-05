@@ -109,7 +109,9 @@ export default function ExploreScreen() {
           </TouchableOpacity>
         )}
         <View style={[styles.searchBar, searchQuery.length > 0 && styles.searchBarActive]}>
-          <Ionicons name="search" size={18} color="#8C77ED" style={styles.searchIcon} />
+          <View style={styles.searchIconWrapper}>
+            <Ionicons name="search" size={13} color="#FFF" />
+          </View>
           <TextInput
             value={searchQuery}
             onChangeText={(text) => {
@@ -269,22 +271,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
+    paddingHorizontal: 5,
+    borderRadius:16,
     borderWidth: 1.5,
-    borderColor: '#DDD8F5',
+    borderColor: '#8B5CF6',
   },
   searchBarActive: {
-    borderColor: '#8C77ED',
+    borderColor: '#6D28D9',
   },
-  searchIcon: {
-    marginRight: 8,
+  searchIconWrapper: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#8B5CF6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 2,
   },
   searchInput: {
     flex: 1,
@@ -339,18 +341,28 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 10, 
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#EAEAEA', 
+    borderColor: '#EAEAEA',
     backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 3,
   },
   categoryCard: {
     paddingHorizontal: 13,
     paddingVertical: 7,
-    borderRadius: 10,
+    borderRadius: 14,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EAEAEA',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 3,
   },
   activeCategoryCard: {
     backgroundColor: '#8C77ED',

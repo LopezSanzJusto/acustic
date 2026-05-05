@@ -67,7 +67,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
         const docSnap = await getDoc(doc(db, 'tours', tourId));
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setTourName(data.name || data.title || '');
+          setTourName(data?.name || data?.title || '');
         }
       } catch {
         // Red disponible pero Firestore falló — intentar manifest como fallback

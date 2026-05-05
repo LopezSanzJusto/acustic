@@ -136,7 +136,7 @@ export const AudioMiniPlayer = ({
   );
 };
 
-const FONT_FAMILY = 'Urbanist-SemiBold';
+const FONT_FAMILY = 'Poppins_600SemiBold';
 
 const styles = StyleSheet.create({
   sheetBackground: {
