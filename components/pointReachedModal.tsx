@@ -7,9 +7,9 @@ import { COLORS } from '../utils/theme';
 import { PointOfInterest } from '../data/points';
 
 const { width: SCREEN_W } = Dimensions.get('window');
-const CARD_W = SCREEN_W - 48;
-const IMAGE_H = 200;
-const FADE_H = 80;
+const CARD_W = SCREEN_W - 72;
+const IMAGE_H = 140;
+const FADE_H = 56;
 
 const PURPLE = '#4A4BA6';
 const PURPLE_BTN = '#7B72E8';
@@ -139,9 +139,9 @@ const styles = StyleSheet.create({
   },
 
   body: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 20,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 16,
     alignItems: 'center',
   },
 
@@ -154,14 +154,14 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#A39BF8', marginRight: 6 },
   alertText: { fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
 
-  arrived: { fontSize: 17, color: '#FFFFFF', fontWeight: '500', textAlign: 'center', marginBottom: 2 },
+  arrived: { fontSize: 14, color: '#FFFFFF', fontWeight: '500', textAlign: 'center', marginBottom: 2 },
   pointName: {
-    fontSize: 19,
+    fontSize: 16,
     fontWeight: '800',
     fontStyle: 'italic',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 14,
   },
 
   listenButton: {
@@ -169,13 +169,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: PURPLE_BTN,
-    borderRadius: 30,
-    paddingVertical: 14,
+    paddingVertical: 11,
     width: '100%',
-    marginBottom: 14,
+    marginBottom: 10,
+    borderRadius: 12,
   },
-  listenText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  listenText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
 
-  laterWrapper: { paddingVertical: 4 },
-  laterText: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '500' },
+  laterWrapper: { paddingVertical: 2 },
+  laterText: { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '500' },
 });

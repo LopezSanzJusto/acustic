@@ -85,8 +85,8 @@ export const MapDisplay = ({
               coordinates={routeCoords}
               strokeColor="#FFFFFF"
               strokeWidth={2}
-              lineDashPattern={[8, 8]}
-              zIndex={2}
+              lineDashPattern={[6, 10]}
+              zIndex={4}
             />
           </>
         )}
@@ -121,7 +121,7 @@ export const MapDisplay = ({
               <View
                 style={
                   markerType === 'number'
-                    ? [styles.numberMarkerOuter, { backgroundColor: index === 0 ? '#FF8533' : COLORS.primary }]
+                    ? [styles.numberMarkerOuter, { backgroundColor: index === 0 ? '#FF8533' : '#4E4FA5' }]
                     : styles.markerBorder
                 }
                 collapsable={false}
@@ -167,12 +167,12 @@ const styles = StyleSheet.create({
     top: 0, left: 0, right: 0, bottom: 0,
   },
   markerBorder: {
-    width: 45, height: 45, borderRadius: 22.5,
+    width: 40, height: 40, borderRadius: 20,
     backgroundColor: COLORS.white,
     justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: COLORS.white,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4, shadowRadius: 4, elevation: 6,
+    shadowRadius: 4, elevation: 6,
   },
   markerImage: { width: 41, height: 41, borderRadius: 20.5 },
   numberMarkerOuter: {
@@ -180,20 +180,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     borderWidth: 2.5, borderColor: 'white',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, shadowRadius: 3, elevation: 5,
   },
-  numberText: { color: COLORS.white, fontSize: 13, fontWeight: 'bold' },
+  numberText: { color: COLORS.white, fontSize: 17, fontWeight: 'bold' },
   startBadge: {
     backgroundColor: '#FF8533', borderRadius: 10,
     paddingHorizontal: 7, paddingVertical: 2, marginBottom: 3,
   },
-  startText: { color: 'white', fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5 },
+  startText: { color: 'white', fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5, borderRadius: 12 },
   userMarkerContainer: { width: 24, height: 24, justifyContent: 'center', alignItems: 'center' },
   userMarkerDot: {
     width: 20, height: 20, borderRadius: 10,
     backgroundColor: '#3B82F6',
     borderWidth: 3, borderColor: 'white',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, shadowRadius: 3, elevation: 5,
+    shadowRadius: 3, elevation: 5,
   },
 });
