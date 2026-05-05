@@ -39,6 +39,18 @@ export default function TourDetailScreen() {
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [calculatedDistance, setCalculatedDistance] = useState<string>("Calculando...");
+  const [calculatedDuration, setCalculatedDuration] = useState<string>('');
+
+  const handleRouteCalculated = (distText: string) => {
+    setCalculatedDistance(distText);
+    const km = parseFloat(distText.replace(',', '.'));
+    if (!isNaN(km) && km > 0) {
+      const totalMinutes = (km / 4.5) * 60;
+      const hours = Math.floor(totalMinutes / 60);
+      const mins = Math.round(totalMinutes % 60);
+      setCalculatedDuration(hours > 0 ? `${hours}h ${mins < 10 ? '0' : ''}${mins}m` : `${mins}m`);
+    }
+  };
 
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
@@ -168,7 +180,7 @@ export default function TourDetailScreen() {
     <>
       <ImageSlider images={resolvedCoverImages.length > 0 ? resolvedCoverImages : tourImages} height={280} width={width} />
       <View style={styles.content}>
-        <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
+        <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={calculatedDuration || tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
         <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />
         <TourIntroAudio
             title={tour.title}
@@ -177,7 +189,7 @@ export default function TourDetailScreen() {
           />
 
         <Text style={styles.sectionTitle}>Mapa del tour</Text>
-        <TourMapPreview tourId={id as string} points={points} onRouteCalculated={(dist) => setCalculatedDistance(dist)} onPress={() => {
+        <TourMapPreview tourId={id as string} points={points} onRouteCalculated={handleRouteCalculated} onPress={() => {
             router.push({ pathname: "/tour/map/[id]", params: { id: id } } as any);
           }}
         />
