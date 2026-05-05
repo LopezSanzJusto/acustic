@@ -54,7 +54,7 @@ export const TourIntroAudio = ({ title, image, audioUrl }: { title: string, imag
 };
 
 const styles = StyleSheet.create({
-  container: { marginTop: 25, marginBottom: 10 },
+  container: { marginTop: 0, marginBottom: 24 },
   header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 12 },
   playerCard: { flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 16, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },
   thumbnail: { width: 50, height: 50, borderRadius: 10, marginRight: 6 },

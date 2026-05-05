@@ -22,7 +22,7 @@ const PURPLE_BG = '#3D3E8C';
 const PURPLE_BUTTON = '#A39BF8';
 const INPUT_BORDER = 'rgba(255,255,255,0.35)';
 const PLACEHOLDER = 'rgba(255,255,255,0.55)';
-const LINK_HIGHLIGHT = '#F5A623';
+const LINK_HIGHLIGHT = '#FF9505';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -54,10 +54,6 @@ export default function ForgotPasswordScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={26} color="#FFFFFF" />
-        </TouchableOpacity>
-
         <Text style={styles.title}>Recupera tu contraseña</Text>
         <Text style={styles.subtitle}>
           Introduce tu correo asociado con tu cuenta y te enviaremos un link para restablecer tu
@@ -110,16 +106,6 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: PURPLE_BG },
   scrollContent: { paddingHorizontal: 26, flexGrow: 1 },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
   title: {
     fontSize: 26,
     fontWeight: '800',
@@ -147,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: INPUT_BORDER,
-    borderRadius: 30,
+    borderRadius: 12,
     paddingHorizontal: 18,
     paddingVertical: 4,
     marginBottom: 14,
@@ -168,7 +154,7 @@ const styles = StyleSheet.create({
   mainButton: {
     backgroundColor: PURPLE_BUTTON,
     paddingVertical: 16,
-    borderRadius: 30,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 22,
   },
@@ -176,13 +162,14 @@ const styles = StyleSheet.create({
   mainButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   footerLinkWrapper: { alignSelf: 'center', marginTop: 18 },
   footerLink: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    backgroundColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    color: LINK_HIGHLIGHT,
+    fontSize: 13,
+    fontWeight: '700',
+    borderWidth: 1.5,
+    borderColor: LINK_HIGHLIGHT,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
     overflow: 'hidden',
   },
 });

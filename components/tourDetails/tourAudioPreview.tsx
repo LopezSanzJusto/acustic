@@ -93,7 +93,7 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 30 },
+  container: { marginBottom: 24 },
   previewButton: {
     backgroundColor: '#EDE9FE', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
     paddingVertical: 10, paddingHorizontal: 20, borderRadius: 14, zIndex: 2, alignSelf: 'center',

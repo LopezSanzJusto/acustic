@@ -25,7 +25,7 @@ const PURPLE_BG    = '#3D3E8C';
 const PURPLE_BUTTON = '#A39BF8';
 const INPUT_BORDER  = 'rgba(255,255,255,0.35)';
 const PLACEHOLDER   = 'rgba(255,255,255,0.55)';
-const LINK_HIGHLIGHT = '#F5A623';
+const LINK_HIGHLIGHT = '#FF9505';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function LoginScreen() {
   const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const offerBiometric = (onAccept: () => Promise<void>) => {
+  const offerBiometric = (onAccept: () => Promise<boolean | void>) => {
     if (!available || enabled) return;
     Alert.alert(
       'Acceso rápido',
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   bioButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PURPLE_BUTTON, borderRadius: 14,
+    backgroundColor: PURPLE_BUTTON, borderRadius: 12,
     paddingVertical: 14, paddingHorizontal: 18, marginBottom: 20,
   },
   bioIcon: { marginRight: 10 },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   dividerText: { color: 'rgba(255,255,255,0.85)', fontSize: 14, marginHorizontal: 12 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center', borderWidth: 1.5,
-    borderColor: INPUT_BORDER, borderRadius: 30,
+    borderColor: INPUT_BORDER, borderRadius: 12,
     paddingHorizontal: 18, paddingVertical: 4, marginBottom: 14,
   },
   inputLeftIcon: { marginRight: 10 },
@@ -212,21 +212,23 @@ const styles = StyleSheet.create({
   eyeButton: { paddingLeft: 8 },
   forgotWrapper: { alignSelf: 'flex-end', marginTop: 2, marginBottom: 6 },
   forgotText: {
-    color: '#FFFFFF', fontSize: 12, fontWeight: '600',
-    backgroundColor: LINK_HIGHLIGHT, paddingHorizontal: 6,
-    paddingVertical: 2, borderRadius: 4, overflow: 'hidden',
+    color: LINK_HIGHLIGHT, fontSize: 12, fontWeight: '600',
+    borderWidth: 1.5, borderColor: LINK_HIGHLIGHT,
+    paddingHorizontal: 10, paddingVertical: 3,
+    borderRadius: 12, overflow: 'hidden',
   },
   errorText: { color: '#FFB4B4', fontSize: 14, textAlign: 'center', marginTop: 12 },
   mainButton: {
     backgroundColor: PURPLE_BUTTON, paddingVertical: 18,
-    borderRadius: 30, alignItems: 'center', marginTop: 38,
+    borderRadius: 12, alignItems: 'center', marginTop: 38,
   },
   mainButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 30, flexWrap: 'wrap' },
   footerText: { color: 'rgba(255,255,255,0.9)', fontSize: 13 },
   footerLink: {
-    color: '#FFFFFF', fontSize: 13, fontWeight: '700',
-    backgroundColor: LINK_HIGHLIGHT, paddingHorizontal: 6,
-    paddingVertical: 2, borderRadius: 4, overflow: 'hidden',
+    color: LINK_HIGHLIGHT, fontSize: 13, fontWeight: '700',
+    borderWidth: 1.5, borderColor: LINK_HIGHLIGHT,
+    paddingHorizontal: 10, paddingVertical: 3,
+    borderRadius: 12, overflow: 'hidden',
   },
 });

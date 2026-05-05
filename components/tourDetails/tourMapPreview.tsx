@@ -43,7 +43,7 @@ export const TourMapPreview = ({ tourId, points, onPress, onRouteCalculated }: T
 };
 
 const styles = StyleSheet.create({
-  container: { height: 200, borderRadius: 20, overflow: 'hidden', marginBottom: 20, backgroundColor: '#f0f0f0' },
+  container: { height: 200, borderRadius: 20, overflow: 'hidden', marginBottom: 5, backgroundColor: '#f0f0f0' },
   touchable: { flex: 1 },
   mapWrapper: { flex: 1 },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'transparent' } 

@@ -25,7 +25,7 @@ const PURPLE_BUTTON = '#A39BF8';
 const SOCIAL_BG = '#D9D9E3';
 const INPUT_BORDER = 'rgba(255,255,255,0.35)';
 const PLACEHOLDER = 'rgba(255,255,255,0.55)';
-const LINK_HIGHLIGHT = '#F5A623';
+const LINK_HIGHLIGHT = '#FF9505';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -205,8 +205,8 @@ export default function RegisterScreen() {
         {/* Términos */}
         <Text style={styles.termsText}>
           Al crear una cuenta, aceptas nuestros{' '}
-          <Text style={styles.termsBold}>Términos y Condiciones</Text> y{' '}
-          <Text style={styles.termsBold}>Política de Privacidad</Text>.
+          <Text style={styles.termsBold} onPress={() => router.push('/profile/privacy' as any)}>Términos y Condiciones</Text> y{' '}
+          <Text style={styles.termsBold} onPress={() => router.push('/profile/privacy' as any)}>Política de Privacidad</Text>.
         </Text>
 
         {/* Link a login */}
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: SOCIAL_BG,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 18,
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: INPUT_BORDER,
-    borderRadius: 30,
+    borderRadius: 12,
     paddingHorizontal: 18,
     paddingVertical: 4,
     marginBottom: 14,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   mainButton: {
     backgroundColor: PURPLE_BUTTON,
     paddingVertical: 16,
-    borderRadius: 30,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 22,
   },
@@ -335,13 +335,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   footerLink: {
-    color: '#FFFFFF',
+    color: LINK_HIGHLIGHT,
     fontSize: 13,
     fontWeight: '700',
-    backgroundColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: LINK_HIGHLIGHT,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
     overflow: 'hidden',
   },
 });

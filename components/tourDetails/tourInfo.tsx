@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap', 
     gap: 15, 
     alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 10 // Un poquito de aire respecto a la foto
+    marginBottom: 24,
+    marginTop: 10
   },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { color: COLORS.textDark, fontSize: 14, fontWeight: '500' }

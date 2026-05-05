@@ -10,13 +10,13 @@ export default function TabLayout() {
     <Tabs screenOptions={{ 
       tabBarActiveTintColor: COLORS.primary, 
       headerShown: false,
-      tabBarStyle: { height: 60, paddingBottom: 10, backgroundColor: COLORS.background }
+      tabBarStyle: { height: 60, paddingBottom: 10, backgroundColor: '#FFFFFF', borderTopWidth: 0, elevation: 0, shadowOpacity: 0 }
     }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Explora',
-          tabBarIcon: ({ color }) => <Ionicons name="map-outline" size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'map' : 'map-outline'} size={24} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -27,8 +27,8 @@ export default function TabLayout() {
             <Image 
               source={require('../../assets/images/logo.png')} 
               style={{ 
-                width: 24, 
-                height: 24, 
+                width: 32,
+                height: 32,
                 tintColor: color // 💡 El color cambiará automáticamente según esté activo o inactivo
               }} 
               resizeMode="contain" 
@@ -39,7 +39,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => <Ionicons name="person-outline" size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />,
         }}
       />
     </Tabs>

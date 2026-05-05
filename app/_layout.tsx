@@ -99,7 +99,8 @@ export default function RootLayout() {
 
     const inAuthGroup = segments[0] === 'auth' || segments[0] === 'welcome';
     const inTabGroup = segments[0] === '(tabs)';
-    const isGuestAllowed = segments[0] === 'tour' || segments[0] === 'modal';
+    const isGuestAllowed = segments[0] === 'tour' || segments[0] === 'modal' ||
+      (segments[0] === 'profile' && segments[1] === 'privacy');
 
     if (user && inAuthGroup) {
       router.replace('/(tabs)' as any);

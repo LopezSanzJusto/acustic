@@ -149,13 +149,13 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
 
 // ... mantén tus estilos intactos (styles.listHeaderContainer, etc.)
 const styles = StyleSheet.create({
-  listHeaderContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 },
+  listHeaderContainer: { paddingHorizontal: 20 },
   itemWrapper: { paddingHorizontal: 20 },
   header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
-  headerRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginBottom: 10, gap: 8, flex: 1 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginBottom: 5, gap: 8, flex: 1 },
   resetButton: { marginLeft: 'auto', padding: 4 },
   headerHint: { fontSize: 18, fontWeight: 'bold', color: COLORS.primary },
-  infoBox: { flexDirection: 'row', backgroundColor: '#F3E8FF', padding: 12, borderRadius: 12, marginBottom: 15, alignItems: 'center', gap: 10 },
+  infoBox: { flexDirection: 'row', backgroundColor: '#F3E8FF', padding: 12, borderRadius: 12, marginBottom: 10, alignItems: 'center', gap: 10 },
   infoText: { fontSize: 12, color: COLORS.primary, flex: 1, lineHeight: 18 },
   row: {
     flexDirection: 'row', alignItems: 'center', padding: 5, marginBottom: 10,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   rowHidden: { backgroundColor: '#f9f9f9', borderColor: '#eaeaea' },
   rowActive: { 
-    elevation: 8, 
+    elevation: 8,
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 5,
     backgroundColor: COLORS.white,
     borderColor: COLORS.primary

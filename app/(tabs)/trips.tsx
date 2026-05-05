@@ -88,7 +88,7 @@ export default function TripsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, paddingTop: 50 },
+  container: { flex: 1, backgroundColor: '#F2F2F7', paddingTop: 50 },
   header: { paddingHorizontal: 20, marginBottom: 15 },
   title: { fontSize: 28, fontWeight: 'bold', color: COLORS.textDark },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },

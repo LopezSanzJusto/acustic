@@ -140,7 +140,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#F2F2F7' },
   scroll: { paddingBottom: 60 },
 
   // Cabecera
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   avatarInitials: { fontSize: 34, fontWeight: 'bold', color: COLORS.white },
 
   // Secciones
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#4E4FA5', marginLeft: 20, marginBottom: 8, marginTop: 4 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#4E4FA5', marginLeft: 20, marginBottom: 8, marginTop: 0 },
   section: {
     marginHorizontal: 16,
     marginBottom: 12,

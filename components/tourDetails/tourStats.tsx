@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: 20,
+    marginBottom: 24,
     justifyContent: 'space-around',
     alignItems: 'center',
     shadowColor: "#000", shadowOffset: {width:0, height:2}, shadowOpacity:0.05, shadowRadius:5, elevation:2

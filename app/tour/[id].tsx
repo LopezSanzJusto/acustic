@@ -241,7 +241,7 @@ export default function TourDetailScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 10 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 15 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 12 },
   premiumButton: {
     backgroundColor: '#D4AF37', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
     paddingVertical: 16, borderRadius: 14, marginTop: 10, marginBottom: 25,

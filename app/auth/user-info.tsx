@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     borderWidth: 1.5,
     borderColor: INPUT_BORDER,
-    borderRadius: 30,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 4,
     marginBottom: 14,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   mainButton: {
     backgroundColor: PURPLE_BUTTON,
     paddingVertical: 16,
-    borderRadius: 30,
+    borderRadius: 12,
     alignItems: 'center',
   },
   mainButtonDisabled: { opacity: 0.6 },

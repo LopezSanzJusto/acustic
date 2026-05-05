@@ -240,10 +240,10 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: COLORS.background, 
-    paddingTop: 50 
+  container: {
+    flex: 1,
+    backgroundColor: '#F2F2F7',
+    paddingTop: 50
   },
   loadingContainer: { 
     flex: 1, 
