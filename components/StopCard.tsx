@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    borderRadius: 20, // Bordes muy redondeados
+    borderRadius: 12, // Bordes muy redondeados
     borderWidth: 1,
     borderColor: '#DDD6FE', // Morado claro (Tailwind violet-200)
     padding: 6,
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   image: {
     width: 56,
     height: 56,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: '#E5E7EB',
   },
   badge: {
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4E4FA5',
     width: 28,
     height: 28,
-    borderRadius: 17,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,

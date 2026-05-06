@@ -4,7 +4,7 @@ import React, { useMemo, useCallback, useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { COLORS } from "../utils/theme";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import Slider from "@react-native-community/slider";
+import { GlowSlider } from "./GlowSlider";
 import { Ionicons } from "@expo/vector-icons";
 import { PointOfInterest } from "../data/points";
 import { StopCard } from "./StopCard";
@@ -106,15 +106,12 @@ export const AudioMiniPlayer = ({
 
         <View style={styles.progress}>
           <Text style={styles.timeLabel}>{formatTime(positionMillis)}</Text>
-          <Slider
+          <GlowSlider
             style={styles.slider}
             minimumValue={0}
             maximumValue={durationMillis || 1}
             value={positionMillis}
             onSlidingComplete={onSeek}
-            minimumTrackTintColor="#8B5CF6"
-            maximumTrackTintColor="#E5E7EB"
-            thumbTintColor="#8B5CF6"
           />
           <Text style={styles.timeLabel}>{formatTime(durationMillis)}</Text>
         </View>
@@ -242,7 +239,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   slider: {
-    flex: 1, 
+    flex: 1,
   },
   timeLabel: {
     fontSize: 12,

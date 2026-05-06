@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
+import { GlowSlider } from '../GlowSlider';
 import { COLORS } from '../../utils/theme';
 import { useSingleAudio } from '../../hooks/useSingleAudio';
 
@@ -30,15 +30,12 @@ export const TourIntroAudio = ({ title, image, audioUrl }: { title: string, imag
           <View style={styles.progress}>
             <Text style={styles.time}>{formatTime(positionMillis)}</Text>
             
-            <Slider
-              style={{ flex: 1, height: 40 }}
+            <GlowSlider
+              style={{ flex: 1 }}
               minimumValue={0}
               maximumValue={durationMillis || 1}
               value={positionMillis}
               onSlidingComplete={seekTo}
-              minimumTrackTintColor="#A78BFA"
-              maximumTrackTintColor="#E0E0E0"
-              thumbTintColor={COLORS.primary}
             />
 
             <Text style={styles.time}>{formatTime(durationMillis)}</Text>
@@ -56,10 +53,10 @@ export const TourIntroAudio = ({ title, image, audioUrl }: { title: string, imag
 const styles = StyleSheet.create({
   container: { marginTop: 0, marginBottom: 24 },
   header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 12 },
-  playerCard: { flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 16, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },
-  thumbnail: { width: 50, height: 50, borderRadius: 10, marginRight: 6 },
+  playerCard: { flexDirection: 'row', alignItems: 'center', padding: 4, borderRadius: 12, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: '#8874F780' },
+  thumbnail: { width: 56, height: 56, borderRadius: 12, marginRight: 2 },
   trackInfo: { flex: 1, justifyContent: 'center', marginRight: 10 },
-  progress: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  progress: { flexDirection: 'row', alignItems: 'center', gap: 4, color: '#8874F7' },
   time: { fontSize: 12, color: COLORS.muted, width: 35, textAlign: 'center' },
-  playBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#8B5CF6', justifyContent: 'center', alignItems: 'center' }
+  playBtn: { width: 35, height: 35, borderRadius: 22, backgroundColor: '#8B5CF6', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
 });
