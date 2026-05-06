@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
   stickyHeader: {
     backgroundColor: "#FFF", 
     paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: 4,
+    paddingBottom: 28,
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6", 
     zIndex: 10,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 6,
   },
   imageContainer: {
     position: "relative",
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    marginBottom: 5,
+    marginBottom: 2,
   },
   mainControls: {
     flexDirection: "row",

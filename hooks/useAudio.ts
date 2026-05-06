@@ -36,6 +36,7 @@ export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = f
           artist: 'Acustic',
           artwork: activePoint?.image ?? undefined,
         });
+        await TrackPlayer.setRate(playbackRate);
         await TrackPlayer.play();
       } catch (e) {
         console.error('[useAudio] TrackPlayer error:', e);

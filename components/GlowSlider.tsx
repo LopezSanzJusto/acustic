@@ -1,5 +1,5 @@
 // components/GlowSlider.tsx
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, StyleSheet, View } from 'react-native';
 
 interface GlowSliderProps {
@@ -27,6 +27,26 @@ export const GlowSlider = ({
   const isDragging = useRef(false);
   const startX = useRef(0);
 
+  // Refs para que el PanResponder (creado una sola vez) siempre lea valores actuales
+  const trackWidthRef = useRef(0);
+  const minimumValueRef = useRef(minimumValue);
+  const maximumValueRef = useRef(maximumValue);
+  const onSlidingCompleteRef = useRef(onSlidingComplete);
+  minimumValueRef.current = minimumValue;
+  maximumValueRef.current = maximumValue;
+  onSlidingCompleteRef.current = onSlidingComplete;
+
+  // Después de seek, mantener dragValue hasta que el prop value se acerque al target
+  const seekTargetRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (seekTargetRef.current === null) return;
+    const tolerance = (maximumValue - minimumValue) * 0.02 + 1000; // 2% del rango o mín 1s
+    if (Math.abs(value - seekTargetRef.current) < tolerance) {
+      seekTargetRef.current = null;
+      setDragValue(null);
+    }
+  }, [value, minimumValue, maximumValue]);
+
   const range = maximumValue - minimumValue || 1;
   const displayValue = dragValue !== null ? dragValue : value;
   const progress = Math.max(0, Math.min(1, (displayValue - minimumValue) / range));
@@ -37,30 +57,43 @@ export const GlowSlider = ({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
+        const tw = trackWidthRef.current;
+        const min = minimumValueRef.current;
+        const rng = maximumValueRef.current - min || 1;
         isDragging.current = true;
-        startX.current = Math.max(0, Math.min(evt.nativeEvent.locationX, trackWidth));
-        const v = minimumValue + (startX.current / trackWidth) * range;
+        startX.current = Math.max(0, Math.min(evt.nativeEvent.locationX, tw));
+        const v = min + (startX.current / tw) * rng;
         setDragValue(v);
       },
       onPanResponderMove: (_, gs) => {
-        const x = Math.max(0, Math.min(startX.current + gs.dx, trackWidth));
-        setDragValue(minimumValue + (x / trackWidth) * range);
+        const tw = trackWidthRef.current;
+        const min = minimumValueRef.current;
+        const rng = maximumValueRef.current - min || 1;
+        const x = Math.max(0, Math.min(startX.current + gs.dx, tw));
+        setDragValue(min + (x / tw) * rng);
       },
       onPanResponderRelease: (_, gs) => {
-        const x = Math.max(0, Math.min(startX.current + gs.dx, trackWidth));
-        const finalValue = minimumValue + (x / trackWidth) * range;
+        const tw = trackWidthRef.current;
+        const min = minimumValueRef.current;
+        const rng = maximumValueRef.current - min || 1;
+        const x = Math.max(0, Math.min(startX.current + gs.dx, tw));
+        const finalValue = min + (x / tw) * rng;
         isDragging.current = false;
-        setDragValue(null);
-        onSlidingComplete(finalValue);
+        // Mantener dragValue en la posición del seek hasta que TrackPlayer confirme
+        seekTargetRef.current = finalValue;
+        setDragValue(finalValue);
+        onSlidingCompleteRef.current(finalValue);
       },
       onPanResponderTerminate: () => {
         isDragging.current = false;
+        seekTargetRef.current = null;
         setDragValue(null);
       },
     })
   ).current;
 
   const onLayout = (e: LayoutChangeEvent) => {
+    trackWidthRef.current = e.nativeEvent.layout.width;
     setTrackWidth(e.nativeEvent.layout.width);
   };
 
