@@ -210,13 +210,13 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
     if (isDownloaded) {
       return (
         <TouchableOpacity
-          style={styles.badgeRow}
+          style={[styles.badgeRow, styles.badgePillDownloaded]}
           onPress={handleDownloadPress}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="checkmark" size={11} color="#22C55E" />
-          <Text style={[styles.badgeText, { color: '#22C55E' }]}>Descargado</Text>
+          <Ionicons name="checkmark" size={11} color="#83CF8F" />
+          <Text style={[styles.badgeText, { color: '#83CF8F' }]}>Descargado</Text>
         </TouchableOpacity>
       );
     }
@@ -253,8 +253,8 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
         activeOpacity={0.7}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Ionicons name="arrow-down-outline" size={11} color="#4E4FA5" />
-        <Text style={[styles.badgeText, { color: '#4E4FA5' }]}>
+        <Ionicons name="arrow-down-outline" size={11} color="#7F86FF" />
+        <Text style={[styles.badgeText, { color: '#7F86FF' }]}>
           {isPaused ? `Reanudar ${downloadPct}%` : 'Descargar'}
         </Text>
       </TouchableOpacity>
@@ -362,25 +362,41 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   badgePill: {
-    backgroundColor: '#EAE7FB',
-    paddingHorizontal: 7,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 3,
     paddingVertical: 3,
     borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  badgePillDownloaded: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 3,
+    paddingVertical: 2,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
   },
   badgePillError: {
     backgroundColor: '#FEE2E2',
-    paddingHorizontal: 7,
+    paddingHorizontal: 3,
     paddingVertical: 3,
     borderRadius: 20,
   },
   badgePillUpdate: {
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 7,
+    paddingHorizontal: 3,
     paddingVertical: 3,
     borderRadius: 20,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 8,
     fontWeight: '600',
     color: '#7F86FF',
   },

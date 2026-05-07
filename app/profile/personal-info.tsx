@@ -165,17 +165,17 @@ const styles = StyleSheet.create({
   avatar: { width: 88, height: 88, borderRadius: 44 },
   avatarPlaceholder: { width: 88, height: 88, borderRadius: 44, backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' },
   avatarInitials: { fontSize: 32, fontWeight: 'bold', color: COLORS.white },
-  pencilButton: { position: 'absolute', bottom: 2, right: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border, justifyContent: 'center', alignItems: 'center', elevation: 2 },
+  pencilButton: { position: 'absolute', bottom: 2, right: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: COLORS.white, borderWidth: 1, justifyContent: 'center', alignItems: 'center', elevation: 2 },
 
   // Campos
   row: { flexDirection: 'row', gap: 12, marginBottom: 14 },
   halfField: { flex: 1 },
   field: { marginBottom: 14 },
   label: { fontSize: 14, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
-  input: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary,  borderColor: '#8874F7', borderWidth: 1 },
+  input: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderWidth: 1 },
   inputDisabled: { color: COLORS.muted },
-  birthdate: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderColor: '#8874F7', borderWidth: 1 },
-  country: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderColor: '#8874F7', borderWidth: 1 },
+  birthdate: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderWidth: 1 },
+  country: { backgroundColor: '#F2F2F7', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: COLORS.primary, borderWidth: 1 },
   // Guardar
   saveButton: { backgroundColor: '#7678ED', borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 24 },
   saveButtonText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
