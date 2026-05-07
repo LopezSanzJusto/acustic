@@ -27,8 +27,8 @@ export default function TabLayout() {
             <Image 
               source={require('../../assets/images/logo.png')} 
               style={{ 
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 tintColor: color // 💡 El color cambiará automáticamente según esté activo o inactivo
               }} 
               resizeMode="contain" 

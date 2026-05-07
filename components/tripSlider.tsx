@@ -40,6 +40,7 @@ export const TripSlider = ({ activeTab, onTabChange }: TripSliderProps) => {
 const styles = StyleSheet.create({
   sliderContainer: {
     paddingHorizontal: 20,
+    marginTop: 10,
     marginBottom: 20,
   },
   sliderBackground: {
@@ -52,8 +53,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
   },
   sliderButtonActive: {
     backgroundColor: '#3A3980',

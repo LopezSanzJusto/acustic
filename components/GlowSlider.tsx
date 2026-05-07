@@ -11,7 +11,7 @@ interface GlowSliderProps {
 }
 
 const THUMB_SIZE = 10;
-const THUMB_GLOW = 15;
+const THUMB_GLOW = 13;
 const TRACK_HEIGHT = 3;
 const GLOW_COLOR = '#8B5CF6';
 
@@ -106,8 +106,6 @@ export const GlowSlider = ({
       {/* Track fondo */}
       <View style={styles.trackBg} />
 
-      {/* Glow de la barra */}
-      <View style={[styles.trackGlow, { width: Math.max(0, progress * trackWidth) }]} />
       {/* Track progreso */}
       <View style={[styles.trackFilled, { width: Math.max(0, progress * trackWidth) }]} />
 
@@ -149,11 +147,6 @@ const styles = StyleSheet.create({
     height: TRACK_HEIGHT,
     backgroundColor: GLOW_COLOR,
     borderRadius: 1,
-    // Glow iOS
-    shadowColor: GLOW_COLOR,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 2,
   },
   thumbHalo: {
     position: 'absolute',

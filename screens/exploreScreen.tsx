@@ -110,7 +110,7 @@ export default function ExploreScreen() {
         )}
         <View style={[styles.searchBar, searchQuery.length > 0 && styles.searchBarActive]}>
           <View style={styles.searchIconWrapper}>
-            <Ionicons name="search" size={13} color="#FFF" />
+            <Ionicons name="search" size={19} color="#FFF" />
           </View>
           <TextInput
             value={searchQuery}
@@ -197,7 +197,7 @@ export default function ExploreScreen() {
           <View style={styles.categoriesWrapper}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
               <TouchableOpacity style={styles.filterButton}>
-                <Text style={{ color: COLORS.text, fontWeight: '500' }}>🌐 Idioma</Text>
+                <Text style={{ color: COLORS.text, fontWeight: '500', fontSize: 11 }}>🌐 Idioma</Text>
               </TouchableOpacity>
               {categories.map((cat, index) => (
                 <TouchableOpacity
@@ -273,16 +273,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 5,
     borderRadius:16,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: '#8B5CF6',
   },
   searchBarActive: {
     borderColor: '#6D28D9',
   },
   searchIconWrapper: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius:20,
     backgroundColor: '#8B5CF6',
     justifyContent: 'center',
     alignItems: 'center',
@@ -339,37 +339,37 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#EAEAEA',
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   categoryCard: {
-    paddingHorizontal: 13,
-    paddingVertical: 7,
-    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EAEAEA',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   activeCategoryCard: {
     backgroundColor: '#8C77ED',
     borderColor: '#8C77ED',
   },
   categoryText: {
-    fontSize: 13,
+    fontSize: 11,
     color: COLORS.text,
     fontWeight: '500',
   },

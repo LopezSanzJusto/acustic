@@ -40,9 +40,6 @@ export default function TripsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mis Viajes</Text>
-      </View>
 
       {/* 1. Componente del Slider */}
       <TripSlider activeTab={activeTab} onTabChange={setActiveTab} />

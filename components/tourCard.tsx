@@ -13,7 +13,7 @@ import { ImageSlider } from './imageSlider';
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 15;
 const CARD_WIDTH = width - CARD_MARGIN * 2;
-const IMAGE_HEIGHT = 165;
+const IMAGE_HEIGHT = 125;
 
 interface TourCardProps {
   tour: any;
@@ -131,7 +131,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
-    borderRadius: 20,
+    borderRadius: 12,
     marginBottom: 20,
     marginHorizontal: CARD_MARGIN,
     overflow: 'hidden',
@@ -147,14 +147,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 9,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
     zIndex: 10,
   },
   badgeFree: { backgroundColor: '#4ACB84' },
   badgePaid: { backgroundColor: '#FFFFFF' },
-  badgeText: { fontWeight: 'bold', fontSize: 13 },
+  badgeText: { fontWeight: 'bold', fontSize: 15 },
   badgeTextFree: { color: COLORS.white },
   badgeTextPaid: { color: '#1A1A1A' },
 
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     zIndex: 10,
-    width: 40,
+    width: 35,
     height: 26,
     borderRadius: 8,
     backgroundColor: 'rgba(140, 119, 237, 0.6)',

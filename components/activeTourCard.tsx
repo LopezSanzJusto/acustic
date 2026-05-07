@@ -290,7 +290,9 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
           </View>
 
           {/* Barra de progreso */}
-          <View style={styles.progressBarBg}>
+          <View style={styles.progressBarContainer}>
+            <View style={styles.progressBarBg} />
+            <View style={[styles.progressBarGlow, { width: `${progressPct}%` as any }]} />
             <View style={[styles.progressBarFill, { width: `${progressPct}%` as any }]} />
           </View>
 
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
   imageWrapper: {},
   image: {
     width: 80,
-    height: 80,
+    height: 83.8,
     borderRadius: 12,
   },
   imagePlaceholder: {
@@ -391,23 +393,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.muted,
   },
-  progressBarBg: {
-    height: 4,
-    backgroundColor: '#DDDEFF',
-    borderRadius: 2,
-    overflow: 'hidden',
+  progressBarContainer: {
+    height: 7,
+    justifyContent: 'center',
     marginTop: 1,
     marginRight: 40,
   },
+  progressBarBg: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: '#DDDEFF',
+    borderRadius: 2,
+  },
+  progressBarGlow: {
+    position: 'absolute',
+    left: 0,
+    height: 6,
+    backgroundColor: '#7F86FF50',
+    borderRadius: 4,
+  },
   progressBarFill: {
-    height: '100%',
+    position: 'absolute',
+    left: 0,
+    height: 4,
     backgroundColor: '#7F86FF',
     borderRadius: 2,
     shadowColor: '#7F86FF',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.9,
-    shadowRadius: 5,
-    elevation: 4,
+    shadowRadius: 2,
   },
   bottomText: {
     fontSize: 12,
