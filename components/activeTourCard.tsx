@@ -215,7 +215,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="checkmark" size={11} color="#83CF8F" />
+          <Image source={require('../assets/images/icons/Tick_Descargado.png')} style={{ width: 11, height: 11 }} resizeMode="contain" />
           <Text style={[styles.badgeText, { color: '#83CF8F' }]}>Descargado</Text>
         </TouchableOpacity>
       );

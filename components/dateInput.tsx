@@ -16,8 +16,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/theme';
 
 type Variant = 'light' | 'dark';
@@ -150,10 +150,10 @@ export function DateInput({ value, onChange, variant = 'light' }: Props) {
       />
 
       <TouchableOpacity style={styles.calendarButton} activeOpacity={0.7} disabled>
-        <Ionicons
-          name="calendar-outline"
-          size={20}
-          color={isDark ? '#F5C542' : COLORS.primary}
+        <Image
+          source={require('../assets/images/icons/Año_de_Nacimiento.png')}
+          style={{ width: 20, height: 20 }}
+          resizeMode="contain"
         />
       </TouchableOpacity>
     </View>

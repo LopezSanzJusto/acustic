@@ -73,10 +73,12 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
                 onPress={() => togglePointVisibility(item.id)}
                 style={styles.iconButton}
               >
-                 <Ionicons 
-                   name={item.isHidden ? "eye-off-outline" : "eye-outline"} 
-                   size={24} 
-                   color={item.isHidden ? COLORS.muted : COLORS.textDark} 
+                 <Image
+                   source={item.isHidden
+                     ? require('../../assets/images/icons/Punto_No_Activo_Audioguia.png')
+                     : require('../../assets/images/icons/Punto_Activo_Audioguia.png')}
+                   style={{ width: 24, height: 24 }}
+                   resizeMode="contain"
                  />
               </RNTouchableOpacity>
 
@@ -131,7 +133,7 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
 
             {hasAccess && (
               <View style={styles.infoBox}>
-                <Ionicons name="information-circle" size={20} color={COLORS.primary} />
+                <Image source={require('../../assets/images/icons/Informacion_Personaliza_Tu_Ruta.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
                 <Text style={styles.infoText}>Arrastra desde el icono derecho para reordenar o toca el ojo para ocultar paradas.</Text>
               </View>
             )}

@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
+  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image,
 } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -41,15 +41,11 @@ export default function PasswordSentScreen() {
 
       <Text style={styles.title}>Revisa tu email</Text>
 
-      {/* Icono sobre */}
-      <View style={styles.iconWrapper}>
-        <View style={styles.envelope}>
-          <Text style={styles.envelopeEmoji}>📧</Text>
-        </View>
-        <View style={styles.badge}>
-          <Text style={{ fontSize: 12 }}>✅</Text>
-        </View>
-      </View>
+      <Image
+        source={require('../../assets/images/icons/Correo_Enviado.png')}
+        style={styles.correoIcon}
+        resizeMode="contain"
+      />
 
       <Text style={styles.confirmation}>¡Correo enviado!</Text>
 
@@ -96,23 +92,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22, fontWeight: '700', color: '#FFFFFF', textAlign: 'center',
   },
-  iconWrapper: {
-    alignSelf: 'center', marginTop: 32,
-    width: 110, height: 90,
-    justifyContent: 'center', alignItems: 'center',
-  },
-  envelope: {
-    width: 100, height: 80,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 20, justifyContent: 'center', alignItems: 'center',
-  },
-  envelopeEmoji: { fontSize: 52 },
-  badge: {
-    position: 'absolute', top: 0, right: 4,
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center', alignItems: 'center',
-    borderWidth: 3, borderColor: PURPLE_BG,
+  correoIcon: {
+    alignSelf: 'center', width: 100, height: 100, marginTop: 32,
   },
   confirmation: {
     fontSize: 26, fontWeight: '800', color: '#FFFFFF',
@@ -123,16 +104,16 @@ const styles = StyleSheet.create({
     textAlign: 'center', marginTop: 18,
     lineHeight: 20, paddingHorizontal: 8,
   },
-  emailText: { color: LINK_HIGHLIGHT, fontWeight: '700' },
+  emailText: { color: '#FFFFFF', fontWeight: '700' },
   spamText: {
     color: 'rgba(255,255,255,0.7)', fontSize: 12,
     textAlign: 'center', marginTop: 18, paddingHorizontal: 10,
   },
-  spamHighlight: { color: LINK_HIGHLIGHT, fontWeight: '700' },
+  spamHighlight: { color: '#FF9505', fontWeight: '700' },
   spacer: { flex: 1 },
   mainButton: {
     backgroundColor: PURPLE_BUTTON,
-    paddingVertical: 16, borderRadius: 30, alignItems: 'center',
+    paddingVertical: 16, borderRadius: 14, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5,
   },
   mainButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   footer: {
@@ -141,9 +122,9 @@ const styles = StyleSheet.create({
   },
   footerText: { color: 'rgba(255,255,255,0.9)', fontSize: 13 },
   footerLink: {
-    color: '#FFFFFF', fontSize: 13, fontWeight: '700',
-    backgroundColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 6, paddingVertical: 2,
-    borderRadius: 4, overflow: 'hidden',
+    color: '#FF9505', fontSize: 13, fontWeight: '700',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 3,
+    borderRadius: 6, borderWidth: 0.5, borderColor: '#FF9505',
   },
 });

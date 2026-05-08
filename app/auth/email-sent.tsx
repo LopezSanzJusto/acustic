@@ -8,9 +8,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -44,14 +44,11 @@ export default function EmailSentScreen() {
     >
       <Text style={styles.title}>Revisa tu email</Text>
 
-      <View style={styles.iconWrapper}>
-        <View style={styles.envelope}>
-          <Ionicons name="mail" size={64} color="#A39BF8" />
-        </View>
-        <View style={styles.badge}>
-          <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-        </View>
-      </View>
+      <Image
+        source={require('../../assets/images/icons/Correo_Enviado.png')}
+        style={styles.correoIcon}
+        resizeMode="contain"
+      />
 
       <Text style={styles.confirmation}>¡Correo enviado!</Text>
 
@@ -102,34 +99,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
   },
-  iconWrapper: {
+  correoIcon: {
     alignSelf: 'center',
-    marginTop: 32,
-    width: 110,
-    height: 90,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  envelope: {
     width: 100,
-    height: 80,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: 0,
-    right: 4,
-    backgroundColor: '#4CAF50',
-    width: 28,
-    height: 28,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: PURPLE_BG,
+    height: 100,
+    marginTop: 32,
   },
   confirmation: {
     fontSize: 26,
@@ -146,7 +120,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     paddingHorizontal: 8,
   },
-  emailText: { color: LINK_HIGHLIGHT, fontWeight: '700'},
+  emailText: { color: '#FFFFFF', fontWeight: '700'},
   spamText: {
     color: 'rgba(255,255,255,0.7)',
     fontSize: 12,

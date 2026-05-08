@@ -41,11 +41,11 @@ export default function ExploreScreen() {
   const { results: searchResults, loadingSearch } = useCitySearch(searchQuery);
 
   const categories = [
-    { label: 'Todos',       icon: null },
-    { label: 'Historia',    icon: '🏛' },
-    { label: 'Arte',        icon: '🎨' },
-    { label: 'Gastronomía', icon: '🍽' },
-    { label: 'Cultura',     icon: '🎭' },
+    { label: 'Todos',       image: null },
+    { label: 'Historia',    image: require('../assets/images/icons/Historia.png') },
+    { label: 'Arte',        image: require('../assets/images/icons/Arte.png') },
+    { label: 'Gastronomía', image: require('../assets/images/icons/Gastronomia.png') },
+    { label: 'Cultura',     image: null },
   ];
 
   // ✨ ACTUALIZADO: Optimizamos la extracción usando textos normalizados
@@ -204,9 +204,12 @@ export default function ExploreScreen() {
                   key={index}
                   style={[styles.categoryCard, cat.label === 'Todos' && styles.activeCategoryCard]}
                 >
-                  <Text style={[styles.categoryText, cat.label === 'Todos' && styles.activeCategoryText]}>
-                    {cat.icon ? `${cat.icon} ${cat.label}` : cat.label}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    {cat.image && <Image source={cat.image} style={{ width: 14, height: 14 }} resizeMode="contain" />}
+                    <Text style={[styles.categoryText, cat.label === 'Todos' && styles.activeCategoryText]}>
+                      {cat.label}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>

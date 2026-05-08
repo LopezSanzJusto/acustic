@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Linking } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { signOut } from '@react-native-firebase/auth';
 import { doc, getDoc } from '@react-native-firebase/firestore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -75,23 +74,20 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Ajustes de cuenta</Text>
         <View style={styles.section}>
           <MenuItem
-            icon="briefcase-outline"
+            imageSource={require('../../assets/images/icons/Informacion_Personal.png')}
             iconBgColor="#E8F4FD"
-            iconColor="#4A9EDE"
             title="Información personal"
             onPress={() => router.push('/profile/personal-info' as any)}
           />
           <MenuItem
-            icon="lock-closed-outline"
+            imageSource={require('../../assets/images/icons/Cambio_de_Contraseña.png')}
             iconBgColor="#F0EDFF"
-            iconColor={COLORS.primary}
             title="Cambio de contraseña"
             onPress={() => router.push('/profile/change-password' as any)}
           />
           <MenuItem
-            icon="notifications-outline"
+            imageSource={require('../../assets/images/icons/Notificaciones_y_Permisos.png')}
             iconBgColor="#FFF8E1"
-            iconColor="#F5A623"
             title="Notificaciones y permisos"
             onPress={() => router.push('/profile/notifications' as any)}
           />
@@ -101,9 +97,8 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Sobre Acustic</Text>
         <View style={styles.section}>
           <MenuItem
-            icon="globe-outline"
+            imageSource={require('../../assets/images/icons/Privacidad_y_Terminos_de_Uso.png')}
             iconBgColor="#FFF0F0"
-            iconColor="#E05C5C"
             title="Privacidad y términos de uso"
             onPress={() => router.push('/profile/privacy' as any)}
           />
@@ -113,16 +108,14 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Centro de ayuda</Text>
         <View style={styles.section}>
           <MenuItem
-            icon="help-circle-outline"
+            imageSource={require('../../assets/images/icons/Preguntas_Frecuentes.png')}
             iconBgColor="#F0EDFF"
-            iconColor={COLORS.primary}
             title="Preguntas frecuentes"
             onPress={() => router.push('/profile/faq' as any)}
           />
           <MenuItem
-            icon="person-outline"
+            imageSource={require('../../assets/images/icons/Contáctanos.png')}
             iconBgColor="#FFF3E8"
-            iconColor="#F5A623"
             title="Contáctanos"
             onPress={() => Linking.openURL('mailto:soporte@acustic.com')}
           />
@@ -130,7 +123,7 @@ export default function ProfileScreen() {
 
         {/* Cerrar sesión */}
         <TouchableOpacity style={styles.logoutRow} onPress={handleLogout} activeOpacity={0.7}>
-          <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
+          <Image source={require('../../assets/images/icons/Cerrar_Sesion.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
 

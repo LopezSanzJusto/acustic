@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, Image,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -214,7 +214,7 @@ export default function PrivacyScreen() {
           onPress={() => toggle('privacy')}
         >
           <View style={styles.iconBox}>
-            <Text style={styles.iconEmoji}>🔐</Text>
+            <Image source={require('../../assets/images/icons/Privacidad_y_Terminos_de_Uso.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
           </View>
           <Text style={styles.itemText}>Política de privacidad</Text>
           <Ionicons
@@ -239,7 +239,7 @@ export default function PrivacyScreen() {
           onPress={() => toggle('terms')}
         >
           <View style={styles.iconBox}>
-            <Text style={styles.iconEmoji}>📋</Text>
+            <Image source={require('../../assets/images/icons/Terminos_y_Condiciones.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
           </View>
           <Text style={styles.itemText}>Términos y condiciones</Text>
           <Ionicons

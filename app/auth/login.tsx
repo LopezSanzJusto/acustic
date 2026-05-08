@@ -13,9 +13,9 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocialAuth } from '../../hooks/useSocialAuth';
@@ -105,7 +105,7 @@ export default function LoginScreen() {
             onPress={handleBiometric}
             activeOpacity={0.85}
           >
-            <Ionicons name="finger-print-outline" size={24} color="#6FB8FF" style={styles.bioIcon} />
+            <Image source={require('../../assets/images/icons/Biometria.png')} style={[{ width: 24, height: 24 }, styles.bioIcon]} resizeMode="contain" />
             <Text style={styles.bioText}>Inicia sesión con biometría</Text>
           </TouchableOpacity>
         )}
@@ -120,7 +120,7 @@ export default function LoginScreen() {
 
         {/* Email */}
         <View style={styles.inputWrapper}>
-          <Ionicons name="mail" size={20} color="#FF8A4C" style={styles.inputLeftIcon} />
+          <Image source={require('../../assets/images/icons/Email.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -135,7 +135,7 @@ export default function LoginScreen() {
 
         {/* Contraseña */}
         <View style={styles.inputWrapper}>
-          <Ionicons name="lock-closed" size={20} color="#F5C542" style={styles.inputLeftIcon} />
+          <Image source={require('../../assets/images/icons/Contraseña.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
@@ -150,7 +150,13 @@ export default function LoginScreen() {
             style={styles.eyeButton}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#9EEDD6" />
+            <Image
+              source={showPassword
+                ? require('../../assets/images/icons/Punto_Activo_Audioguia.png')
+                : require('../../assets/images/icons/Punto_No_Activo_Audioguia.png')}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         </View>
 

@@ -1,8 +1,7 @@
 // components/tourDetails/tourInfo.tsx
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { COLORS } from '../../utils/theme';
 
 interface TourInfoProps {
@@ -20,19 +19,19 @@ export const TourInfo = ({ city, country, duration, distance, points }: TourInfo
   return (
     <View style={styles.metaRow}>
       <View style={styles.metaItem}>
-        <Ionicons name="location-sharp" size={16} color={COLORS.error} />
+        <Image source={require('../../assets/images/icons/Ubicacion_Ciudad.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
         <Text style={styles.metaText}>{city}, {country}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Ionicons name="time-outline" size={16} color={COLORS.primary} />
+        <Image source={require('../../assets/images/icons/Tiempo_Audioguia.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
         <Text style={styles.metaText}>{duration}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Ionicons name="walk-outline" size={16} color={COLORS.accent} />
+        <Image source={require('../../assets/images/icons/Distancia_Audioguia.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
         <Text style={styles.metaText}>{distance}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Ionicons name="map-outline" size={16} color={COLORS.gold} />
+        <Image source={require('../../assets/images/icons/Puntos_de_Interes_Audioguia.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
         <Text style={styles.metaText}>{points?.length || 0}</Text>
       </View>
     </View>

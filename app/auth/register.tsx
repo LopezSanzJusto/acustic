@@ -13,9 +13,9 @@ import {
   ScrollView,
   Keyboard,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSocialAuth } from '../../hooks/useSocialAuth';
 import { useBiometricAuth } from '../../hooks/useBiometricAuth';
@@ -118,7 +118,7 @@ export default function RegisterScreen() {
             disabled={socialLoading}
             activeOpacity={0.85}
           >
-            <Ionicons name="logo-google" size={22} color="#DB4437" style={styles.socialIcon} />
+            <Image source={require('../../assets/images/icons/Logo_Google.png')} style={[{ width: 22, height: 22 }, styles.socialIcon]} resizeMode="contain" />
             <Text style={styles.socialText}>Continuar con Google</Text>
           </TouchableOpacity>
 
@@ -129,7 +129,7 @@ export default function RegisterScreen() {
               disabled={socialLoading}
               activeOpacity={0.85}
             >
-              <Ionicons name="logo-apple" size={22} color="#FFFFFF" style={styles.socialIcon} />
+              <Image source={require('../../assets/images/icons/Logo_Apple.png')} style={[{ width: 22, height: 22 }, styles.socialIcon]} resizeMode="contain" />
               <Text style={[styles.socialText, styles.appleText]}>Continuar con Apple</Text>
             </TouchableOpacity>
           )}
@@ -147,7 +147,7 @@ export default function RegisterScreen() {
 
         {/* Email */}
         <View style={styles.inputWrapper}>
-          <Ionicons name="mail" size={20} color="#FF8A4C" style={styles.inputLeftIcon} />
+          <Image source={require('../../assets/images/icons/Email.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -162,7 +162,7 @@ export default function RegisterScreen() {
 
         {/* Confirmación de email */}
         <View style={styles.inputWrapper}>
-          <Ionicons name="mail-open" size={20} color="#FF8A4C" style={styles.inputLeftIcon} />
+          <Image source={require('../../assets/images/icons/Email.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
             placeholder="Confirma tu email"
@@ -177,7 +177,7 @@ export default function RegisterScreen() {
 
         {/* Contraseña */}
         <View style={styles.inputWrapper}>
-          <Ionicons name="lock-closed" size={20} color="#F5C542" style={styles.inputLeftIcon} />
+          <Image source={require('../../assets/images/icons/Contraseña.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
             placeholder="Contraseña"
@@ -188,7 +188,13 @@ export default function RegisterScreen() {
             autoCapitalize="none"
           />
           <TouchableOpacity onPress={() => setShowPassword(v => !v)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color={PLACEHOLDER} />
+            <Image
+              source={showPassword
+                ? require('../../assets/images/icons/Punto_No_Activo_Audioguia.png')
+                : require('../../assets/images/icons/Punto_Activo_Audioguia.png')}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         </View>
 

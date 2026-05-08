@@ -1,7 +1,6 @@
 // components/routeProgressBar.tsx
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet, Image } from 'react-native';
 import { COLORS } from '../utils/theme';
 
 interface RouteProgressBarProps {
@@ -16,9 +15,7 @@ export const RouteProgressBar = ({ percentage }: RouteProgressBarProps) => {
       <View style={styles.track} />
 
       <View style={[styles.indicatorWrapper, { left: `${safePercentage}%` }]}>
-        <View style={styles.indicator}>
-          <Ionicons name="walk" size={12} color={COLORS.white} />
-        </View>
+        <Image source={require('../assets/images/icons/Delimitador_Mapa__Procentaje_Realizado.png')} style={{ width: 14, height: 14 }} resizeMode="contain" />
       </View>
     </View>
   );
@@ -42,21 +39,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    transform: [{ translateX: -10 }], // Mitad del nuevo ancho del icono (20px / 2)
+    transform: [{ translateX: -14 }],
   },
-  indicator: {
-    width: 20, // Icono mucho más discreto
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: COLORS.primary,
-    borderWidth: 1.5,
-    borderColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    elevation: 2,
-  }
 });

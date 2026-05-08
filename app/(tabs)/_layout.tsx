@@ -16,7 +16,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Explora',
-          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'map' : 'map-outline'} size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Image source={require('../../assets/images/icons/Explora.png')} style={{ width: 24, height: 24, tintColor: color }} resizeMode="contain" />,
         }}
       />
       <Tabs.Screen
@@ -39,7 +39,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Image source={require('../../assets/images/icons/Perfil.png')} style={{ width: 24, height: 24, tintColor: color }} resizeMode="contain" />,
         }}
       />
     </Tabs>

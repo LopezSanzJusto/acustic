@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
+  ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -219,7 +219,13 @@ function PasswordField({
           placeholderTextColor={COLORS.placeholder}
         />
         <TouchableOpacity onPress={onToggle} hitSlop={8}>
-          <Ionicons name={show ? 'eye' : 'eye-off'} size={20} color={COLORS.muted} />
+          <Image
+            source={show
+              ? require('../../assets/images/icons/Punto_Activo_Audioguia.png')
+              : require('../../assets/images/icons/Punto_No_Activo_Audioguia.png')}
+            style={{ width: 20, height: 20 }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
     </View>

@@ -1,7 +1,6 @@
 // components/tourCard.tsx
-import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { collection, getDocs, orderBy, query } from '@react-native-firebase/firestore';
 
 import { useFavorites } from '../hooks/useFavorites';
@@ -84,7 +83,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
           activeOpacity={0.8}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={22} color="#FFF" />
+          <Image source={require('../assets/images/icons/Corazon_Favoritos.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
         </TouchableOpacity>
       </View>
 
@@ -95,7 +94,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
           <Text style={styles.title} numberOfLines={1}>{tour.title}</Text>
           {tour.rating != null && (
             <View style={styles.ratingRow}>
-              <Ionicons name="star" size={13} color={COLORS.gold} />
+              <Image source={require('../assets/images/icons/Estrella_Valoracion_Audioguia_Card.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
               <Text style={styles.ratingText}>{tour.rating}</Text>
               {tour.reviews != null && (
                 <Text style={styles.reviewCount}>({tour.reviews})</Text>
@@ -107,19 +106,19 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
         {/* Meta */}
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Ionicons name="location-sharp" size={13} color={COLORS.error} />
+            <Image source={require('../assets/images/icons/Ubicacion_Ciudad.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
             <Text style={styles.metaText}>{location}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={13} color="#8C77ED" />
+            <Image source={require('../assets/images/icons/Tiempo_Audioguia.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
             <Text style={styles.metaText}>{calculatedTime}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="walk-outline" size={13} color={COLORS.accent} />
+            <Image source={require('../assets/images/icons/Distancia_Audioguia.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
             <Text style={styles.metaText}>{preciseDistance} km</Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="map-outline" size={13} color={COLORS.gold} />
+            <Image source={require('../assets/images/icons/Puntos_de_Interes_Audioguia.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
             <Text style={styles.metaText}>{realPointsCount}</Text>
           </View>
         </View>

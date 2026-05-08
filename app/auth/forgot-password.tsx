@@ -12,9 +12,9 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -62,7 +62,7 @@ export default function ForgotPasswordScreen() {
 
         <Text style={styles.label}>Correo electrónico</Text>
         <View style={styles.inputWrapper}>
-          <Ionicons name="mail" size={20} color="#FF8A4C" style={styles.inputLeftIcon} />
+          <Image source={require('../../assets/images/icons/Email.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
             placeholder="Introduce tu correo"

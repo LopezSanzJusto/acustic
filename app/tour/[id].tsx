@@ -1,7 +1,7 @@
 // app/tour/[id].tsx
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity, Image } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, onSnapshot } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../../services/firebaseConfig';
@@ -198,7 +198,7 @@ export default function TourDetailScreen() {
 
         {!hasAccess && (
           <TouchableOpacity style={styles.premiumButton} onPress={handleStartRoute}>
-            <Ionicons name="lock-closed" size={20} color="white" style={{ marginRight: 8 }} />
+            <Image source={require('../../assets/images/icons/Candado_Adio_Bloqueado.png')} style={{ width: 20, height: 20, marginRight: 8 }} resizeMode="contain" />
             <Text style={styles.premiumText}>Personaliza tu ruta (Premium)</Text>
           </TouchableOpacity>
         )}

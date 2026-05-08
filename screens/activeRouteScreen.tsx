@@ -1,7 +1,7 @@
 // screens/activeRouteScreen.tsx
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, Image } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from 'expo-router';
@@ -21,7 +21,6 @@ import { COLORS } from "../utils/theme";
 import { useCustomRoute } from "../hooks/useCustomRoute";
 import { useOfflineAssets } from "../hooks/useOfflineAssets";
 
-import { RouteProgressBar } from "../components/routeProgressBar";
 import { calculateRealTimeProgress } from "../utils/geo";
 import { useTourProgress } from "../hooks/useTourProgress";
 import { PointReachedModal } from "../components/pointReachedModal";
@@ -290,11 +289,13 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
               <Text style={styles.headerTitle} numberOfLines={1}>{tourName}</Text>
               <View style={styles.headerButton} />
             </View>
-            <View style={styles.progressRow}>
-              <Text style={styles.progressText}>{Math.round(currentProgress)}%</Text>
-              <View style={styles.barWrapper}>
-                <RouteProgressBar percentage={currentProgress} />
-              </View>
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Image
+                source={require('../assets/images/icons/Delimitador_Mapa__Procentaje_Realizado.png')}
+                style={styles.dividerIcon}
+                resizeMode="contain"
+              />
             </View>
           </View>
 
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   topHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 },
   headerButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: 'bold', color: COLORS.primary },
-  progressRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 10 },
-  progressText: { fontSize: 13, fontWeight: 'bold', color: COLORS.primary, width: 42, textAlign: 'left' },
-  barWrapper: { flex: 1, marginLeft: 6 },
+  dividerRow: { height: 0, justifyContent: 'flex-end', alignItems: 'center', overflow: 'visible' },
+  dividerLine: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 6, backgroundColor: '#8874F7' },
+  dividerIcon: { width: 22, height: 22, marginBottom: -7.5 },
 });

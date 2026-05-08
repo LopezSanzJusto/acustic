@@ -87,7 +87,7 @@ export default function PersonalInfoScreen() {
               style={styles.pencilButton}
               onPress={() => Alert.alert('Editar foto', 'Disponible muy pronto.')}
             >
-              <Ionicons name="pencil" size={14} color={COLORS.text} />
+              <Image source={require('../../assets/images/icons/Lápiz_Editar_Foto_Informacion_Personal.png')} style={{ width: 22, height: 22 }} resizeMode="contain" />
             </TouchableOpacity>
           </View>
         </View>
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   avatar: { width: 88, height: 88, borderRadius: 44 },
   avatarPlaceholder: { width: 88, height: 88, borderRadius: 44, backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' },
   avatarInitials: { fontSize: 32, fontWeight: 'bold', color: COLORS.white },
-  pencilButton: { position: 'absolute', bottom: 2, right: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: COLORS.white, borderWidth: 1, justifyContent: 'center', alignItems: 'center', elevation: 2 },
+  pencilButton: { position: 'absolute', top: 2, right: 0, justifyContent: 'center', alignItems: 'center', zIndex: 1, elevation: 2 },
 
   // Campos
   row: { flexDirection: 'row', gap: 12, marginBottom: 14 },

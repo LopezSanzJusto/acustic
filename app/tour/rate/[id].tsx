@@ -161,7 +161,7 @@ export default function RateTourScreen() {
         >
           {showCelebration && (
             <View style={styles.celebration}>
-              <Text style={styles.celebrationEmoji}>🎉</Text>
+              <Image source={require('../../../assets/images/icons/Audioguia_Completada.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />
               <Text style={styles.celebrationText}>
                 <Text style={{ fontWeight: '700' }}>¡Enhorabuena! </Text>
                 has completado

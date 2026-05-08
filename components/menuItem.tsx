@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/theme';
 
@@ -7,7 +7,8 @@ const ARROW_COLOR = '#8874F7';
 const ITEM_BORDER = '#8874F7';
 
 interface MenuItemProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap;
+  imageSource?: any;
   iconBgColor?: string;
   iconColor?: string;
   title: string;
@@ -18,6 +19,7 @@ interface MenuItemProps {
 
 export const MenuItem = ({
   icon,
+  imageSource,
   iconBgColor = COLORS.primary + '20',
   iconColor = COLORS.primary,
   title,
@@ -31,8 +33,12 @@ export const MenuItem = ({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View style={[styles.iconContainer, { backgroundColor: isDestructive ? COLORS.error + '20' : iconBgColor }]}>
-        <Ionicons name={icon} size={20} color={isDestructive ? COLORS.error : iconColor} />
+      <View style={styles.iconContainer}>
+        {imageSource ? (
+          <Image source={imageSource} style={{ width: 32, height: 32 }} resizeMode="contain" />
+        ) : icon ? (
+          <Ionicons name={icon} size={28} color={isDestructive ? COLORS.error : iconColor} />
+        ) : null}
       </View>
       <Text style={[styles.menuText, isDestructive && { color: COLORS.error }]}>{title}</Text>
       <Ionicons name="chevron-forward" size={20} color={ARROW_COLOR} />
@@ -57,9 +63,8 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 9,
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
