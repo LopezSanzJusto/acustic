@@ -149,7 +149,7 @@ export default function RateTourScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={10}>
-            <Ionicons name="arrow-back" size={26} color={COLORS.primary} />
+            <Ionicons name="arrow-back" size={26} color="#4E4FA5" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Valora tu experiencia</Text>
           <View style={{ width: 26 }} />
@@ -159,35 +159,51 @@ export default function RateTourScreen() {
           contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
         >
+          <Image
+            source={require('../../../assets/images/logo.png')}
+            style={styles.bgLogo}
+            resizeMode="contain"
+          />
+
           {showCelebration && (
             <View style={styles.celebration}>
-              <Image source={require('../../../assets/images/icons/Audioguia_Completada.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />
-              <Text style={styles.celebrationText}>
-                <Text style={{ fontWeight: '700' }}>¡Enhorabuena! </Text>
-                has completado
-              </Text>
+              <Image source={require('../../../assets/images/icons/Audioguia_Completada.png')} style={{ width: 80, height: 80 }} resizeMode="contain" />
+              <Text style={styles.celebrationText}>¡Enhorabuena has completado</Text>
             </View>
           )}
 
           {tour && (
             <View style={styles.tourCard}>
-              {tourImage ? (
-                <Image source={{ uri: tourImage }} style={styles.tourImage} />
-              ) : (
-                <View style={[styles.tourImage, { backgroundColor: COLORS.border }]} />
-              )}
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.tourTitle} numberOfLines={1}>{tour.title}</Text>
-                <View style={styles.locationRow}>
-                  <Ionicons name="location" size={12} color={COLORS.primary} />
-                  <Text style={styles.tourLocation} numberOfLines={1}>
-                    {[tour.city, tour.country].filter(Boolean).join(', ')}
-                  </Text>
-                </View>
+              {/* Imagen full-height */}
+              <View style={styles.tourImageWrapper}>
+                {tourImage ? (
+                  <Image source={{ uri: tourImage }} style={styles.tourImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.tourImage, { backgroundColor: COLORS.border }]} />
+                )}
               </View>
-              <View style={styles.progressBadge}>
-                <Text style={styles.progressNumber}>{progress}%</Text>
-                <Text style={styles.progressLabel}>completado</Text>
+
+              {/* Info + Badge dentro del mismo flex */}
+              <View style={styles.tourInfo}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.tourTitle} numberOfLines={2}>{tour.title}</Text>
+                    <View style={styles.locationRow}>
+                      <Image
+                        source={require('../../../assets/images/icons/Ubicacion_Ciudad.png')}
+                        style={{ width: 13, height: 13 }}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.tourLocation} numberOfLines={1}>
+                        {[tour.city, tour.country].filter(Boolean).join(', ')}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.progressBadge}>
+                    <Text style={styles.progressNumber}>{progress}%</Text>
+                    <Text style={styles.progressLabel}>completado</Text>
+                  </View>
+                </View>
               </View>
             </View>
           )}
@@ -269,53 +285,86 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: COLORS.background,
   },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textDark },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#4E4FA5' },
   scroll: { padding: 20 },
-  celebration: { alignItems: 'center', marginBottom: 16 },
+  bgLogo: {
+    position: 'absolute',
+    width: 340,
+    height: 340,
+    alignSelf: 'center',
+    top: 60,
+    opacity: 0.05,
+  },
+  celebration: { alignItems: 'center', marginBottom: 20 },
   celebrationEmoji: { fontSize: 40, marginBottom: 6 },
-  celebrationText: { fontSize: 18, color: COLORS.textDark },
+  celebrationText: { fontSize: 20, fontWeight: '700', color: '#4E4FA5', marginTop: 8 },
   tourCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    padding: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#4E4FA5',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    elevation: 3,
     marginBottom: 24,
+    minHeight: 90,
+    paddingRight: 12,
   },
-  tourImage: { width: 64, height: 64, borderRadius: 12 },
-  tourTitle: { fontSize: 15, fontWeight: '700', color: COLORS.textDark },
-  locationRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-  tourLocation: { fontSize: 12, color: COLORS.muted, marginLeft: 4 },
+  tourImageWrapper: {
+    width: 80,
+    alignSelf: 'stretch',
+    borderTopLeftRadius: 15,
+    borderBottomLeftRadius: 15,
+    overflow: 'hidden',
+  },
+  tourImage: {
+    width: 80,
+    height: 88,
+    borderRadius: 12,
+  },
+  tourInfo: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 0,
+    justifyContent: 'center',
+    gap: 6,
+  },
+  tourTitle: { fontSize: 14, fontWeight: '700', color: '#4E4FA5', lineHeight: 18 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  tourLocation: { fontSize: 12, color: '#4E4FA5', opacity: 0.75, flex: 1 },
   progressBadge: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    borderWidth: 3,
-    borderColor: COLORS.primary,
+    borderRadius: 32,
+    borderWidth: 4,
+    borderColor: '#4E4FA5',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    shadowColor: '#4E4FA5',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 6,
   },
-  progressNumber: { fontSize: 11, fontWeight: '800', color: COLORS.primary },
-  progressLabel: { fontSize: 7, color: COLORS.primary },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textDark, marginBottom: 16 },
+  progressNumber: { fontSize: 10, fontWeight: '800', color: '#4E4FA5' },
+  progressLabel: { fontSize: 7, color: '#4E4FA5', textAlign: 'center' },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#4E4FA5', marginBottom: 16 },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 18,
   },
-  ratingLabel: { fontSize: 14, color: COLORS.textDark, flex: 1 },
+  ratingLabel: { fontSize: 14, color: '#4E4FA5', flex: 1 },
   starsRow: { flexDirection: 'row' },
   textarea: {
-    borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderWidth: 1.5,
+    borderColor: '#4E4FA5',
     borderRadius: 12,
     padding: 14,
     minHeight: 100,
@@ -325,7 +374,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   submit: {
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#4E4FA5',
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
