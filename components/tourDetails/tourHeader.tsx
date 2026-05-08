@@ -1,7 +1,7 @@
 // components/tourDetails/tourHeader.tsx
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,8 +25,16 @@ export const TourHeader = ({ title, isFavorite, onBack, onToggleFavorite }: Tour
         {title}
       </Text>
 
-      <TouchableOpacity onPress={onToggleFavorite} style={styles.iconButton} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-        <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={26} color="#312E81" />
+      <TouchableOpacity
+        onPress={onToggleFavorite}
+        style={[styles.iconButton, { backgroundColor: isFavorite ? '#312E81' : 'transparent' }]}
+        hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+      >
+        <Image
+          source={require('../../assets/images/icons/Corazon_Favoritos.png')}
+          style={{ width: 26, height: 26, tintColor: isFavorite ? 'white' : '#312E81' }}
+          resizeMode="contain"
+        />
       </TouchableOpacity>
     </View>
   );
@@ -47,7 +55,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   iconButton: {
-    padding: 2,
+    padding: 4,
+    borderRadius: 8,
   },
   title: {
     flex: 1,

@@ -1,7 +1,7 @@
 // components/tourDetails/tourAudioPreview.tsx
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
@@ -47,19 +47,16 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.previewButton} onPress={toggleExpand} activeOpacity={0.8}>
-         <Ionicons name="headset" size={22} color="#6B6B6B" style={{ marginRight: 10 }} />
-         <Text style={styles.previewText}>Pre-view de la ruta</Text>
+         <Image source={require('../../assets/images/icons/auriculares.png')} style={{ width: 30, height: 30, marginRight: 10 }} resizeMode="contain" />
+         <Text style={styles.previewText}>Escucha <Text style={styles.previewTextBold}>gratis</Text>{'\n'}los primeros audios</Text>
       </TouchableOpacity>
-      <Text style={styles.subtitleText}>
-        Escucha <Text style={styles.subtitleItalic}>gratis</Text> los primeros audios
-      </Text>
 
       {isExpanded && (
         <View style={styles.dropdownContainer}>
           {points.map((point, index) => {
-            const isLocked = index >= 2; 
+            const isLocked = index >= 2;
             const isCurrentPoint = activePoint?.id === point.id;
-            let iconName: any = isLocked ? "lock-closed" : (isCurrentPoint && isPlaying ? "pause-circle" : "play-circle");
+            const playIconName: any = isCurrentPoint && isPlaying ? "pause-circle" : "play-circle";
 
             return (
               <View key={point.id || index} style={styles.audioRow}>
@@ -77,11 +74,10 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
                   disabled={isLocked}
                   onPress={() => isCurrentPoint ? togglePlayPause() : setActivePointIndex(index)}
                 >
-                  <Ionicons
-                    name={iconName}
-                    size={32}
-                    color={isLocked ? COLORS.muted : COLORS.primary}
-                  />
+                  {isLocked
+                    ? <Image source={require('../../assets/images/icons/Candado_Adio_Bloqueado.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
+                    : <Ionicons name={playIconName} size={32} color={COLORS.primary} />
+                  }
                 </TouchableOpacity>
               </View>
             );
@@ -93,14 +89,13 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 24 },
+  container: { marginBottom: 24, paddingTop: 30 },
   previewButton: {
-    backgroundColor: '#EDE9FE', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    paddingVertical: 10, paddingHorizontal: 20, borderRadius: 14, zIndex: 2, alignSelf: 'center',
+    backgroundColor: '#8874F71A', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    paddingVertical: 5, paddingHorizontal: 15, borderRadius: 14, zIndex: 2, alignSelf: 'center',
   },
-  previewText: { color: '#7C3AED', fontWeight: 'bold', fontSize: 16 },
-  subtitleText: { textAlign: 'center', fontSize: 16, fontWeight: '700', color: '#1a1a1a', marginTop: 12 },
-  subtitleItalic: { fontStyle: 'italic', fontWeight: '400' },
+  previewText: { color: '#8874F7', fontWeight: '400', fontSize: 16, textAlign: 'center' },
+  previewTextBold: { color: '#8874F7', fontWeight: '700' },
   dropdownContainer: {
     backgroundColor: COLORS.surface, borderRadius: 12,
     paddingTop: 10, paddingBottom: 10, paddingHorizontal: 15, marginTop: 12, borderWidth: 1,

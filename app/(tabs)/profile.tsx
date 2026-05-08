@@ -17,6 +17,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
 
   const [firstName, setFirstName] = useState(user?.displayName?.split(' ')[0] || 'Viajero');
+  const [photoError, setPhotoError] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -59,8 +60,12 @@ export default function ProfileScreen() {
         {/* Cabecera */}
         <Text style={styles.greeting}>¡Hola {firstName}!</Text>
         <View style={styles.avatarWrapper}>
-          {user?.photoURL ? (
-            <Image source={{ uri: user.photoURL }} style={styles.avatar} />
+          {user?.photoURL && !photoError ? (
+            <Image
+              source={{ uri: user.photoURL }}
+              style={styles.avatar}
+              onError={() => setPhotoError(true)}
+            />
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarInitials}>

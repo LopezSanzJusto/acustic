@@ -133,7 +133,7 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
 
             {hasAccess && (
               <View style={styles.infoBox}>
-                <Image source={require('../../assets/images/icons/Informacion_Personaliza_Tu_Ruta.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                <Image source={require('../../assets/images/icons/Informacion_Personaliza_Tu_Ruta.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
                 <Text style={styles.infoText}>Arrastra desde el icono derecho para reordenar o toca el ojo para ocultar paradas.</Text>
               </View>
             )}
@@ -153,10 +153,10 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
 const styles = StyleSheet.create({
   listHeaderContainer: { paddingHorizontal: 20 },
   itemWrapper: { paddingHorizontal: 20 },
-  header: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
-  headerRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginBottom: 5, gap: 8, flex: 1 },
+  header: { fontSize: 16, fontWeight: 'bold', color: COLORS.textDark },
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 5, gap: 8, justifyContent: 'center' },
   resetButton: { marginLeft: 'auto', padding: 4 },
-  headerHint: { fontSize: 18, fontWeight: 'bold', color: COLORS.primary },
+  headerHint: { fontSize: 16, fontWeight: 'bold', color: '#8874F7'},
   infoBox: { flexDirection: 'row', backgroundColor: '#F3E8FF', padding: 12, borderRadius: 12, marginBottom: 10, alignItems: 'center', gap: 10 },
   infoText: { fontSize: 12, color: COLORS.primary, flex: 1, lineHeight: 18 },
   row: {
