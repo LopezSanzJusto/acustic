@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   containerLight: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#8874F7',
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   cellYear: { minWidth: 56 },
   textDark: { color: '#FFFFFF', fontSize: 15 },
-  textLight: { color: COLORS.primary, fontSize: 16 },
+  textLight: { color: '#000000', fontSize: 16 },
   sepDark: { color: 'rgba(255,255,255,0.75)', fontSize: 15, marginHorizontal: 4 },
   sepLight: { color: COLORS.muted, fontSize: 16, marginHorizontal: 4 },
   calendarButton: { marginLeft: 'auto', paddingLeft: 8 },

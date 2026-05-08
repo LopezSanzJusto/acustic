@@ -69,7 +69,7 @@ export function CountrySelector({
         <Ionicons
           name="chevron-down"
           size={20}
-          color={isDark ? 'rgba(255,255,255,0.75)' : COLORS.muted}
+          color={isDark ? 'rgba(255,255,255,0.75)' : '#8874F7'}
         />
       </TouchableOpacity>
 
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#8874F7',
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
   },
   triggerTextDark: { color: '#FFFFFF', fontSize: 15, flex: 1 },
-  triggerTextLight: { color: COLORS.primary, fontSize: 16, flex: 1 },
+  triggerTextLight: { color: '#000000', fontSize: 16, flex: 1 },
   placeholderDark: { color: 'rgba(255,255,255,0.55)' },
   placeholderLight: { color: COLORS.placeholder },
 
