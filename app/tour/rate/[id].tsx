@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
-    height: 120,
+    height: 90,
   },
   celebrationIcon: {
     position: 'absolute',
@@ -306,6 +306,7 @@ const styles = StyleSheet.create({
     color: '#4E4FA5',
     textAlign: 'center',
     zIndex: 2,
+    top: 12,
   },
   tourCard: {
     flexDirection: 'row',

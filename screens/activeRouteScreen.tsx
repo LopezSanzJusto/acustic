@@ -1,10 +1,10 @@
 // screens/activeRouteScreen.tsx
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, Image } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { doc, getDoc } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../services/firebaseConfig';
@@ -45,6 +45,7 @@ interface ActiveRouteScreenProps {
 export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
   const { location } = useLocation(true);
   const { points, loading: pointsLoading } = useFirebasePoints(tourId);
   const { activeRoutePoints, setInitialPoints } = useCustomRoute(tourId);
@@ -239,6 +240,25 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
     const isLastPoint = maxReachedIndex === routeToUse.length - 1;
     saveProgress(tourId, isLastPoint ? 100 : currentProgress);
   }, [maxReachedIndex]);
+
+  // ✨ Intercepta cualquier salida (flecha, swipe iOS, back Android) para
+  // redirigir a la pantalla de valoración cuando el tour está completado.
+  const redirectedRef = useRef(false);
+  useEffect(() => {
+    const unsub = (navigation as any).addListener('beforeRemove', (e: any) => {
+      if (redirectedRef.current) return;
+      if (currentProgress >= 100) {
+        e.preventDefault();
+        redirectedRef.current = true;
+        saveProgress(tourId, 100);
+        router.replace({
+          pathname: '/tour/rate/[id]',
+          params: { id: tourId, completed: 'true' },
+        } as any);
+      }
+    });
+    return unsub;
+  }, [navigation, currentProgress, tourId, router, saveProgress]);
 
   if (pointsLoading) {
     return (
