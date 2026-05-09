@@ -149,7 +149,7 @@ export default function RateTourScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={10}>
-            <Ionicons name="arrow-back" size={26} color="#4E4FA5" />
+            <Ionicons name="arrow-back" size={26} color="#8874F7" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Valora tu experiencia</Text>
           <View style={{ width: 26 }} />
@@ -159,16 +159,15 @@ export default function RateTourScreen() {
           contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
         >
-          <Image
-            source={require('../../../assets/images/logo.png')}
-            style={styles.bgLogo}
-            resizeMode="contain"
-          />
 
           {showCelebration && (
             <View style={styles.celebration}>
-              <Image source={require('../../../assets/images/icons/Audioguia_Completada.png')} style={{ width: 80, height: 80 }} resizeMode="contain" />
-              <Text style={styles.celebrationText}>¡Enhorabuena has completado</Text>
+              <Image
+                source={require('../../../assets/images/icons/Audioguia_Completada.png')}
+                style={styles.celebrationIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.celebrationText}>¡Enhorabuena! has completado</Text>
             </View>
           )}
 
@@ -261,7 +260,7 @@ function RatingRow({
       <Text style={styles.ratingLabel}>{label}</Text>
       <View style={styles.starsRow}>
         {[1, 2, 3, 4, 5].map(i => (
-          <TouchableOpacity key={i} onPress={() => onChange(i)} hitSlop={6}>
+          <TouchableOpacity key={i} onPress={() => onChange(i === value ? i - 1 : i)} hitSlop={6}>
             <Ionicons
               name="star"
               size={26}
@@ -285,30 +284,38 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: COLORS.background,
   },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#4E4FA5' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#39398A' },
   scroll: { padding: 20 },
-  bgLogo: {
-    position: 'absolute',
-    width: 340,
-    height: 340,
-    alignSelf: 'center',
-    top: 60,
-    opacity: 0.05,
+  celebration: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    height: 120,
   },
-  celebration: { alignItems: 'center', marginBottom: 20 },
+  celebrationIcon: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    alignSelf: 'center',
+    top: 0,
+  },
   celebrationEmoji: { fontSize: 40, marginBottom: 6 },
-  celebrationText: { fontSize: 20, fontWeight: '700', color: '#4E4FA5', marginTop: 8 },
+  celebrationText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4E4FA5',
+    textAlign: 'center',
+    zIndex: 2,
+  },
   tourCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#4E4FA5',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
-    shadowRadius: 6,
+    shadowRadius: 16,
     elevation: 3,
     marginBottom: 24,
     minHeight: 90,
@@ -323,7 +330,7 @@ const styles = StyleSheet.create({
   },
   tourImage: {
     width: 80,
-    height: 88,
+    height: 90,
     borderRadius: 12,
   },
   tourInfo: {
@@ -342,14 +349,15 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     borderWidth: 4,
     borderColor: '#4E4FA5',
+    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
     shadowColor: '#4E4FA5',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 6,
+    shadowOpacity: 0.9,
+    shadowRadius: 14,
+    elevation: 12,
   },
   progressNumber: { fontSize: 10, fontWeight: '800', color: '#4E4FA5' },
   progressLabel: { fontSize: 7, color: '#4E4FA5', textAlign: 'center' },
@@ -360,11 +368,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 18,
   },
-  ratingLabel: { fontSize: 14, color: '#4E4FA5', flex: 1 },
+  ratingLabel: { fontSize: 14, color: '#39398A', flex: 1 },
   starsRow: { flexDirection: 'row' },
   textarea: {
     borderWidth: 1.5,
-    borderColor: '#4E4FA5',
+    borderColor: '#8874F7',
     borderRadius: 12,
     padding: 14,
     minHeight: 100,
@@ -374,7 +382,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   submit: {
-    backgroundColor: '#4E4FA5',
+    backgroundColor: '#8874F7',
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
