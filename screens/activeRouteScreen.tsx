@@ -290,10 +290,11 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
               <View style={styles.headerButton} />
             </View>
             <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
+              <View style={styles.dividerTrack} />
+              <View style={[styles.dividerLine, { width: `${currentProgress}%` as any }]} />
               <Image
                 source={require('../assets/images/icons/Delimitador_Mapa__Procentaje_Realizado.png')}
-                style={styles.dividerIcon}
+                style={[styles.dividerIcon, { left: `${Math.min(Math.max(currentProgress, 1), 99)}%` as any }]}
                 resizeMode="contain"
               />
             </View>
@@ -336,7 +337,8 @@ const styles = StyleSheet.create({
   topHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 },
   headerButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: 'bold', color: COLORS.primary },
-  dividerRow: { height: 0, justifyContent: 'flex-end', alignItems: 'center', overflow: 'visible' },
-  dividerLine: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 6, backgroundColor: '#8874F7' },
-  dividerIcon: { width: 22, height: 22, marginBottom: -7.5 },
+  dividerRow: { height: 0, overflow: 'visible' },
+  dividerTrack: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 6, backgroundColor: '#D8D0F5' },
+  dividerLine: { position: 'absolute', left: 0, bottom: 0, height: 6, backgroundColor: '#8874F7' },
+  dividerIcon: { position: 'absolute', width: 22, height: 22, bottom: -7.5, marginLeft: -11 },
 });
