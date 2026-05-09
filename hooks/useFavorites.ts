@@ -2,27 +2,47 @@
 
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from '@react-native-firebase/firestore';
+import { onAuthStateChanged } from '@react-native-firebase/auth';
 import { db, auth, firestoreReady } from '../services/firebaseConfig';
 
 export const useFavorites = (tourId: string) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    const userId = auth.currentUser?.uid;
-    if (!userId || !tourId) return;
+    if (!tourId) return;
 
-    let unsubscribe: (() => void) | undefined;
+    let unsubSnap: (() => void) | undefined;
 
-    firestoreReady.then(() => {
-      unsubscribe = onSnapshot(doc(db, 'users', userId), (snap) => {
-        if (snap.exists()) {
-          const favs = snap.data().favoriteTours || [];
-          setIsFavorite(favs.includes(tourId));
-        }
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubSnap?.();
+      unsubSnap = undefined;
+
+      if (!user) {
+        setIsFavorite(false);
+        return;
+      }
+
+      firestoreReady.then(() => {
+        unsubSnap = onSnapshot(
+          doc(db, 'users', user.uid),
+          (snap) => {
+            if (!snap || !snap.exists()) return;
+            const favs = snap.data()?.favoriteTours || [];
+            setIsFavorite(favs.includes(tourId));
+          },
+          (err) => {
+            if (err?.code !== 'firestore/permission-denied') {
+              console.log('useFavorites onSnapshot error →', err?.code, err?.message);
+            }
+          }
+        );
       });
     });
 
-    return () => { unsubscribe?.(); };
+    return () => {
+      unsubSnap?.();
+      unsubAuth();
+    };
   }, [tourId]);
 
   const toggleFavorite = async () => {
