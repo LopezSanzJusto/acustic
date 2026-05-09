@@ -34,8 +34,8 @@ export default function RootLayout() {
 
   const router = useRouter();
   const segments = useSegments();
-  const notifListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
+  const notifListener = useRef<Notifications.EventSubscription | undefined>(undefined);
+  const responseListener = useRef<Notifications.EventSubscription | undefined>(undefined);
 
   useEffect(() => {
     const initPlayer = async () => {
@@ -59,7 +59,8 @@ export default function RootLayout() {
             Capability.JumpBackward,
           ],
           compactCapabilities: [Capability.JumpBackward, Capability.Play, Capability.Pause, Capability.JumpForward],
-          jumpInterval: 15,
+          forwardJumpInterval: 15,
+          backwardJumpInterval: 15,
           progressUpdateEventInterval: 1,
         });
       } catch (e) {
@@ -100,7 +101,7 @@ export default function RootLayout() {
     const inAuthGroup = segments[0] === 'auth' || segments[0] === 'welcome';
     const inTabGroup = segments[0] === '(tabs)';
     const isGuestAllowed = segments[0] === 'tour' || segments[0] === 'modal' ||
-      (segments[0] === 'profile' && segments[1] === 'privacy');
+      (segments[0] === 'profile' && (segments as string[])[1] === 'privacy');
 
     if (user && inAuthGroup) {
       router.replace('/(tabs)' as any);

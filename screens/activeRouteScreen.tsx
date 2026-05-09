@@ -234,13 +234,10 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
 
   const currentProgress = currentProgressData.percentage;
 
-  // ✨ GUARDADO EN FIREBASE: solo cuando se alcanza un nuevo punto por GPS,
-  // evitando escrituras masivas y garantizando que el % guardado refleja
-  // avance físico real.
   useEffect(() => {
-    if (routeToUse.length > 0) {
-      saveProgress(tourId, currentProgress);
-    }
+    if (routeToUse.length === 0) return;
+    const isLastPoint = maxReachedIndex === routeToUse.length - 1;
+    saveProgress(tourId, isLastPoint ? 100 : currentProgress);
   }, [maxReachedIndex]);
 
   if (pointsLoading) {
@@ -275,6 +272,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
                 style={styles.headerButton}
                 onPress={() => {
                   if (currentProgress >= 100) {
+                    saveProgress(tourId, 100);
                     router.replace({
                       pathname: '/tour/rate/[id]',
                       params: { id: tourId, completed: 'true' },

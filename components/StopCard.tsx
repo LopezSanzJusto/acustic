@@ -31,7 +31,7 @@ export const StopCard = memo(({ point, onPress }: StopCardProps) => {
         </Text>
       </View>
       
-      <Ionicons name="chevron-forward" size={24} color="#8874F7" />
+      <Ionicons name="chevron-forward" size={24} color="#8874F780" style={{ transform: [{ scaleX: 0.6 }] }}/>
     </TouchableOpacity>
   );
 });
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 12, // Bordes muy redondeados
     borderWidth: 1,
-    borderColor: '#8874F7', // Morado claro (Tailwind violet-200)
+    borderColor: '#8874F780', // Morado claro (Tailwind violet-200)
     padding: 4,
     marginBottom: 16,
   },
@@ -61,12 +61,12 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    right: -15,
+    right: -12.5,
     top: '50%',
-    marginTop: -15,
+    marginTop: -12,
     backgroundColor: '#8874F7',
-    width: 28,
-    height: 28, 
+    width: 25,
+    height: 25, 
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#FFF',
-    top: -3.5,
-    fontSize: 22,
+    top: -2.5,
+    fontSize: 18,
     fontFamily: FONT_FAMILY,
     fontWeight: '700',
   },

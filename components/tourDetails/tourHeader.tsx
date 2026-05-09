@@ -27,12 +27,14 @@ export const TourHeader = ({ title, isFavorite, onBack, onToggleFavorite }: Tour
 
       <TouchableOpacity
         onPress={onToggleFavorite}
-        style={[styles.iconButton, { backgroundColor: isFavorite ? '#312E81' : 'transparent' }]}
+        style={styles.iconButton}
         hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
       >
         <Image
-          source={require('../../assets/images/icons/Corazon_Favoritos.png')}
-          style={{ width: 26, height: 26, tintColor: isFavorite ? 'white' : '#312E81' }}
+          source={isFavorite
+            ? require('../../assets/images/icons/Corazon_Relleno.png')
+            : require('../../assets/images/icons/Corazon_Favoritos.png')}
+          style={{ width: 26, height: 26, tintColor: isFavorite ? '#312E81' : '#312E81', transform: [{ scale: isFavorite ? 1.25 : 1 }] }}
           resizeMode="contain"
         />
       </TouchableOpacity>

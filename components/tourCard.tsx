@@ -83,20 +83,13 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
           activeOpacity={0.8}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          {isFavorite ? (
-            <View style={{ width: 22, height: 22 }}>
-              {[1, 0.82, 0.64, 0.46, 0.28].map((scale, i) => (
-                <Image
-                  key={i}
-                  source={require('../assets/images/icons/Corazon_Favoritos.png')}
-                  style={{ position: 'absolute', width: 22, height: 22, tintColor: 'white', transform: [{ scale }] }}
-                  resizeMode="contain"
-                />
-              ))}
-            </View>
-          ) : (
-            <Image source={require('../assets/images/icons/Corazon_Favoritos.png')} style={{ width: 22, height: 22, tintColor: 'white' }} resizeMode="contain" />
-          )}
+          <Image
+            source={isFavorite
+              ? require('../assets/images/icons/Corazon_Relleno.png')
+              : require('../assets/images/icons/Corazon_Favoritos.png')}
+            style={{ width: 22, height: 22, tintColor: 'white', transform: [{ scale: isFavorite ? 1.25 : 1 }] }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 

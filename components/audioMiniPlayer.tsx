@@ -181,12 +181,12 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: "absolute",
-    right: -16,
+    right: -18,
     top: "50%",
-    marginTop: -15,
+    marginTop: -12.5,
     backgroundColor: "#8874F7",
-    width: 30,
-    height: 30,
+    width: 26,
+    height: 26,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
@@ -195,10 +195,10 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: "#FFF",
-    fontSize: 23,
+    fontSize: 18,
     fontFamily: FONT_FAMILY,
     fontWeight: "700",
-    top: -3,
+    top: -2,
   },
   title: {
     flex: 1,
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontSize: 12,
     color: "#6B7280",
-    fontFamily: FONT_FAMILY,
+    fontFamily: 'Poppins_400Regular',
     width: 36,
     textAlign: "center",
   },

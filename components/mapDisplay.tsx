@@ -90,8 +90,8 @@ export const MapDisplay = ({
             <Polyline
               coordinates={routeCoords}
               strokeColor="#FFFFFF"
-              strokeWidth={1}
-              lineDashPattern={[15, 10]}
+              strokeWidth={1.5}
+              lineDashPattern={[20, 15]}
               lineCap="butt"
               zIndex={3}
             />

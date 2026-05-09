@@ -148,7 +148,10 @@ const styles = StyleSheet.create({
     left: 0,
     height: TRACK_HEIGHT,
     backgroundColor: GLOW_COLOR,
-    borderRadius: 1,
+    borderTopLeftRadius: 3,
+    borderBottomLeftRadius: 3,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
   },
   thumbHalo: {
     position: 'absolute',
