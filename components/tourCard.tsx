@@ -69,7 +69,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
     <View style={styles.card}>
       {/* Imagen */}
       <View style={styles.imageContainer}>
-        <ImageSlider images={images} width={CARD_WIDTH} height={IMAGE_HEIGHT} onPress={onPress} />
+        <ImageSlider images={images} width={CARD_WIDTH} height={IMAGE_HEIGHT} borderRadius={12} onPress={onPress} />
 
         <View style={[styles.badge, tour.price === 0 || tour.price == null ? styles.badgeFree : styles.badgePaid]}>
           <Text style={[styles.badgeText, tour.price === 0 || tour.price == null ? styles.badgeTextFree : styles.badgeTextPaid]}>
@@ -147,13 +147,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginHorizontal: CARD_MARGIN,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
   },
-  imageContainer: { height: IMAGE_HEIGHT, position: 'relative' },
+  imageContainer: { height: IMAGE_HEIGHT, position: 'relative'},
 
   badge: {
     position: 'absolute',

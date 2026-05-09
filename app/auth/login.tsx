@@ -218,10 +218,10 @@ const styles = StyleSheet.create({
   eyeButton: { paddingLeft: 8 },
   forgotWrapper: { alignSelf: 'flex-end', marginTop: 2, marginBottom: 6 },
   forgotText: {
-    color: LINK_HIGHLIGHT, fontSize: 12, fontWeight: '600',
-    borderWidth: 1.5, borderColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 10, paddingVertical: 3,
-    borderRadius: 12, overflow: 'hidden',
+    color: '#FF9505', fontSize: 13, fontWeight: '700',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 3,
+    borderRadius: 6, borderWidth: 0.5, borderColor: '#FF9505',
   },
   errorText: { color: '#FFB4B4', fontSize: 14, textAlign: 'center', marginTop: 12 },
   mainButton: {
@@ -232,9 +232,9 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 30, flexWrap: 'wrap' },
   footerText: { color: 'rgba(255,255,255,0.9)', fontSize: 13 },
   footerLink: {
-    color: LINK_HIGHLIGHT, fontSize: 13, fontWeight: '700',
-    borderWidth: 1.5, borderColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 10, paddingVertical: 3,
-    borderRadius: 12, overflow: 'hidden',
+    color: '#FF9505', fontSize: 13, fontWeight: '700',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 3,
+    borderRadius: 6, borderWidth: 0.5, borderColor: '#FF9505',
   },
 });

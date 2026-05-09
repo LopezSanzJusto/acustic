@@ -58,11 +58,6 @@ const styles = StyleSheet.create({
   },
   sliderButtonActive: {
     backgroundColor: '#3A3980',
-    shadowColor: '#3A3980',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
   },
   sliderText: {
     fontWeight: '600',

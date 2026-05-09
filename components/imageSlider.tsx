@@ -8,13 +8,14 @@ import { COLORS } from '../utils/theme';
 interface ImageSliderProps {
   images: string[];
   height: number;
-  width?: number; // Opcional: si no se pasa, usa el ancho de pantalla
+  width?: number;
+  borderRadius?: number;
   onPress?: () => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export const ImageSlider = ({ images, height, width = screenWidth, onPress }: ImageSliderProps) => {
+export const ImageSlider = ({ images, height, width = screenWidth, borderRadius = 0, onPress }: ImageSliderProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Asegurar que siempre hay un array válido
@@ -28,7 +29,7 @@ export const ImageSlider = ({ images, height, width = screenWidth, onPress }: Im
   };
 
   return (
-    <View style={{ width, height, position: 'relative' }}>
+    <View style={{ width, height, position: 'relative', borderRadius, overflow: 'hidden' }}>
       <ScrollView
         horizontal
         pagingEnabled
