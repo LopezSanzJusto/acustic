@@ -27,23 +27,36 @@ export function useAudio(points: PointOfInterest[], autoSelectFirst: boolean = f
 
   useEffect(() => {
     if (!audioUri) return;
+    let cancelled = false;
+
     const load = async () => {
       try {
         await TrackPlayer.reset();
+        if (cancelled) return;
         await TrackPlayer.add({
           url: audioUri,
           title: activePoint?.name ?? '',
           artist: 'Acustic',
           artwork: activePoint?.image ?? undefined,
         });
+        if (cancelled) return;
         await TrackPlayer.setRate(playbackRate);
+        if (cancelled) return;
         await TrackPlayer.play();
       } catch (e) {
-        console.error('[useAudio] TrackPlayer error:', e);
+        if (!cancelled) console.error('[useAudio] TrackPlayer error:', e);
       }
     };
+
     load();
+    return () => { cancelled = true; };
   }, [audioUri]);
+
+  useEffect(() => {
+    return () => {
+      TrackPlayer.reset().catch(() => {});
+    };
+  }, []);
 
   const togglePlayPause = async () => {
     if (isPlaying) {
