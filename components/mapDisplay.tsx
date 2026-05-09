@@ -77,16 +77,23 @@ export const MapDisplay = ({
           <>
             <Polyline
               coordinates={routeCoords}
-              strokeColor="#4E4FA5"
-              strokeWidth={10}
+              strokeColor="#FFFFFF"
+              strokeWidth={9}
               zIndex={1}
             />
             <Polyline
               coordinates={routeCoords}
+              strokeColor={ROUTE_PURPLE}
+              strokeWidth={8}
+              zIndex={2}
+            />
+            <Polyline
+              coordinates={routeCoords}
               strokeColor="#FFFFFF"
-              strokeWidth={2}
-              lineDashPattern={[6, 10]}
-              zIndex={4}
+              strokeWidth={1}
+              lineDashPattern={[15, 10]}
+              lineCap="butt"
+              zIndex={3}
             />
           </>
         )}
@@ -97,8 +104,8 @@ export const MapDisplay = ({
             key={`geo-${p.id}`}
             center={{ latitude: p.latitude, longitude: p.longitude }}
             radius={radius}
-            fillColor="rgba(139,92,246,0.18)"
-            strokeColor="rgba(139,92,246,0.45)"
+            fillColor="rgba(136,116,247,0.18)"
+            strokeColor="rgba(136,116,247,0.45)"
             strokeWidth={1}
           />
         ))}
@@ -109,19 +116,21 @@ export const MapDisplay = ({
             key={p.id}
             coordinate={{ latitude: p.latitude, longitude: p.longitude }}
             onPress={() => onMarkerPress?.(p.id)}
-            anchor={{ x: 0.5, y: markerType === 'number' && index === 0 ? 0.9 : 0.5 }}
+            anchor={{ x: markerType === 'number' && index === 0 ? 0.78 : 0.5, y: 0.5 }}
             tracksViewChanges={false}
           >
-            <View style={{ alignItems: 'center' }} collapsable={false}>
-              {markerType === 'number' && index === 0 && (
-                <View style={styles.startBadge}>
-                  <Text style={styles.startText}>START</Text>
+            {markerType === 'number' && index === 0 ? (
+              <View style={styles.startPill} collapsable={false}>
+                <Text style={styles.startText}>START</Text>
+                <View style={styles.startNumberCircle} collapsable={false}>
+                  <Text style={styles.startNumberText}>1</Text>
                 </View>
-              )}
+              </View>
+            ) : (
               <View
                 style={
                   markerType === 'number'
-                    ? [styles.numberMarkerOuter, { backgroundColor: index === 0 ? '#FF8533' : '#4E4FA5' }]
+                    ? styles.numberMarkerOuter
                     : styles.markerBorder
                 }
                 collapsable={false}
@@ -134,7 +143,7 @@ export const MapDisplay = ({
                   <View style={[styles.markerImage, { backgroundColor: COLORS.primary }]} />
                 )}
               </View>
-            </View>
+            )}
           </Marker>
         ))}
 
@@ -154,6 +163,10 @@ export const MapDisplay = ({
     </View>
   );
 };
+
+const ROUTE_PURPLE = '#8874F7';
+const STOP_PURPLE = '#39398A';
+const START_ORANGE = '#FF9505';
 
 const styles = StyleSheet.create({
   mapContainer: {
@@ -176,17 +189,34 @@ const styles = StyleSheet.create({
   },
   markerImage: { width: 41, height: 41, borderRadius: 20.5 },
   numberMarkerOuter: {
-    width: 30, height: 30, borderRadius: 15,
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: STOP_PURPLE,
     justifyContent: 'center', alignItems: 'center',
-    borderWidth: 2.5, borderColor: 'white',
+    borderWidth: 2, borderColor: 'white',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25, shadowRadius: 3, elevation: 5,
   },
-  numberText: { color: COLORS.white, fontSize: 17, fontWeight: 'bold' },
-  startBadge: {
-    backgroundColor: '#FF8533', borderRadius: 10,
-    paddingHorizontal: 7, paddingVertical: 2, marginBottom: 3,
+  numberText: { color: COLORS.white, fontSize: 16, fontWeight: 'bold', top: -0.5 },
+  startPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: START_ORANGE,
+    borderRadius: 14,
+    paddingLeft: 7,
+    paddingRight: 2,
+    paddingVertical: 2,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25, shadowRadius: 2, elevation: 5,
   },
-  startText: { color: 'white', fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5, borderRadius: 12 },
+  startNumberCircle: {
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: START_ORANGE,
+    justifyContent: 'center', alignItems: 'center',
+    borderWidth: 2, borderColor: 'white',
+    marginLeft: 4,
+  },
+  startNumberText: { color: 'white', fontSize: 15, fontWeight: 'bold', top: -2 },
+  startText: { color: 'white', fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
   userMarkerContainer: { width: 24, height: 24, justifyContent: 'center', alignItems: 'center' },
   userMarkerDot: {
     width: 20, height: 20, borderRadius: 10,
