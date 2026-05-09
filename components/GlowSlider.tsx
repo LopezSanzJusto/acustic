@@ -12,8 +12,8 @@ interface GlowSliderProps {
 
 const THUMB_SIZE = 10;
 const THUMB_GLOW = 13;
-const TRACK_HEIGHT = 3;
-const GLOW_COLOR = '#8B5CF6';
+const TRACK_HEIGHT = 5;
+const GLOW_COLOR = '#8874F7';
 
 export const GlowSlider = ({
   value,
@@ -130,8 +130,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: TRACK_HEIGHT,
-    backgroundColor: '#C4B5FD50',
-    borderRadius: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 3,
+    borderWidth: 0.8,
+    borderColor: '#8874F7',
   },
   trackGlow: {
     position: 'absolute',
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     width: THUMB_GLOW,
     height: THUMB_GLOW,
     borderRadius: THUMB_GLOW / 2,
-    backgroundColor: '#8B5CF618',
+    backgroundColor: '#8874F718',
     justifyContent: 'center',
     alignItems: 'center',
     // Glow exterior iOS

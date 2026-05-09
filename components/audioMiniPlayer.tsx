@@ -1,7 +1,7 @@
 // components/audioMiniPlayer.tsx
 
 import React, { useMemo, useCallback, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from "react-native";
 import { COLORS } from "../utils/theme";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { GlowSlider } from "./GlowSlider";
@@ -46,8 +46,10 @@ export const AudioMiniPlayer = ({
   onToggleSpeed,
 }: Props) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const { height: screenHeight } = useWindowDimensions();
 
-  const snapPoints = useMemo(() => [180, '85%'], []);
+  const snapPoints = useMemo(() => [180, '67%'], []);
+  const topInset = Math.round(screenHeight * 0.33);
 
   const handleStopPress = useCallback((pointId: string) => {
     const index = points.findIndex(p => p.id === pointId);
@@ -65,6 +67,8 @@ export const AudioMiniPlayer = ({
       ref={bottomSheetRef}
       index={0}
       snapPoints={snapPoints}
+      topInset={topInset}
+      enableOverDrag={false}
       handleIndicatorStyle={styles.dragIndicator}
       backgroundStyle={styles.sheetBackground}
     >
@@ -85,15 +89,15 @@ export const AudioMiniPlayer = ({
         <View style={styles.controlsAndSpeedRow}>
           <View style={styles.mainControls}>
             <TouchableOpacity onPress={onPrevious} style={styles.controlBtn}>
-              <Ionicons name="play-back" size={26} color="#3730A3" />
+              <Ionicons name="play-back" size={26} color="#39398A" />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={onPlayPause} style={styles.playPauseBtn}>
-              <Ionicons name={isPlaying ? "pause" : "play"} size={30} color="#8B5CF6" />
+              <Ionicons name={isPlaying ? "pause" : "play"} size={30} color="#8874F7" />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={onNext} style={styles.controlBtn}>
-              <Ionicons name="play-forward" size={26} color="#3730A3" />
+              <Ionicons name="play-forward" size={26} color="#39398A" />
             </TouchableOpacity>
           </View>
 
@@ -147,21 +151,18 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   dragIndicator: {
-    width: 40,
+    width: 80,
     height: 5,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#8874F7',
     borderRadius: 3,
     marginTop: 10,
   },
   stickyHeader: {
-    backgroundColor: "#FFF", 
+    backgroundColor: "#FFF",
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: 28,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6", 
+    paddingBottom: 12,
     zIndex: 10,
-    elevation: 5, 
   },
   headerRow: {
     flexDirection: "row",
@@ -183,27 +184,28 @@ const styles = StyleSheet.create({
     right: -16,
     top: "50%",
     marginTop: -15,
-    backgroundColor: "#4E4FA5",
+    backgroundColor: "#8874F7",
     width: 30,
     height: 30,
-    borderRadius: 17,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
     borderColor: "#FFF",
   },
   badgeText: {
-    color: "#FFF", 
-    fontSize: 20,
+    color: "#FFF",
+    fontSize: 23,
     fontFamily: FONT_FAMILY,
     fontWeight: "700",
+    top: -3,
   },
   title: {
     flex: 1,
     fontWeight: "700",
     fontSize: 16,
     fontFamily: FONT_FAMILY,
-    color: "#1F2937",
+    color: "#4E4FA5E5",
   },
   controlsAndSpeedRow: {
     flexDirection: "row",
@@ -222,13 +224,14 @@ const styles = StyleSheet.create({
   speedBadge: {
     position: "absolute",
     right: 0,
-    backgroundColor: "#EDE9FE",
-    paddingVertical: 4,
+    backgroundColor: "#8874F733",
+    paddingVertical: 0,
     paddingHorizontal: 8,
     borderRadius: 6,
+    borderWidth: 0,
   },
   speedText: {
-    color: "#8B5CF6",
+    color: "#8874F7",
     fontWeight: "700",
     fontFamily: FONT_FAMILY,
     fontSize: 12,

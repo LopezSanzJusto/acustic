@@ -31,7 +31,7 @@ export const StopCard = memo(({ point, onPress }: StopCardProps) => {
         </Text>
       </View>
       
-      <Ionicons name="chevron-forward" size={24} color="#8B5CF6" />
+      <Ionicons name="chevron-forward" size={24} color="#8874F7" />
     </TouchableOpacity>
   );
 });
@@ -45,17 +45,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 12, // Bordes muy redondeados
     borderWidth: 1,
-    borderColor: '#DDD6FE', // Morado claro (Tailwind violet-200)
-    padding: 6,
-    marginBottom: 12,
+    borderColor: '#8874F7', // Morado claro (Tailwind violet-200)
+    padding: 4,
+    marginBottom: 16,
   },
   imageContainer: {
     position: 'relative',
     marginRight: 26,
   },
   image: {
-    width: 56,
-    height: 56,
+    width: 65,
+    height: 65,
     borderRadius: 12,
     backgroundColor: '#E5E7EB',
   },
@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
     right: -15,
     top: '50%',
     marginTop: -15,
-    backgroundColor: '#4E4FA5',
+    backgroundColor: '#8874F7',
     width: 28,
-    height: 28,
-    borderRadius: 12,
+    height: 28, 
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -75,7 +75,8 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#FFF',
-    fontSize: 17,
+    top: -3.5,
+    fontSize: 22,
     fontFamily: FONT_FAMILY,
     fontWeight: '700',
   },
@@ -87,13 +88,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     fontFamily: FONT_FAMILY,
-    color: '#312E81',
-    marginBottom: 4,
+    color: '#4E4FA5E5',
+    marginBottom: 0,
+    left: -6,
+    top: 3,
   },
   subtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#4E4FA580',
     fontStyle: 'italic',
     fontFamily: FONT_FAMILY,
+    top: -6,
+    left: -6,
   },
 });
