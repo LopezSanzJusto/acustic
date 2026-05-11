@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     paddingHorizontal: 10,
   },
-  spamBold: { color: LINK_HIGHLIGHT, fontWeight: '700' },
+  spamBold: { color: '#FF9505', fontWeight: '700' },
   spacer: { flex: 1 },
   mainButton: {
     backgroundColor: PURPLE_BUTTON,
@@ -146,13 +146,9 @@ const styles = StyleSheet.create({
   },
   footerText: { color: 'rgba(255,255,255,0.9)', fontSize: 13 },
   footerLink: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-    backgroundColor: LINK_HIGHLIGHT,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 12,
-    overflow: 'hidden',
+    color: '#FF9505', fontSize: 13, fontWeight: '700',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 3,
+    borderRadius: 6, borderWidth: 0.5, borderColor: '#FF9505',
   },
 });
