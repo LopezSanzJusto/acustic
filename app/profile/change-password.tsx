@@ -52,6 +52,10 @@ export default function ChangePasswordScreen() {
       Alert.alert('No coinciden', 'La nueva contraseña y su confirmación no coinciden.');
       return;
     }
+    if (next === current) {
+      Alert.alert('Contraseña repetida', 'La nueva contraseña no puede ser igual a la actual.');
+      return;
+    }
 
     setLoadingChange(true);
     try {
