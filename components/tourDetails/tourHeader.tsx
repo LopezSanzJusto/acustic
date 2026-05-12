@@ -18,7 +18,7 @@ export const TourHeader = ({ title, isFavorite, onBack, onToggleFavorite }: Tour
   return (
     <View style={[styles.topBar, { paddingTop: Math.max(insets.top, 15) }]}>
       <TouchableOpacity onPress={onBack} style={styles.iconButton} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-        <Ionicons name="arrow-back" size={26} color="#312E81" />
+        <Ionicons name="arrow-back" size={22} color="#312E81" />
       </TouchableOpacity>
       
       <Text style={styles.title} numberOfLines={1}>
@@ -34,7 +34,7 @@ export const TourHeader = ({ title, isFavorite, onBack, onToggleFavorite }: Tour
           source={isFavorite
             ? require('../../assets/images/icons/Corazon_Relleno.png')
             : require('../../assets/images/icons/Corazon_Favoritos.png')}
-          style={{ width: 26, height: 26, tintColor: isFavorite ? '#312E81' : '#312E81', transform: [{ scale: isFavorite ? 1.25 : 1 }] }}
+          style={{ width: 17, height: 17, tintColor: isFavorite ? '#312E81' : '#312E81', transform: [{ scale: isFavorite ? 1.25 : 1 }] }}
           resizeMode="contain"
         />
       </TouchableOpacity>

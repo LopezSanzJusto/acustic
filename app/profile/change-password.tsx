@@ -239,7 +239,7 @@ function PasswordField({
 const INPUT_BORDER_COLOR = '#C8C5F0';
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#FFFFFF' },
+  flex: { flex: 1, backgroundColor: '#F7F7F7' },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 8, paddingVertical: 12,

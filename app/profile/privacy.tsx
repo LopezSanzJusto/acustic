@@ -262,7 +262,7 @@ export default function PrivacyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#F7F7F7' },
 
   header: {
     flexDirection: 'row', alignItems: 'center',

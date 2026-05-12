@@ -19,8 +19,6 @@ export const TourStats = ({ listens, rating, reviews }: TourStatsProps) => {
         <Text style={styles.statLabel}>Escuchas</Text>
       </View>
 
-      <View style={styles.divider} />
-
       {/* Columna 2: Rating */}
       <View style={styles.statCol}>
         <Text style={styles.statNumber}>{rating}</Text>
@@ -30,8 +28,6 @@ export const TourStats = ({ listens, rating, reviews }: TourStatsProps) => {
           ))}
         </View>
       </View>
-
-      <View style={styles.divider} />
 
       {/* Columna 3: Opiniones */}
       <View style={styles.statCol}>
@@ -53,7 +49,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     justifyContent: 'space-around',
     alignItems: 'center',
-    shadowColor: "#000", shadowOffset: {width:0, height:2}, shadowOpacity:0.05, shadowRadius:5, elevation:2
+    shadowColor: "#000", shadowOffset: {width:0, height:1}, shadowOpacity:0.05, shadowRadius:2, elevation:1.5
   },
   statCol: { alignItems: 'center', flex: 1 },
   statNumber: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 4 },

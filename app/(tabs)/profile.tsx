@@ -138,7 +138,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F2F7' },
+  container: { flex: 1, backgroundColor: '#F7F7F7' },
   scroll: { paddingBottom: 60 },
 
   // Cabecera

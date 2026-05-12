@@ -57,6 +57,7 @@ export function useFirebasePoints(tourId: string) {
             audio: String(audioField),
             image: String(imageField),
             order: Number(data.order),
+            audioDuration: data.audioDuration ? String(data.audioDuration) : undefined,
           } as unknown as PointOfInterest;
         });
         setPoints(pointsArray);

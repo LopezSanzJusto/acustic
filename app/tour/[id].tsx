@@ -16,6 +16,7 @@ import { useOfflineAssets } from '../../hooks/useOfflineAssets';
 import { useFirebasePoints } from '../../hooks/useFirebasePoints';
 import { usePurchaseTour } from '../../hooks/usePurchaseTour';
 import { useMyTours } from '../../hooks/useMyTours';
+// import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import TrackPlayer from 'react-native-track-player';
 
 // Componentes Modulares
@@ -55,7 +56,8 @@ export default function TourDetailScreen() {
   const { isFavorite, toggleFavorite } = useFavorites(id as string);
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
   const { addTourToMyList, isProcessing } = usePurchaseTour();
-  const { purchasedTours } = useMyTours(); 
+  const { purchasedTours } = useMyTours();
+  // const { startCheckout, loading: isCheckoutLoading } = useStripeCheckout();
 
   const tourImages = useMemo(() => {
     if (!tour) return [];
@@ -156,11 +158,15 @@ export default function TourDetailScreen() {
       router.push({ pathname: "/active-tour/[id]", params: { id: id } } as any);
       return;
     }
-    Alert.alert(
-      "Ruta Premium",
-      "Esta ruta es de pago. Adquiérela para desbloquear la personalización y la experiencia completa.",
-      [{ text: "Entendido", style: "default" }]
-    );
+
+    // STRIPE COMENTADO — pendiente de decidir si se implementa
+    // const result = await startCheckout(tour.id);
+    // if (result.status === "succeeded") {
+    //   Alert.alert(
+    //     "¡Pago realizado!",
+    //     "Tu audioguía se está activando. En unos segundos podrás empezar la ruta.",
+    //   );
+    // }
   };
 
   if (loading || pointsLoading) return (
@@ -181,7 +187,7 @@ export default function TourDetailScreen() {
       <ImageSlider images={resolvedCoverImages.length > 0 ? resolvedCoverImages : tourImages} height={280} width={width} />
       <View style={styles.content}>
         <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={calculatedDuration || tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
-        <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />
+        {isFree && <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />}
         <TourIntroAudio
             title={tour.title}
             image={resolvedCoverImages[0] ?? tourImages[0]}
@@ -196,12 +202,6 @@ export default function TourDetailScreen() {
 
         <TourAudioPreview points={resolvedPoints} price={tour.price || 0} />
 
-        {!hasAccess && (
-          <TouchableOpacity style={styles.premiumButton} onPress={handleStartRoute}>
-            <Image source={require('../../assets/images/icons/Candado_Adio_Bloqueado.png')} style={{ width: 20, height: 20, marginRight: 8 }} resizeMode="contain" />
-            <Text style={styles.premiumText}>Personaliza tu ruta (Premium)</Text>
-          </TouchableOpacity>
-        )}
       </View>
     </>
   );
@@ -209,7 +209,7 @@ export default function TourDetailScreen() {
   // ✅ 2. Extraemos todo el contenido INFERIOR a otra función
   const renderFooter = () => (
     <View style={styles.content}>
-      <TourReviews tourId={id as string} />
+      {isFree && <TourReviews tourId={id as string} hasAccess={hasAccess} />}
     </View>
   );
 
@@ -242,10 +242,4 @@ export default function TourDetailScreen() {
 const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 10 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 12 },
-  premiumButton: {
-    backgroundColor: '#D4AF37', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    paddingVertical: 16, borderRadius: 14, marginTop: 10, marginBottom: 25,
-    shadowColor: '#D4AF37', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5
-  },
-  premiumText: { color: 'white', fontWeight: 'bold', fontSize: 16 }
 });

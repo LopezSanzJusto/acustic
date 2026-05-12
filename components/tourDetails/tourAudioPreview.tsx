@@ -1,13 +1,19 @@
 // components/tourDetails/tourAudioPreview.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
 import { useAudio } from '../../hooks/useAudio';
-// ✨ IMPORTAMOS useLocalSearchParams para leer los parámetros de la ruta
 import { useLocalSearchParams } from 'expo-router';
+
+const formatDuration = (ms: number) => {
+  const totalSecs = Math.round(ms / 1000);
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -23,7 +29,17 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
   const { fromTrips } = useLocalSearchParams();
   
   const [isExpanded, setIsExpanded] = useState(false);
-  const { activePoint, isPlaying, setActivePointIndex, togglePlayPause } = useAudio(points);
+  const [cachedDurations, setCachedDurations] = useState<Record<string, string>>({});
+  const { activePoint, isPlaying, durationMillis, setActivePointIndex, togglePlayPause } = useAudio(points);
+
+  useEffect(() => {
+    if (activePoint && durationMillis > 0) {
+      setCachedDurations(prev => {
+        if (prev[activePoint.id]) return prev;
+        return { ...prev, [activePoint.id]: formatDuration(durationMillis) };
+      });
+    }
+  }, [activePoint?.id, durationMillis]);
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -60,13 +76,21 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
 
             return (
               <View key={point.id || index} style={styles.audioRow}>
+                {point.image ? (
+                  <Image source={{ uri: point.image }} style={[styles.pointImage, isLocked && { opacity: 0.5 }]} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.pointImage, styles.pointImagePlaceholder, isLocked && { opacity: 0.5 }]} />
+                )}
+
                 <View style={styles.audioInfo}>
                   <Text style={[styles.audioTitle, isLocked && styles.textLocked]} numberOfLines={1}>
-                    {index + 1}. {point.name || `Punto ${index + 1}`}
+                    {point.name || `Punto ${index + 1}`}
                   </Text>
-                  <Text style={[styles.audioStatus, !isLocked && styles.textFree]}>
-                    {isLocked ? "Disponible al iniciar la ruta" : "Muestra de audio"}
-                  </Text>
+                  {!isLocked && (
+                    <Text style={[styles.audioStatus, styles.textFree]}>
+                      {cachedDurations[point.id] ?? point.audioDuration ?? "—"}
+                    </Text>
+                  )}
                 </View>
 
                 <TouchableOpacity
@@ -75,7 +99,7 @@ export const TourAudioPreview = ({ points, price }: TourAudioPreviewProps) => {
                   onPress={() => isCurrentPoint ? togglePlayPause() : setActivePointIndex(index)}
                 >
                   {isLocked
-                    ? <Image source={require('../../assets/images/icons/Candado_Adio_Bloqueado.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
+                    ? <Image source={require('../../assets/images/icons/Candado_Adio_Bloqueado.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
                     : <Ionicons name={playIconName} size={32} color={COLORS.primary} />
                   }
                 </TouchableOpacity>
@@ -101,8 +125,10 @@ const styles = StyleSheet.create({
     paddingTop: 10, paddingBottom: 10, paddingHorizontal: 15, marginTop: 12, borderWidth: 1,
     borderColor: COLORS.border,
   },
-  audioRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  audioInfo: { flex: 1, paddingRight: 10 },
+  audioRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, gap: 10 },
+  pointImage: { width: 44, height: 44, borderRadius: 8 },
+  pointImagePlaceholder: { backgroundColor: COLORS.border },
+  audioInfo: { flex: 1 },
   audioTitle: { fontSize: 15, fontWeight: '600', color: COLORS.textDark, marginBottom: 4 },
   textLocked: { color: COLORS.muted },
   audioStatus: { fontSize: 12, color: COLORS.muted },

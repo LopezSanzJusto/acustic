@@ -12,7 +12,7 @@ import { ImageSlider } from './imageSlider';
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 15;
 const CARD_WIDTH = width - CARD_MARGIN * 2;
-const IMAGE_HEIGHT = 125;
+const IMAGE_HEIGHT = 132;
 
 interface TourCardProps {
   tour: any;
@@ -87,7 +87,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
             source={isFavorite
               ? require('../assets/images/icons/Corazon_Relleno.png')
               : require('../assets/images/icons/Corazon_Favoritos.png')}
-            style={{ width: 22, height: 22, tintColor: 'white', transform: [{ scale: isFavorite ? 1.25 : 1 }] }}
+            style={{ width: 17, height: 17, tintColor: 'white', transform: [{ scale: isFavorite ? 1.25 : 1 }] }}
             resizeMode="contain"
           />
         </TouchableOpacity>
@@ -100,7 +100,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
           <Text style={styles.title} numberOfLines={1}>{tour.title}</Text>
           {tour.rating != null && (
             <View style={styles.ratingRow}>
-              <Image source={require('../assets/images/icons/Estrella_Valoracion_Audioguia_Card.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
+              <Image source={require('../assets/images/icons/Estrella_Valoracion_Audioguia_Card.png')} style={{ width: 11, height: 11 }} resizeMode="contain" />
               <Text style={styles.ratingText}>{tour.rating}</Text>
               {tour.reviews != null && (
                 <Text style={styles.reviewCount}>({tour.reviews})</Text>
@@ -145,26 +145,26 @@ const styles = StyleSheet.create({
 
   badge: {
     position: 'absolute',
-    top: 10,
-    left: 10,
-    paddingHorizontal: 10,
+    top: 8,
+    left: 8,
+    paddingHorizontal: 6,
     paddingVertical: 3,
-    borderRadius: 10,
+    borderRadius: 6,
     zIndex: 10,
   },
   badgeFree: { backgroundColor: '#4ACB84' },
   badgePaid: { backgroundColor: '#FFFFFF' },
-  badgeText: { fontWeight: 'bold', fontSize: 15 },
+  badgeText: { fontWeight: 'bold', fontSize: 13 },
   badgeTextFree: { color: COLORS.white },
   badgeTextPaid: { color: '#1A1A1A' },
 
   favoriteButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 8,
+    right: 8,
     zIndex: 10,
-    width: 35,
-    height: 26,
+    width: 30,
+    height: 23,
     borderRadius: 8,
     backgroundColor: '#8C77EDCC',
     alignItems: 'center',
@@ -185,13 +185,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 3,
     marginLeft: 8,
-    backgroundColor: '#FFF3C4',
+    backgroundColor: '#FFFCE3',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
   },
   ratingText: { fontSize: 12, fontWeight: '700', color: '#1A1A1A' },
-  reviewCount: { fontSize: 12, color: '#1A1A1A' },
+  reviewCount: { fontSize: 12, color: '#6B6B6B' },
 
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'center' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },

@@ -19,19 +19,19 @@ export const TourInfo = ({ city, country, duration, distance, points }: TourInfo
   return (
     <View style={styles.metaRow}>
       <View style={styles.metaItem}>
-        <Image source={require('../../assets/images/icons/Ubicacion_Ciudad.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+        <Image source={require('../../assets/images/icons/Ubicacion_Ciudad.png')} style={{ width: 12, height: 12 }} resizeMode="contain" />
         <Text style={styles.metaText}>{city}, {country}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Image source={require('../../assets/images/icons/Tiempo_Audioguia.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+        <Image source={require('../../assets/images/icons/Tiempo_Audioguia.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
         <Text style={styles.metaText}>{duration}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Image source={require('../../assets/images/icons/Distancia_Audioguia.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+        <Image source={require('../../assets/images/icons/Distancia_Audioguia.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
         <Text style={styles.metaText}>{distance}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Image source={require('../../assets/images/icons/Puntos_de_Interes_Audioguia.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
+        <Image source={require('../../assets/images/icons/Puntos_de_Interes_Audioguia.png')} style={{ width: 12, height: 12 }} resizeMode="contain" />
         <Text style={styles.metaText}>{points?.length || 0}</Text>
       </View>
     </View>

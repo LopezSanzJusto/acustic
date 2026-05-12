@@ -1,7 +1,6 @@
 // app/(tabs)/_layout.tsx  
 
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { Image } from 'react-native';
 
@@ -16,9 +15,9 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Explora',
-          tabBarIcon: ({ color, focused }) => focused
-            ? <Ionicons name="map" size={24} color={color} />
-            : <Image source={require('../../assets/images/icons/Explora.png')} style={{ width: 30, height: 26, tintColor: color }} resizeMode="contain" />,
+          tabBarIcon: ({ focused }) => focused
+            ? <Image source={require('../../assets/images/icons/Explora_Relleno.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
+            : <Image source={require('../../assets/images/icons/Explora.png')} style={{ width: 30, height: 32 }} resizeMode="contain" />,
         }}
       />
       <Tabs.Screen
@@ -43,8 +42,8 @@ export default function TabLayout() {
           title: 'Perfil',
           tabBarIcon: ({ focused }) => (
             <Image
-              source={require('../../assets/images/icons/Perfil.png')}
-              style={{ width: 32, height: 32, filter: focused ? [] : [{ grayscale: 1 }] } as any}
+              source={require('../../assets/images/icons/Perfil (2).png')}
+              style={{ width: 30, height: 30, filter: focused ? [] : [{ grayscale: 1 }] } as any}
               resizeMode="contain"
             />
           ),

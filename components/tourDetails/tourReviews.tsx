@@ -18,6 +18,7 @@ import { useReviews, ReviewWithId } from '../../hooks/useReviews';
 
 interface TourReviewsProps {
   tourId: string;
+  hasAccess?: boolean;
 }
 
 function overallAvg(r: ReviewWithId): number {
@@ -115,7 +116,7 @@ function ReviewCard({ review, isOwn }: { review: ReviewWithId; isOwn: boolean })
   );
 }
 
-export const TourReviews = ({ tourId }: TourReviewsProps) => {
+export const TourReviews = ({ tourId, hasAccess = true }: TourReviewsProps) => {
   const router = useRouter();
   const { reviews, userReview, loading } = useReviews(tourId);
 
@@ -145,12 +146,14 @@ export const TourReviews = ({ tourId }: TourReviewsProps) => {
         <Text style={styles.empty}>Aún no hay valoraciones. ¡Sé el primero!</Text>
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handlePress}>
-        <Ionicons name="star-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
-        <Text style={styles.btnText}>
-          {userReview ? 'Editar tu valoración' : 'Valora tu experiencia'}
-        </Text>
-      </TouchableOpacity>
+      {hasAccess && (
+        <TouchableOpacity style={styles.button} onPress={handlePress}>
+          <Ionicons name="star-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
+          <Text style={styles.btnText}>
+            {userReview ? 'Editar tu valoración' : 'Valora tu experiencia'}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

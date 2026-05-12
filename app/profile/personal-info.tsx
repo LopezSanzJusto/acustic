@@ -149,7 +149,7 @@ export default function PersonalInfoScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFDFD' },
+  container: { flex: 1, backgroundColor: '#F7F7F7' },
   centered: { justifyContent: 'center', alignItems: 'center' },
   scroll: { paddingHorizontal: 22, paddingBottom: 50 },
 

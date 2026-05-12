@@ -245,7 +245,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F7F7F7',
     paddingTop: 50
   },
   loadingContainer: { 
@@ -345,17 +345,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#EAEAEA',
     backgroundColor: '#FFFFFF',
+    marginRight: 30,
   },
   categoryCard: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     paddingVertical: 5,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EAEAEA',
   },
   activeCategoryCard: {
     backgroundColor: '#8C77ED',
@@ -363,7 +360,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 11,
-    color: COLORS.text,
+    color: 'rgba(0, 0, 0, 0.5)',
     fontWeight: '500',
   },
   activeCategoryText: {
