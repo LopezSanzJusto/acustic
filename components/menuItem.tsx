@@ -35,7 +35,7 @@ export const MenuItem = ({
     >
       <View style={styles.iconContainer}>
         {imageSource ? (
-          <Image source={imageSource} style={{ width: 32, height: 32 }} resizeMode="contain" />
+          <Image source={imageSource} style={{ width: 22, height: 22 }} resizeMode="contain" />
         ) : icon ? (
           <Ionicons name={icon} size={28} color={isDestructive ? COLORS.error : iconColor} />
         ) : null}
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: COLORS.white,
     borderRadius: 17,
