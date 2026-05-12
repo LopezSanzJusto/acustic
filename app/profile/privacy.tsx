@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: COLORS.white,
     paddingVertical: 16, paddingHorizontal: 14,
-    borderRadius: 14,
+    borderRadius: 17,
     borderWidth: 0.8, borderColor: COLORS.border,
     marginBottom: 2,
   },
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   // Panel morado expandible
   card: {
     backgroundColor: CARD_BG,
-    borderRadius: 18,
+    borderRadius: 17,
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 24,

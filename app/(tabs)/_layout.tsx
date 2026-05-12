@@ -40,13 +40,9 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../../assets/images/icons/Perfil (2).png')}
-              style={{ width: 30, height: 30, filter: focused ? [] : [{ grayscale: 1 }] } as any}
-              resizeMode="contain"
-            />
-          ),
+          tabBarIcon: ({ focused }) => focused
+            ? <Image source={require('../../assets/images/icons/Perfil_Relleno.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />
+            : <Image source={require('../../assets/images/icons/Perfil.png')} style={{ width: 30, height: 30 }} resizeMode="contain" />,
         }}
       />
     </Tabs>

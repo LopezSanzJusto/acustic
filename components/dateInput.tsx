@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
   containerLight: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: '#F7F7F7',
+    borderRadius: 17,
     borderWidth: 1,
     borderColor: '#8874F7',
     paddingHorizontal: 14,

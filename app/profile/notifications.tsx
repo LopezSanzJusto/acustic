@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 17,
     borderWidth: 0,
     borderColor: COLORS.primary + '40',
     overflow: 'hidden',

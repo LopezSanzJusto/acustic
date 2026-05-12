@@ -301,7 +301,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
         </View>
 
         {/* Chevron */}
-        <Ionicons name="chevron-forward" size={30} color="#C8C8D0" />
+        <Ionicons name="chevron-forward" size={26} color="#C8C8D0" />
       </View>
     </TouchableOpacity>
   );
@@ -311,7 +311,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: 12,
-    marginBottom: 10,
+    marginTop: 24,
+    marginBottom: 2,
     marginHorizontal: 16,
     paddingVertical: 0,
     paddingRight: 5,

@@ -172,10 +172,10 @@ const styles = StyleSheet.create({
   halfField: { flex: 1 },
   field: { marginBottom: 14 },
   label: { fontSize: 14, fontWeight: '400', color: '#000000', marginBottom: 6 },
-  input: { backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#000000', borderWidth: 1, borderColor: '#8874F7' },
+  input: { backgroundColor: '#F7F7F7', borderRadius: 17, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#000000', borderWidth: 1, borderColor: '#8874F7' },
   inputDisabled: { color: COLORS.muted },
-  birthdate: { backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#000000', borderWidth: 1, borderColor: '#8874F7' },
-  country: { backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#000000', borderWidth: 1, borderColor: '#8874F7' },
+  birthdate: { backgroundColor: '#F7F7F7', borderRadius: 17, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#000000', borderWidth: 1, borderColor: '#8874F7' },
+  country: { backgroundColor: '#F7F7F7', borderRadius: 17, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: '#000000', borderWidth: 1, borderColor: '#8874F7' },
   // Guardar
   saveButton: { backgroundColor: '#8874F7', borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 24 },
   saveButtonText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },

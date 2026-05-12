@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 17,
     borderWidth: 1,
     borderColor: ITEM_BORDER,
     marginBottom: -1,

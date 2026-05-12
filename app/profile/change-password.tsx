@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
     borderWidth: 1.5, borderColor: INPUT_BORDER_COLOR,
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 0,
+    borderRadius: 17, paddingHorizontal: 14, paddingVertical: 0,
   },
   input: {
     fontSize: 15, color: COLORS.text,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
 
   // Botón
   btn: {
-    backgroundColor: '#7678ED', borderRadius: 12,
+    backgroundColor: '#7678ED', borderRadius: 17,
     paddingVertical: 15, alignItems: 'center', marginTop: 6,
   },
   btnDisabled: { opacity: 0.55 },

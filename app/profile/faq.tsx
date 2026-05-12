@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   // Píldora
   pill: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 17,
     borderWidth: 1,
     borderColor: '#8874F7',
     paddingHorizontal: 16,
