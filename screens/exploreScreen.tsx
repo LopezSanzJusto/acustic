@@ -351,12 +351,12 @@ const styles = StyleSheet.create({
   categoryCard: {
     paddingHorizontal: 5,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 8,
     backgroundColor: '#FFFFFF',
   },
   activeCategoryCard: {
-    backgroundColor: '#8C77ED',
-    borderColor: '#8C77ED',
+    backgroundColor: '#4E4FA5',
+    borderColor: '#4E4FA5',
   },
   categoryText: {
     fontSize: 11,

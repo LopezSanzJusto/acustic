@@ -18,7 +18,7 @@ export const TourHeader = ({ title, isFavorite, onBack, onToggleFavorite }: Tour
   return (
     <View style={[styles.topBar, { paddingTop: Math.max(insets.top, 15) }]}>
       <TouchableOpacity onPress={onBack} style={styles.iconButton} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-        <Ionicons name="arrow-back" size={22} color="#312E81" />
+        <Ionicons name="arrow-back" size={22} color="#8874F7" />
       </TouchableOpacity>
       
       <Text style={styles.title} numberOfLines={1}>
