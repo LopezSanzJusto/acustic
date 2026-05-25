@@ -16,7 +16,6 @@ import { useOfflineAssets } from '../../hooks/useOfflineAssets';
 import { useFirebasePoints } from '../../hooks/useFirebasePoints';
 import { usePurchaseTour } from '../../hooks/usePurchaseTour';
 import { useMyTours } from '../../hooks/useMyTours';
-// import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import TrackPlayer from 'react-native-track-player';
 
 // Componentes Modulares
@@ -57,8 +56,6 @@ export default function TourDetailScreen() {
   const { points, loading: pointsLoading } = useFirebasePoints(id as string);
   const { addTourToMyList, isProcessing } = usePurchaseTour();
   const { purchasedTours } = useMyTours();
-  // const { startCheckout, loading: isCheckoutLoading } = useStripeCheckout();
-
   const tourImages = useMemo(() => {
     if (!tour) return [];
     if (tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0) {
@@ -159,14 +156,6 @@ export default function TourDetailScreen() {
       return;
     }
 
-    // STRIPE COMENTADO — pendiente de decidir si se implementa
-    // const result = await startCheckout(tour.id);
-    // if (result.status === "succeeded") {
-    //   Alert.alert(
-    //     "¡Pago realizado!",
-    //     "Tu audioguía se está activando. En unos segundos podrás empezar la ruta.",
-    //   );
-    // }
   };
 
   if (loading || pointsLoading) return (

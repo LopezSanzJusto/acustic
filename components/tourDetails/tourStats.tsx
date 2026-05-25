@@ -1,8 +1,30 @@
 // components/tourDetails/tourStats.tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { COLORS } from '../../utils/theme';
+
+const STAR_FULL = require('../../assets/images/icons/estrella_morada_rellena.png');
+const STAR_HALF = require('../../assets/images/icons/estrella_morada_medio_rellena.png');
+const STAR_EMPTY = require('../../assets/images/icons/estrella_morada_vacia.png');
+
+function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {[1, 2, 3, 4, 5].map(i => {
+        const diff = rating - i;
+        const source = diff >= 0 ? STAR_FULL : diff >= -0.5 ? STAR_HALF : STAR_EMPTY;
+        const isHalf = source === STAR_HALF;
+        return (
+          <Image
+            key={i}
+            source={source}
+            style={{ width: size, height: size, transform: isHalf ? [{ scaleX: -1 }] : [] }}
+          />
+        );
+      })}
+    </View>
+  );
+}
 
 interface TourStatsProps {
   listens: number;
@@ -22,11 +44,7 @@ export const TourStats = ({ listens, rating, reviews }: TourStatsProps) => {
       {/* Columna 2: Rating */}
       <View style={styles.statCol}>
         <Text style={styles.statNumber}>{rating}</Text>
-        <View style={{ flexDirection: 'row' }}>
-          {[1,2,3,4,5].map(i => (
-            <Ionicons key={i} name={i <= Math.round(rating) ? "star" : "star-outline"} size={12} color={COLORS.primary} />
-          ))}
-        </View>
+        <StarRating rating={rating} size={14} />
       </View>
 
       {/* Columna 3: Opiniones */}

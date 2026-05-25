@@ -19,12 +19,6 @@ import { ensureProximityChannel } from '../services/notificationService';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackPlayer, { Capability } from 'react-native-track-player';
 import { PlaybackService } from '../services/playbackService';
-// import { StripeProvider } from '@stripe/stripe-react-native';
-// import {
-//   STRIPE_PUBLISHABLE_KEY,
-//   STRIPE_MERCHANT_IDENTIFIER,
-// } from '../constants/stripe';
-
 SplashScreen.preventAutoHideAsync();
 
 // Registra el servicio de reproducción antes de que el SO lo invoque en segundo plano
@@ -129,11 +123,6 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* <StripeProvider
-        publishableKey={STRIPE_PUBLISHABLE_KEY}
-        merchantIdentifier={STRIPE_MERCHANT_IDENTIFIER}
-        urlScheme="acustic"
-      > */}
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <DownloadsProvider>
         <RouteProvider>
@@ -156,7 +145,6 @@ export default function RootLayout() {
         </RouteProvider>
         </DownloadsProvider>
       </ThemeProvider>
-      {/* </StripeProvider> */}
     </GestureHandlerRootView>
   );
 }
