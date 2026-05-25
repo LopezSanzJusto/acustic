@@ -64,7 +64,7 @@ export default function WelcomeScreen() {
       <Image
         source={require('../assets/images/welcome-bg.png')}
         style={StyleSheet.absoluteFill}
-        contentFit="cover"
+        contentFit="fill"
         contentPosition="center"
       />
 
