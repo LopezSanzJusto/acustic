@@ -1,6 +1,7 @@
 // components/GlowSlider.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, StyleSheet, View } from 'react-native';
+import Svg, { Defs, FeGaussianBlur, Filter, Rect } from 'react-native-svg';
 
 interface GlowSliderProps {
   value: number;
@@ -97,17 +98,61 @@ export const GlowSlider = ({
     setTrackWidth(e.nativeEvent.layout.width);
   };
 
+  const fillWidth = Math.max(0, progress * trackWidth);
+  const svgHeight = TRACK_HEIGHT + 12;
+  const yCenter = svgHeight / 2;
+  const rx = TRACK_HEIGHT / 2;
+
   return (
     <View
       style={[styles.container, style]}
       onLayout={onLayout}
       {...panResponder.panHandlers}
     >
-      {/* Track fondo */}
-      <View style={styles.trackBg} />
+      {/* Track SVG con glow */}
+      {trackWidth > 0 && (
+        <Svg
+          width={trackWidth}
+          height={svgHeight}
+          style={{ position: 'absolute' }}
+        >
+          <Defs>
+            <Filter id="glowTrack" x="-30%" y="-100%" width="160%" height="300%">
+              <FeGaussianBlur stdDeviation={3} />
+            </Filter>
+          </Defs>
 
-      {/* Track progreso */}
-      <View style={[styles.trackFilled, { width: Math.max(0, progress * trackWidth) }]} />
+          {/* Fondo */}
+          <Rect
+            x={0} y={yCenter - TRACK_HEIGHT / 2}
+            width={trackWidth} height={TRACK_HEIGHT}
+            rx={rx}
+            fill="#FFFFFF"
+            stroke={GLOW_COLOR}
+            strokeWidth={0.8}
+          />
+
+          {/* Glow capa */}
+          {fillWidth > 0 && (
+            <Rect
+              x={0} y={yCenter - TRACK_HEIGHT / 2}
+              width={fillWidth} height={TRACK_HEIGHT}
+              rx={rx} fill={GLOW_COLOR}
+              filter="url(#glowTrack)"
+              opacity={0.65}
+            />
+          )}
+
+          {/* Relleno */}
+          {fillWidth > 0 && (
+            <Rect
+              x={0} y={yCenter - TRACK_HEIGHT / 2}
+              width={fillWidth} height={TRACK_HEIGHT}
+              rx={rx} fill={GLOW_COLOR}
+            />
+          )}
+        </Svg>
+      )}
 
       {/* Thumb con halo y glow */}
       {trackWidth > 0 && (
@@ -124,34 +169,6 @@ const styles = StyleSheet.create({
     height: THUMB_GLOW + 8,
     justifyContent: 'center',
     overflow: 'visible',
-  },
-  trackBg: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: TRACK_HEIGHT,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 3,
-    borderWidth: 0.8,
-    borderColor: '#8874F7',
-  },
-  trackGlow: {
-    position: 'absolute',
-    left: 0,
-    height: 7,
-    marginTop:0.28,
-    backgroundColor: '#8B5CF650',
-    borderRadius: 4,
-  },
-  trackFilled: {
-    position: 'absolute',
-    left: 0,
-    height: TRACK_HEIGHT,
-    backgroundColor: GLOW_COLOR,
-    borderTopLeftRadius: 3,
-    borderBottomLeftRadius: 3,
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
   },
   thumbHalo: {
     position: 'absolute',

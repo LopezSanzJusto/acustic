@@ -37,6 +37,7 @@ import {
   formatBytes,
 } from '../services/offlineTourService';
 import { COLORS } from '../utils/theme';
+import { GlowProgressBar } from './GlowProgressBar';
 
 const IMAGE_SIZE = 50;
 
@@ -303,11 +304,10 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
           </View>
 
           {/* Barra de progreso */}
-          <View style={styles.progressBarContainer}>
-            <View style={styles.progressBarBg} />
-            <View style={[styles.progressBarGlow, { width: `${progressPct}%` as any }]} />
-            <View style={[styles.progressBarFill, { width: `${progressPct}%` as any }]} />
-          </View>
+          <GlowProgressBar
+            progress={progressPct}
+            style={{ marginRight: 40 }}
+          />
 
           {/* Texto inferior */}
           <Text style={styles.bottomText}>{bottomText}</Text>
@@ -416,34 +416,6 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 12,
     color: COLORS.muted,
-  },
-  progressBarContainer: {
-    height: 7,
-    justifyContent: 'center',
-    marginTop: 1,
-    marginRight: 40,
-  },
-  progressBarBg: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: '#DDDEFF',
-    borderRadius: 2,
-  },
-  progressBarGlow: {
-    position: 'absolute',
-    left: 0,
-    height: 6,
-    backgroundColor: '#7F86FF50',
-    borderRadius: 4,
-  },
-  progressBarFill: {
-    position: 'absolute',
-    left: 0,
-    height: 4,
-    backgroundColor: '#7F86FF',
-    borderRadius: 2,
   },
   bottomText: {
     fontSize: 12,
