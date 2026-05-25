@@ -11,19 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-
-const ChevronRight = ({ size = 30, color = '#C8C8D0' }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M 13 5 L 17 12 L 13 19"
-      stroke={color}
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
 import { collection, getDocs, orderBy, query } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../services/firebaseConfig';
 import { useTourDownload } from '../hooks/useDownloads';
@@ -38,6 +25,18 @@ import {
 } from '../services/offlineTourService';
 import { COLORS } from '../utils/theme';
 import { GlowProgressBar } from './GlowProgressBar';
+import Svg, { Path } from 'react-native-svg';
+
+const DownloadIcon = ({ size = 12, color = '#7F86FF' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    {/* Flecha vertical */}
+    <Path d="M 12 4 L 12 16" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    {/* Punta de la flecha */}
+    <Path d="M 7 11 L 12 16 L 17 11" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    {/* Raya horizontal pegada */}
+    <Path d="M 6 18 L 18 18" stroke={color} strokeWidth={2} strokeLinecap="round" />
+  </Svg>
+);
 
 const IMAGE_SIZE = 50;
 
@@ -261,17 +260,19 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
 
     // idle o paused
     return (
-      <TouchableOpacity
-        style={[styles.badgeRow, styles.badgePill]}
-        onPress={handleDownloadPress}
-        activeOpacity={0.7}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <Ionicons name="download-outline" size={13} color="#7F86FF" />
-        <Text style={[styles.badgeText, { color: '#7F86FF' }]}>
-          {isPaused ? `Reanudar ${downloadPct}%` : 'Descargar'}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.badgeShadowClip}>
+        <TouchableOpacity
+          style={[styles.badgeRow, styles.badgePill]}
+          onPress={handleDownloadPress}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <DownloadIcon size={11} color="#7F86FF" />
+          <Text style={[styles.badgeText, { color: '#7F86FF' }]}>
+            {isPaused ? `Reanudar ${downloadPct}%` : 'Descargar'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -304,17 +305,14 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
           </View>
 
           {/* Barra de progreso */}
-          <GlowProgressBar
-            progress={progressPct}
-            style={{ marginRight: 40 }}
-          />
+          <GlowProgressBar progress={progressPct} glowRadius={1.5} style={{ marginRight: 40 }} />
 
           {/* Texto inferior */}
           <Text style={styles.bottomText}>{bottomText}</Text>
         </View>
 
         {/* Chevron */}
-        <ChevronRight />
+        <Ionicons name="chevron-forward" size={26} color="#C8C8D0" />
       </View>
     </TouchableOpacity>
   );
@@ -330,7 +328,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     paddingRight: 5,
     paddingLeft: 0,
-    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
@@ -370,17 +367,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 3,
   },
+  badgeShadowClip: {},
   badgePill: {
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 3,
-    paddingVertical: 3,
-    paddingLeft: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 4,
     borderRadius: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 0,
-    elevation: 1,
+    boxShadow: '0px 3px 3px 0px rgba(0, 0, 0, 0.15)',
   },
   badgePillDownloaded: {
     backgroundColor: '#FFFFFF',

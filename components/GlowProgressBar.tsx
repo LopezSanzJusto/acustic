@@ -24,7 +24,7 @@ export const GlowProgressBar = ({
 
   const pct = Math.min(100, Math.max(0, progress));
   const fillWidth = (pct / 100) * trackWidth;
-  const svgHeight = height + glowRadius * 4;
+  const svgHeight = height + glowRadius * 2;
   const yCenter = svgHeight / 2;
   const rx = height / 2;
 
@@ -34,7 +34,11 @@ export const GlowProgressBar = ({
       onLayout={e => setTrackWidth(e.nativeEvent.layout.width)}
     >
       {trackWidth > 0 && (
-        <Svg width={trackWidth} height={svgHeight} style={{ position: 'absolute' }}>
+        <Svg
+          width={trackWidth + glowRadius * 2}
+          height={svgHeight}
+          style={{ position: 'absolute', left: -glowRadius }}
+        >
           <Defs>
             <Filter id="glow" x="-30%" y="-100%" width="160%" height="300%">
               <FeGaussianBlur stdDeviation={glowRadius} />
@@ -43,7 +47,7 @@ export const GlowProgressBar = ({
 
           {/* Track de fondo */}
           <Rect
-            x={0} y={yCenter - height / 2}
+            x={glowRadius} y={yCenter - height / 2}
             width={trackWidth} height={height}
             rx={rx} fill={trackColor}
           />
@@ -51,7 +55,7 @@ export const GlowProgressBar = ({
           {/* Capa glow (borrosa) */}
           {fillWidth > 0 && (
             <Rect
-              x={0} y={yCenter - height / 2}
+              x={glowRadius} y={yCenter - height / 2}
               width={fillWidth} height={height}
               rx={rx} fill={color}
               filter="url(#glow)"
@@ -62,7 +66,7 @@ export const GlowProgressBar = ({
           {/* Barra rellena encima */}
           {fillWidth > 0 && (
             <Rect
-              x={0} y={yCenter - height / 2}
+              x={glowRadius} y={yCenter - height / 2}
               width={fillWidth} height={height}
               rx={rx} fill={color}
             />
