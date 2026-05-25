@@ -38,9 +38,11 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const isEmailValid = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
+
   const isFormValid = useMemo(
     () =>
-      email.trim().length > 0 &&
+      isEmailValid(email) &&
       email.trim().toLowerCase() === emailConfirm.trim().toLowerCase() &&
       password.length >= 6,
     [email, emailConfirm, password]
@@ -49,6 +51,10 @@ export default function RegisterScreen() {
   const handleContinue = () => {
     if (!email.trim() || !emailConfirm.trim() || !password) {
       Alert.alert('Faltan campos', 'Introduce email, confirmación y contraseña.');
+      return;
+    }
+    if (!isEmailValid(email)) {
+      Alert.alert('Email no válido', 'Introduce una dirección de correo válida.');
       return;
     }
     if (email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase()) {
@@ -180,7 +186,7 @@ export default function RegisterScreen() {
           <Image source={require('../../assets/images/icons/Contraseña.png')} style={[{ width: 20, height: 20 }, styles.inputLeftIcon]} resizeMode="contain" />
           <TextInput
             style={styles.input}
-            placeholder="Contraseña"
+            placeholder="Contraseña (mínimo 6 caracteres)"
             placeholderTextColor={PLACEHOLDER}
             value={password}
             onChangeText={setPassword}

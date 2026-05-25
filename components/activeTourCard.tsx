@@ -11,6 +11,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+
+const ChevronRight = ({ size = 30, color = '#C8C8D0' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M 13 5 L 17 12 L 13 19"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
 import { collection, getDocs, orderBy, query } from '@react-native-firebase/firestore';
 import { db, firestoreReady } from '../services/firebaseConfig';
 import { useTourDownload } from '../hooks/useDownloads';
@@ -253,7 +266,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
         activeOpacity={0.7}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Ionicons name="arrow-down-outline" size={11} color="#7F86FF" />
+        <Ionicons name="download-outline" size={13} color="#7F86FF" />
         <Text style={[styles.badgeText, { color: '#7F86FF' }]}>
           {isPaused ? `Reanudar ${downloadPct}%` : 'Descargar'}
         </Text>
@@ -301,7 +314,7 @@ export const ActiveTourCard = ({ tour, onPress }: ActiveTourCardProps) => {
         </View>
 
         {/* Chevron */}
-        <Ionicons name="chevron-forward" size={26} color="#C8C8D0" />
+        <ChevronRight />
       </View>
     </TouchableOpacity>
   );
@@ -363,6 +376,11 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingLeft: 5,
     borderRadius: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 0,
+    elevation: 1,
   },
   badgePillDownloaded: {
     backgroundColor: '#FFFFFF',
