@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot, collection, query, where, getDocs, documentId } from '@react-native-firebase/firestore';
+import NetInfo from '@react-native-community/netinfo';
 import { db, auth, firestoreReady } from '../services/firebaseConfig';
 
 export function useMyTours() {
@@ -32,6 +33,14 @@ export function useMyTours() {
     const setup = async () => {
       const userId = auth.currentUser?.uid;
       if (!userId) { setLoading(false); return; }
+
+      // Sin red no montamos el listener: el SDK lanzaría "Could not load bundle".
+      // Cuando vuelva la conexión, este hook se remontará en la próxima navegación.
+      const net = await NetInfo.fetch();
+      if (!(net.isConnected ?? false)) {
+        setLoading(false);
+        return;
+      }
 
       await firestoreReady;
       if (cancelled) return;

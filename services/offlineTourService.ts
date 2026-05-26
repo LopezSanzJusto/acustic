@@ -17,6 +17,7 @@ import {
 } from './offlinePaths';
 import { DownloadEntry } from './offlineTypes';
 import { downloadOfflineMap, deleteOfflineMap } from './offlineMapService';
+import { fetchFullRoute } from './osrmService';
 
 // ─── Types internos ───────────────────────────────────────────────────────
 
@@ -294,11 +295,27 @@ export async function downloadTour(
   onProgress({ phase: 'assets' });
   await runDownloadBatch(tourId, assets, 0, totalBytes, onProgress);
 
-  // 5. Guardar manifest en disco
+  // 5. Precalcular polyline OSRM con el orden por defecto de los stops.
+  // Si falla (timeout, OSRM caído), no es crítico: el polyline simplemente
+  // no se mostrará offline. Online sí seguirá funcionando vía useOsrmRoute.
+  try {
+    const stopsInOrder = [...manifest.stops].sort((a, b) => a.order - b.order);
+    const coords = await fetchFullRoute(stopsInOrder);
+    if (coords.length > 0) {
+      manifest.routeCache = {
+        stopIds: stopsInOrder.map((s) => s.stopId),
+        coords,
+      };
+    }
+  } catch (e) {
+    console.warn('[offline] precompute OSRM route failed:', e);
+  }
+
+  // 6. Guardar manifest en disco (con routeCache si lo conseguimos)
   await saveManifest(manifest);
   await AsyncStorage.removeItem(resumeKey(tourId));
 
-  // 6. Descarga de tiles del mapa
+  // 7. Descarga de tiles del mapa
   onProgress({ phase: 'map', progress: 0 });
   try {
     await downloadOfflineMap(tourId, manifest, (pct) => {
@@ -365,6 +382,20 @@ export async function resumeDownload(
   });
 
   await runDownloadBatch(tourId, assets, bytesDownloaded, totalBytes, onProgress);
+
+  // Precompute OSRM aquí también para que reanudar deje el manifest completo.
+  try {
+    const stopsInOrder = [...manifest.stops].sort((a, b) => a.order - b.order);
+    const coords = await fetchFullRoute(stopsInOrder);
+    if (coords.length > 0) {
+      manifest.routeCache = {
+        stopIds: stopsInOrder.map((s) => s.stopId),
+        coords,
+      };
+    }
+  } catch (e) {
+    console.warn('[offline] precompute OSRM route failed (resume):', e);
+  }
 
   await saveManifest(manifest);
   await AsyncStorage.removeItem(resumeKey(tourId));

@@ -381,6 +381,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     paddingLeft: 5,
     borderRadius: 20,
+    boxShadow: '0px 3px 3px 0px rgba(0, 0, 0, 0.15)',
   },
   badgePillError: {
     backgroundColor: '#FEE2E2',

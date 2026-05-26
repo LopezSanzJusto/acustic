@@ -191,7 +191,10 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
 
   const { gpsActivePoint } = useGeoAudioSync({
     location,
-    points: routeToUse,
+    // Usamos los puntos con assets resueltos (file:// offline) para que la
+    // notificación local y el modal de "punto alcanzado" muestren la imagen
+    // descargada en lugar de la URL remota, que offline no cargaría.
+    points: resolvedRoutePoints,
     radius: RADIUS,
     isPreloading,
     pointsLoading,
@@ -276,14 +279,15 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
       <View style={styles.container}>
         <View style={{ flex: 1, position: "relative" }}>
           
-          <MapDisplay 
-            location={location} 
+          <MapDisplay
+            location={location}
             points={routeToUse}
             radius={RADIUS}
-            showGeofence={true} 
-            markerType="number" 
-            dashedRoute={true}  
-            onMarkerPress={handleMarkerPress} 
+            showGeofence={true}
+            markerType="number"
+            dashedRoute={true}
+            onMarkerPress={handleMarkerPress}
+            tourId={tourId}
           />
 
           <View style={[styles.topBarWrapper, { paddingTop: insets.top }]}>

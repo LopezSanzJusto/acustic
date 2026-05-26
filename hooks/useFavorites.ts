@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from '@react-native-firebase/firestore';
 import { onAuthStateChanged } from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
+import NetInfo from '@react-native-community/netinfo';
+import { Alert } from 'react-native';
 import { db, auth, firestoreReady } from '../services/firebaseConfig';
 
 export const useFavorites = (tourId: string) => {
@@ -24,7 +26,13 @@ export const useFavorites = (tourId: string) => {
         return;
       }
 
-      firestoreReady.then(() => {
+      (async () => {
+        // Sin red no montamos el listener: el SDK lanzaría "Could not load bundle"
+        // como unhandled rejection. Mantenemos el último valor conocido en memoria.
+        const net = await NetInfo.fetch();
+        if (!(net.isConnected ?? false)) return;
+
+        await firestoreReady;
         unsubSnap = onSnapshot(
           doc(db, 'users', user.uid),
           (snap) => {
@@ -38,7 +46,7 @@ export const useFavorites = (tourId: string) => {
             }
           }
         );
-      });
+      })();
     });
 
     return () => {
@@ -51,6 +59,11 @@ export const useFavorites = (tourId: string) => {
     const userId = auth.currentUser?.uid;
     if (!userId) {
       router.push('/welcome' as any);
+      return;
+    }
+    const net = await NetInfo.fetch();
+    if (!(net.isConnected ?? false)) {
+      Alert.alert('Sin conexión', 'Necesitas conexión para cambiar tus favoritos.');
       return;
     }
     try {

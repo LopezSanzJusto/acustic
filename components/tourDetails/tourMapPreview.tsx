@@ -34,6 +34,7 @@ export const TourMapPreview = ({ tourId, points, onPress, onRouteCalculated }: T
             markerType="number"
             dashedRoute={true}
             fitPadding={{ top: 30, right: 30, bottom: 30, left: 30 }}
+            tourId={tourId}
           />
         </View>
         <View style={styles.overlay} />

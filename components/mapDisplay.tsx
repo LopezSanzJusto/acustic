@@ -18,6 +18,9 @@ interface MapDisplayProps {
   dashedRoute?: boolean;
   onMarkerPress?: (id: string) => void;
   fitPadding?: { top: number; right: number; bottom: number; left: number };
+  // Si se pasa, useOsrmRoute intenta usar la polyline cacheada en el manifest
+  // del tour descargado en lugar de hacer fetch online a OSRM.
+  tourId?: string;
 }
 
 export const MapDisplay = ({
@@ -29,10 +32,11 @@ export const MapDisplay = ({
   markerType = 'image',
   onMarkerPress,
   fitPadding = { top: 140, right: 80, bottom: 180, left: 80 },
+  tourId,
 }: MapDisplayProps) => {
   const mapRef = useRef<MapView>(null);
   const sortedPoints = useSortedPoints(points);
-  const { routeCoords, routeDistance } = useOsrmRoute(sortedPoints);
+  const { routeCoords, routeDistance } = useOsrmRoute(sortedPoints, tourId);
 
   useEffect(() => {
     if (routeDistance && onRouteCalculated) onRouteCalculated(routeDistance);

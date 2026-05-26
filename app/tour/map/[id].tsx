@@ -101,6 +101,7 @@ export default function TourMapScreen() {
             markerType="number"
             showGeofence={false}
             fitPadding={{ top: 80, right: 60, bottom: 100, left: 60 }}
+            tourId={id as string}
         />
       </View>
 

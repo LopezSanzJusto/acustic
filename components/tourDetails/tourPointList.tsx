@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../utils/theme';
 import { PointOfInterest } from '../../data/points';
 import { useCustomRoute } from '../../hooks/useCustomRoute';
+import { useOfflineAssets } from '../../hooks/useOfflineAssets';
 
 import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
@@ -28,16 +29,35 @@ export const TourPointList = ({ tourId, points, hasAccess = true, headerComponen
     }
   }, [points, setInitialPoints]);
 
+  // Resuelve las imágenes contra el manifest local. Si el tour está descargado,
+  // devuelve rutas file://; si no, mantiene las URLs remotas tal cual. Esto es
+  // necesario porque useCustomRoute persiste en AsyncStorage los puntos con las
+  // URLs que tenían la primera vez (típicamente remotas), y al abrir offline
+  // esas URLs ya no se pueden cargar.
+  const { resolvedPoints: resolvedCustomPoints } = useOfflineAssets(
+    tourId,
+    customPoints as unknown as PointOfInterest[],
+  );
+
+  const resolvedImageById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of resolvedCustomPoints) {
+      if (p.image) map.set(p.id, p.image as string);
+    }
+    return map;
+  }, [resolvedCustomPoints]);
+
   const listData = useMemo(() => {
     let visibleCounter = 0;
     return customPoints.map(point => {
       if (!point.isHidden) visibleCounter++;
-      return { 
-        ...point, 
-        displayNumber: point.isHidden ? null : visibleCounter 
+      return {
+        ...point,
+        image: resolvedImageById.get(point.id) ?? point.image,
+        displayNumber: point.isHidden ? null : visibleCounter
       };
     });
-  }, [customPoints]);
+  }, [customPoints, resolvedImageById]);
 
   const renderItem = useCallback(({ item, drag, isActive }: RenderItemParams<any>) => (
     <View style={styles.itemWrapper}>

@@ -4,7 +4,8 @@ import { manifestPath } from './offlinePaths';
 
 // Versión del esquema del manifest. Incrementar si cambia la estructura
 // para invalidar descargas antiguas en el paso 10.
-export const MANIFEST_SCHEMA_VERSION = 1;
+// v2: añadido routeCache (polyline OSRM precalculada para offline).
+export const MANIFEST_SCHEMA_VERSION = 2;
 
 export interface TourMeta {
   id: string;
@@ -28,6 +29,19 @@ export interface StopAsset {
   imageUrl: string;   // URL remota original
 }
 
+export interface Coord {
+  latitude: number;
+  longitude: number;
+}
+
+// Polyline OSRM precalculada para poder dibujar la ruta sin red.
+// stopIds guarda el orden exacto con el que se calcularon las coords;
+// si el usuario reordena la ruta, hay que recalcular (o no mostrar polyline).
+export interface RouteCache {
+  stopIds: string[];
+  coords: Coord[];
+}
+
 export interface TourManifest {
   schemaVersion: number;
   tourId: string;
@@ -35,6 +49,7 @@ export interface TourManifest {
   introAudioUrl: string;
   coverImageUrls: string[];   // URLs remotas de todas las imágenes del tour
   stops: StopAsset[];
+  routeCache?: RouteCache;    // opcional: puede no existir si OSRM falló al descargar
   createdAt: number;          // timestamp ms — cuándo se descargó
 }
 
