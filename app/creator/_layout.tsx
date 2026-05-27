@@ -47,6 +47,7 @@ export default function CreatorLayout() {
         }}
       >
         <Stack.Screen name="basics" />
+        <Stack.Screen name="points" />
       </Stack>
     </CreatorProvider>
   );

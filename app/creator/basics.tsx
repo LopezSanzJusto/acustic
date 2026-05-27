@@ -1,18 +1,13 @@
 // app/creator/basics.tsx
 //
 // Pantalla 1 del wizard: Datos básicos.
-// Orden visual (Figma):
-//   1. Banner de portada            (placeholder en 5.2a → real en 5.2b)
-//   2. Datos básicos
-//        - Título
-//        - Destino
-//        - Precio (read-only "Gratis", reservado para v2)
-//        - Categoría
-//   3. Audio de introducción         (placeholder en 5.2a → real en 5.2c)
-//   4. Fotos favoritas de la ruta    (placeholder en 5.2a → real en 5.2d)
-//   5. Botón Siguiente               (validación + activación en 5.2e)
+// Orden visual:
+//   1. Banner de portada
+//   2. Datos básicos (título, destino, precio, categoría)
+//   3. Audio de introducción
+//   4. Botón Siguiente (habilitado cuando title + destination + category rellenos)
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -23,15 +18,35 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useCreator } from '@/contexts/CreatorContext';
 import { LabeledInput } from '@/components/creator/LabeledInput';
 import { CategoryPicker } from '@/components/creator/CategoryPicker';
 import { CoverImagePicker } from '@/components/creator/CoverImagePicker';
+import { IntroAudioPicker } from '@/components/creator/IntroAudioPicker';
 import { COLORS, FONTS } from '@/utils/theme';
 
 export default function CreatorBasicsScreen() {
-  const { draft, loading, error, creatorId, updateField } = useCreator();
+  const router = useRouter();
+  const { draft, loading, error, creatorId, updateField, flushSave } = useCreator();
+  const [navigating, setNavigating] = useState(false);
+
+  const canProceed =
+    !!draft &&
+    (draft.title ?? '').trim().length >= 3 &&
+    (draft.destination ?? '').trim().length >= 2 &&
+    draft.category !== null;
+
+  const handleNext = async () => {
+    if (!canProceed || navigating) return;
+    setNavigating(true);
+    try {
+      await flushSave();
+    } finally {
+      setNavigating(false);
+    }
+    router.push('/creator/points' as any);
+  };
 
   // ───── Estados de carga / errores ─────
   if (loading) {
@@ -108,53 +123,33 @@ export default function CreatorBasicsScreen() {
           onChange={(id) => updateField('category', id)}
         />
 
-        {/* 3. AUDIO DE INTRODUCCIÓN (placeholder) */}
-        <PlaceholderSlot
-          icon="mic-outline"
-          title="Audio de introducción"
-          subtitle="Sube el audio que da la bienvenida al tour"
-          height={80}
-        />
+        {/* 3. AUDIO DE INTRODUCCIÓN */}
+        <IntroAudioPicker />
 
-        {/* 4. FOTOS FAVORITAS (placeholder) */}
-        <PlaceholderSlot
-          icon="images-outline"
-          title="Fotos favoritas de la ruta"
-          subtitle="Añade hasta varias fotos para mostrar el recorrido"
-          height={120}
-        />
-
-        {/* 5. BOTÓN SIGUIENTE (deshabilitado hasta 5.2e) */}
+        {/* 4. BOTÓN SIGUIENTE */}
         <Pressable
-          disabled
-          style={[styles.nextButton, styles.nextButtonDisabled]}
+          onPress={handleNext}
+          disabled={!canProceed || navigating}
+          style={({ pressed }) => [
+            styles.nextButton,
+            (!canProceed || navigating) && styles.nextButtonDisabled,
+            pressed && canProceed && !navigating && { opacity: 0.85 },
+          ]}
         >
-          <Text style={styles.nextButtonText}>Siguiente</Text>
+          {navigating ? (
+            <ActivityIndicator color={COLORS.white} size="small" />
+          ) : (
+            <Text style={styles.nextButtonText}>Siguiente</Text>
+          )}
         </Pressable>
+
+        {!canProceed && (
+          <Text style={styles.hint}>
+            Rellena el título, el destino y la categoría para continuar.
+          </Text>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
-  );
-}
-
-// ───────────────────────────────────────────────────────────────────────
-// Placeholder reutilizable para los slots de media (banner / audio / fotos).
-// Se reemplazará por los componentes reales en 5.2b/c/d.
-// ───────────────────────────────────────────────────────────────────────
-
-interface PlaceholderSlotProps {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  subtitle: string;
-  height: number;
-}
-
-function PlaceholderSlot({ icon, title, subtitle, height }: PlaceholderSlotProps) {
-  return (
-    <View style={[styles.placeholder, { minHeight: height }]}>
-      <Ionicons name={icon} size={28} color={COLORS.primary} />
-      <Text style={styles.placeholderTitle}>{title}</Text>
-      <Text style={styles.placeholderSubtitle}>{subtitle}</Text>
-    </View>
   );
 }
 
@@ -183,31 +178,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  placeholder: {
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: COLORS.primary,
-    borderRadius: 14,
-    backgroundColor: COLORS.backgroundAlt,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    gap: 4,
-    marginBottom: 16,
-  },
-  placeholderTitle: {
-    fontFamily: FONTS.semiBold,
-    fontSize: 15,
-    color: COLORS.primary,
-  },
-  placeholderSubtitle: {
-    fontFamily: FONTS.regular,
-    fontSize: 12,
-    color: COLORS.muted,
-    textAlign: 'center',
-  },
-
   nextButton: {
     marginTop: 28,
     alignSelf: 'flex-end',
@@ -215,6 +185,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     backgroundColor: COLORS.primary,
+    minWidth: 130,
+    alignItems: 'center',
   },
   nextButtonDisabled: {
     opacity: 0.45,
@@ -223,5 +195,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontFamily: FONTS.bold,
     fontSize: 15,
+  },
+  hint: {
+    fontFamily: FONTS.regular,
+    fontSize: 12,
+    color: COLORS.muted,
+    textAlign: 'right',
+    marginTop: 8,
   },
 });
