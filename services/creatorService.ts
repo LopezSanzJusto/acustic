@@ -33,6 +33,7 @@ import type {
   TourPoint,
   TourDraft,
   TourDraftInput,
+  TourPointInput,
 } from '@/types/tour';
 import { getDistanceInMeters } from '@/utils/geo';
 
@@ -143,6 +144,93 @@ export async function updateDraft(tourId: string, patch: TourDraftInput): Promis
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Points (CRUD desde el wizard)
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Lee un point por id. Lanza si no existe. Usado por el editor de punto. */
+export async function getPoint(tourId: string, pointId: string): Promise<TourPoint> {
+  await firestoreReady;
+  const ref = doc(db, 'tours', tourId, 'points', pointId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error(`Point ${pointId} del tour ${tourId} no existe`);
+  return { id: snap.id, ...(snap.data() as Omit<TourPoint, 'id'>) };
+}
+
+/** Aplica un patch parcial a un point + bump de `updatedAt`. Pensado para
+ *  autosave con debounce desde el editor del punto. */
+export async function updatePoint(
+  tourId: string,
+  pointId: string,
+  patch: TourPointInput,
+): Promise<void> {
+  await firestoreReady;
+  const ref = doc(db, 'tours', tourId, 'points', pointId);
+  await updateDoc(ref, { ...patch, updatedAt: serverTimestamp() });
+}
+
+/** Crea un point vacío al final de la lista del tour.
+ *  Se llama desde el botón "+" de la pantalla 2 del wizard. Inicializa
+ *  todos los campos a null/0/'' para que el editor de punto los rellene
+ *  con autosave igual que hace el draft del tour. */
+export async function createEmptyPoint(
+  tourId: string,
+  creatorId: string,
+  order: number,
+): Promise<TourPoint> {
+  await firestoreReady;
+  const now = serverTimestamp();
+  const data = {
+    creatorId,
+    tourStatus: 'draft' as const,
+    order,
+    name: '',
+    description: '',
+    // 0/0 es válido para Firestore pero "sin coordenadas reales" — el editor
+    // sobreescribirá esto antes de poder publicar. Usamos un sentinel que la
+    // validación de publish detectará (latitude === 0 && longitude === 0).
+    latitude: 0,
+    longitude: 0,
+    placeId: null,
+    audioUrl: null,
+    audioStoragePath: null,
+    audioDuration: null,
+    audioSizeBytes: null,
+    imageUrl: null,
+    imageStoragePath: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const ref = await addDoc(collection(db, 'tours', tourId, 'points'), data);
+  const snap = await getDoc(ref);
+  return { id: snap.id, ...(snap.data() as Omit<TourPoint, 'id'>) };
+}
+
+/** Borra un point + sus blobs (audio + imagen). Idempotente.
+ *  No reescala el `order` del resto: la lista se renumera al renderizar
+ *  por `order` ascendente, y el siguiente reorder los compacta. */
+export async function deletePoint(tourId: string, point: TourPoint): Promise<void> {
+  await firestoreReady;
+  await deleteFiles([point.audioStoragePath, point.imageStoragePath]);
+  await deleteDoc(doc(db, 'tours', tourId, 'points', point.id));
+}
+
+/** Persiste un nuevo orden de points en un solo batch.
+ *  `orderedIds` es la lista de ids en el orden deseado: el índice se
+ *  convierte directamente en el nuevo campo `order`. */
+export async function reorderPoints(tourId: string, orderedIds: string[]): Promise<void> {
+  if (orderedIds.length === 0) return;
+  await firestoreReady;
+  const batch = writeBatch(db);
+  orderedIds.forEach((pointId, index) => {
+    batch.update(doc(db, 'tours', tourId, 'points', pointId), {
+      order: index,
+      updatedAt: serverTimestamp(),
+    });
+  });
+  await batch.commit();
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Descartar draft (con limpieza de blobs)
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -206,7 +294,11 @@ export function validateForPublish(tour: Tour, points: TourPoint[]): PublishVali
   points.forEach((p, idx) => {
     if (!p.name?.trim()) errors.push({ field: `points[${idx}].name`, message: `Parada ${idx + 1}: falta el nombre` });
     if (!p.audioUrl) errors.push({ field: `points[${idx}].audio`, message: `Parada ${idx + 1}: falta el audio` });
-    if (typeof p.latitude !== 'number' || typeof p.longitude !== 'number') {
+    if (
+      typeof p.latitude !== 'number' ||
+      typeof p.longitude !== 'number' ||
+      (p.latitude === 0 && p.longitude === 0)
+    ) {
       errors.push({ field: `points[${idx}].coords`, message: `Parada ${idx + 1}: falta la ubicación` });
     }
   });

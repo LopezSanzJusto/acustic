@@ -134,6 +134,24 @@ export interface TourDraftInput {
   introAudioDuration?: number | null;
 }
 
+/** Patch parcial que aplica el editor de una parada. Sigue el mismo
+ *  contrato que `TourDraftInput`: el hook lo acumula y lo manda con
+ *  autosave debounced. `order` se gestiona desde la pantalla 2 (lista),
+ *  no desde el editor del punto. */
+export interface TourPointInput {
+  name?: string;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  placeId?: string | null;
+  audioUrl?: string | null;
+  audioStoragePath?: string | null;
+  audioDuration?: number | null;
+  audioSizeBytes?: number | null;
+  imageUrl?: string | null;
+  imageStoragePath?: string | null;
+}
+
 /** Devuelve el destino "para mostrar" tolerando tours antiguos
  *  (que sólo tienen `city`/`country`). */
 export function getTourDestinationLabel(tour: Pick<Tour, 'destination' | 'city' | 'country'>): string {

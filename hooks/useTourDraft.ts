@@ -19,6 +19,9 @@ import {
   discardDraft,
   publishTour,
   listTourPoints,
+  createEmptyPoint,
+  deletePoint as deletePointRemote,
+  reorderPoints as reorderPointsRemote,
 } from '@/services/creatorService';
 import type { TourDraft, TourDraftInput, TourPoint } from '@/types/tour';
 
@@ -43,6 +46,14 @@ export interface UseTourDraftResult {
 
   /** Recarga la lista de points desde Firestore (útil tras volver del editor). */
   refreshPoints: () => Promise<void>;
+
+  /** Crea un point vacío al final de la lista y lo devuelve. El consumidor
+   *  decide si navegar al editor con el id devuelto. */
+  addPoint: () => Promise<TourPoint>;
+  /** Borra un point del draft (incluye sus blobs). */
+  removePoint: (pointId: string) => Promise<void>;
+  /** Persiste un nuevo orden de points. Recibe la lista ya reordenada. */
+  persistPointsOrder: (ordered: TourPoint[]) => Promise<void>;
 
   /** Descarta el draft actual (con sus blobs) y crea uno nuevo vacío. */
   discardAndRestart: () => Promise<void>;
@@ -163,6 +174,50 @@ export function useTourDraft(creatorId: string | null): UseTourDraftResult {
     if (mountedRef.current) setPoints(ps);
   }, [draft?.id]);
 
+  // ───────── Mutaciones de points ─────────
+  const addPoint = useCallback(async (): Promise<TourPoint> => {
+    if (!draft?.id || !creatorId) {
+      throw new Error('addPoint: draft o creatorId no disponibles');
+    }
+    const nextOrder = points.length;
+    const created = await createEmptyPoint(draft.id, creatorId, nextOrder);
+    if (mountedRef.current) {
+      // Optimismo local: lo añadimos al final sin esperar a refreshPoints.
+      setPoints((prev) => [...prev, created]);
+    }
+    return created;
+  }, [draft?.id, creatorId, points.length]);
+
+  const removePoint = useCallback(async (pointId: string): Promise<void> => {
+    if (!draft?.id) return;
+    const target = points.find((p) => p.id === pointId);
+    if (!target) return;
+    // Optimismo local: lo quitamos de la lista antes de esperar a Firestore.
+    if (mountedRef.current) {
+      setPoints((prev) => prev.filter((p) => p.id !== pointId));
+    }
+    try {
+      await deletePointRemote(draft.id, target);
+    } catch (e) {
+      // Si falla, recargamos para no quedar inconsistentes.
+      await refreshPoints();
+      throw e;
+    }
+  }, [draft?.id, points, refreshPoints]);
+
+  const persistPointsOrder = useCallback(async (ordered: TourPoint[]): Promise<void> => {
+    if (!draft?.id || ordered.length === 0) return;
+    // Optimismo local: actualizamos el campo `order` en memoria.
+    const reindexed = ordered.map((p, i) => ({ ...p, order: i }));
+    if (mountedRef.current) setPoints(reindexed);
+    try {
+      await reorderPointsRemote(draft.id, ordered.map((p) => p.id));
+    } catch (e) {
+      await refreshPoints();
+      throw e;
+    }
+  }, [draft?.id, refreshPoints]);
+
   // ───────── Descartar y reiniciar ─────────
   const discardAndRestart = useCallback(async () => {
     if (!draft || !creatorId) return;
@@ -228,6 +283,9 @@ export function useTourDraft(creatorId: string | null): UseTourDraftResult {
     updateFields,
     flushSave,
     refreshPoints,
+    addPoint,
+    removePoint,
+    persistPointsOrder,
     discardAndRestart,
     publish,
   };

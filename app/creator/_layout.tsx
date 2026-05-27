@@ -48,6 +48,8 @@ export default function CreatorLayout() {
       >
         <Stack.Screen name="basics" />
         <Stack.Screen name="points" />
+        <Stack.Screen name="point/[id]" />
+        <Stack.Screen name="point-map/[id]" options={{ headerShown: false }} />
       </Stack>
     </CreatorProvider>
   );
