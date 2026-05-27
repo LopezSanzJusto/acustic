@@ -1,0 +1,41 @@
+rules_version = '2';
+
+// Reglas de Firebase Storage para Acustic.
+//
+// Estructura de rutas:
+//   tours/{creatorId}/{tourId}/cover.{ext}
+//   tours/{creatorId}/{tourId}/photos/{photoId}.{ext}
+//   tours/{creatorId}/{tourId}/intro-audio.{ext}
+//   tours/{creatorId}/{tourId}/points/{pointId}/audio.{ext}
+//   tours/{creatorId}/{tourId}/points/{pointId}/image.{ext}
+//
+// Validación barata: el `creatorId` va en la ruta, así no hace falta
+// consultar Firestore con `firestore.get` (que es costoso + lento).
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Lectura pública de cualquier blob de tours (los tours son públicos).
+    // Si en el futuro queremos ocultar blobs de drafts, restringir aquí.
+    match /tours/{creatorId}/{allPaths=**} {
+      allow read: if true;
+
+      allow write: if request.auth != null
+                   && request.auth.uid == creatorId
+                   && request.resource.size < 50 * 1024 * 1024  // 50 MB tope duro
+                   && (
+                     request.resource.contentType.matches('image/.*')
+                     || request.resource.contentType.matches('audio/.*')
+                   );
+
+      allow delete: if request.auth != null
+                    && request.auth.uid == creatorId;
+    }
+
+    // Resto del bucket: denegar por defecto (no debería usarse para nada
+    // hasta que añadamos otros features con su propia ruta y regla).
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

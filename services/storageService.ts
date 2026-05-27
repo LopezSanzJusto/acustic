@@ -10,7 +10,7 @@
 import {
   getStorage,
   ref as storageRef,
-  putFile,
+  putFile as putFileModular,
   getDownloadURL,
   deleteObject,
   type FirebaseStorageTypes,
@@ -108,9 +108,10 @@ export function uploadFileWithControl(opts: UploadOptions): UploadHandle {
 
   const ref = storageRef(storage, storagePath);
 
-  // putFile en RN Firebase acepta `file://` directamente. Si viene `content://`,
-  // también lo gestiona en Android (resuelve internamente).
-  const task: FirebaseStorageTypes.Task = ref.putFile(localUri, { contentType });
+  // API modular (v22+). La namespaced `ref.putFile()` está deprecada y
+  // lanza warnings; además en Android v24 a veces falla con
+  // `storage/object-not-found` cuando el archivo local es temporal.
+  const task: FirebaseStorageTypes.Task = putFileModular(ref, localUri, { contentType });
 
   if (onProgress) {
     task.on('state_changed', (snapshot) => {

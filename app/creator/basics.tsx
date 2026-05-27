@@ -27,6 +27,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCreator } from '@/contexts/CreatorContext';
 import { LabeledInput } from '@/components/creator/LabeledInput';
 import { CategoryPicker } from '@/components/creator/CategoryPicker';
+import { CoverImagePicker } from '@/components/creator/CoverImagePicker';
 import { COLORS, FONTS } from '@/utils/theme';
 
 export default function CreatorBasicsScreen() {
@@ -72,13 +73,8 @@ export default function CreatorBasicsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. PORTADA (placeholder) */}
-        <PlaceholderSlot
-          icon="image-outline"
-          title="Portada"
-          subtitle="Toca para añadir la foto principal del tour"
-          height={180}
-        />
+        {/* 1. PORTADA */}
+        <CoverImagePicker />
 
         {/* 2. DATOS BÁSICOS */}
         <Text style={styles.sectionTitle}>Datos básicos</Text>
