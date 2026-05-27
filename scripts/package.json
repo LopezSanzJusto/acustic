@@ -1,0 +1,10 @@
+{
+  "name": "acustic-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scripts puntuales (migraciones, mantenimiento). Aislados del proyecto RN para no contaminar deps.",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

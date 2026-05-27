@@ -1,8 +1,9 @@
 // app/(tabs)/trips.tsx
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import { ActiveTourCard } from '../../components/activeTourCard';
 import { TourCard } from '../../components/tourCard';
@@ -10,7 +11,9 @@ import { TripSlider } from '../../components/tripSlider';
 import { EmptyState } from '../../components/emptyState';
 
 import { useMyTours } from '../../hooks/useMyTours';
-import { COLORS } from '../../utils/theme';
+import { COLORS, FONTS } from '../../utils/theme';
+import { auth } from '../../services/firebaseConfig';
+import { findActiveDraft, discardDraft } from '../../services/creatorService';
 
 const LogoAcustic = require('../../assets/images/logo.png');
 
@@ -20,6 +23,48 @@ export default function TripsScreen() {
   
   // Estado local
   const [activeTab, setActiveTab] = useState<'purchased' | 'favorites'>('purchased');
+  const [creatingDraft, setCreatingDraft] = useState(false);
+
+  const handleCreateAudioguide = async () => {
+    if (creatingDraft) return;
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      router.push('/auth/login' as any);
+      return;
+    }
+    setCreatingDraft(true);
+    try {
+      const existing = await findActiveDraft(uid);
+      if (existing) {
+        Alert.alert(
+          'Borrador en curso',
+          'Tienes una audioguía a medio crear. ¿Qué quieres hacer?',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Descartar y empezar de cero',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await discardDraft(existing);
+                  router.push('/creator/basics' as any);
+                } catch {
+                  Alert.alert('Error', 'No se pudo descartar el borrador.');
+                }
+              },
+            },
+            { text: 'Continuar borrador', onPress: () => router.push('/creator/basics' as any) },
+          ],
+        );
+      } else {
+        router.push('/creator/basics' as any);
+      }
+    } catch {
+      Alert.alert('Error', 'No se pudo comprobar si tienes un borrador.');
+    } finally {
+      setCreatingDraft(false);
+    }
+  };
 
   // Lógica: ¿Qué datos mostramos ahora?
   const dataToShow = activeTab === 'purchased' ? purchasedTours : favoriteTours;
@@ -80,6 +125,26 @@ export default function TripsScreen() {
           }}
         />
       )}
+
+      {/* FAB para entrar al Panel de creador */}
+      <Pressable
+        onPress={handleCreateAudioguide}
+        disabled={creatingDraft}
+        style={({ pressed }) => [
+          styles.fab,
+          pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+          creatingDraft && { opacity: 0.6 },
+        ]}
+      >
+        {creatingDraft ? (
+          <ActivityIndicator color={COLORS.white} />
+        ) : (
+          <>
+            <Ionicons name="add" size={22} color={COLORS.white} />
+            <Text style={styles.fabLabel}>Crear audioguía</Text>
+          </>
+        )}
+      </Pressable>
     </View>
   );
 }
@@ -89,5 +154,27 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 20, marginBottom: 15 },
   title: { fontSize: 28, fontWeight: 'bold', color: COLORS.textDark },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 10, color: COLORS.muted, fontWeight: '600' }
+  loadingText: { marginTop: 10, color: COLORS.muted, fontWeight: '600' },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 28,
+    backgroundColor: COLORS.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabLabel: {
+    color: COLORS.white,
+    fontFamily: FONTS.bold,
+    fontSize: 15,
+  },
 });

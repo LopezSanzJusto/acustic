@@ -141,6 +141,7 @@ export default function RootLayout() {
             <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             <Stack.Screen name="tour/[id]" options={{ presentation: 'card' }} />
             <Stack.Screen name="active-tour/[id]" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
+            <Stack.Screen name="creator" options={{ headerShown: false }} />
           </Stack>
         </RouteProvider>
         </DownloadsProvider>

@@ -45,3 +45,9 @@ app-example
 # local env files
 .env
 .env*.local
+
+# firebase admin service account keys (NEVER commit)
+*serviceAccount*.json
+*service-account*.json
+*firebase-adminsdk*.json
+scripts/.secrets/
