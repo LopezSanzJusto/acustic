@@ -2,23 +2,22 @@ rules_version = '2';
 
 // Reglas de Firestore para Acustic.
 //
-// Cambios respecto a la versión anterior:
-//   - Se añade regla de `create` para /tours (necesaria para el panel de creador).
-//   - Se añade regla de `delete` para /tours (necesaria para descartar drafts).
-//   - Se generaliza la regla de subcollections para que:
-//       a) Las reviews sigan funcionando (docId == uid).
-//       b) Los points puedan crearse/borrarse con docId auto-generado,
-//          validando propiedad por `creatorId` en el payload.
-//
-// Notas:
-//   - `read: if true` en /tours y subcollections se mantiene para no romper
-//     el warmup ni las pantallas de Explora (lectura pública de publicados,
-//     reviews, etc.). Drafts quedan técnicamente expuestos a lectura
-//     anónima, pero MVP — se endurecerá cuando todas las queries filtren
-//     por `status: "published"`.
-//   - `update` en /tours se deja amplio (cualquier auth) para que el
-//     recálculo de rating/reviews que hace `reviewService` no se rompa.
-//     Se endurecerá cuando ese cálculo migre a Cloud Function.
+// Modelo:
+//   - /users/{uid}      : sólo el propio uid lee/escribe.
+//   - /tours/{tourId}   : lectura pública (los drafts no salen en Explora
+//                         porque el warmup filtra por status='published';
+//                         para protegerlos hace falta endurecer queries
+//                         del cliente, no las reglas). Write: sólo el
+//                         creador puede crear drafts propios, actualizar
+//                         (update es amplio para que reviewService pueda
+//                         recalcular rating) y borrar lo suyo.
+//   - /tours/{tourId}/points/{pointId} :
+//                         lectura pública (idem). Write: sólo el creador
+//                         del point (mismo uid).
+//   - /tours/{tourId}/reviews/{reviewId} :
+//                         lectura pública. Write: docId == auth.uid
+//                         (modelo legacy donde el id de la review es el
+//                         uid del autor).
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -44,29 +43,26 @@ service cloud.firestore {
       allow delete: if request.auth != null
                     && resource.data.creatorId == request.auth.uid;
 
-      // ─── Subcollections (points, reviews, …) ───────────────────────
-      // Acepta tanto el modelo legacy (docId == uid, p.ej. reviews) como
-      // el nuevo (docId auto-generado + creatorId en payload, p.ej. points).
-      match /{subcollection}/{docId} {
+      // ─── Subcollection: points ────────────────────────────────────
+      match /points/{pointId} {
         allow read: if true;
 
         allow create: if request.auth != null
-                      && (
-                        request.auth.uid == docId
-                        || request.resource.data.creatorId == request.auth.uid
-                      );
+                      && request.resource.data.creatorId == request.auth.uid;
 
         allow update: if request.auth != null
-                      && (
-                        request.auth.uid == docId
-                        || resource.data.creatorId == request.auth.uid
-                      );
+                      && resource.data.creatorId == request.auth.uid;
 
         allow delete: if request.auth != null
-                      && (
-                        request.auth.uid == docId
-                        || resource.data.creatorId == request.auth.uid
-                      );
+                      && resource.data.creatorId == request.auth.uid;
+      }
+
+      // ─── Subcollection: reviews (modelo legacy docId == uid) ──────
+      match /reviews/{reviewId} {
+        allow read: if true;
+
+        allow create, update, delete: if request.auth != null
+                                      && request.auth.uid == reviewId;
       }
     }
   }

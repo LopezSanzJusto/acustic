@@ -3,8 +3,8 @@
 // Card de una parada en la pantalla 2 del wizard ("Panel de creador").
 // Muestra thumbnail con badge numérico, título, descripción corta y un
 // botón papelera (rojo) que aparece cuando NO estamos en modo arrastrar.
-// En modo arrastrar, en lugar de papelera mostramos un icono de "grip"
-// para indicar que se puede mantener pulsado para reordenar.
+// En modo arrastrar mostramos un icono de "grip" cuyo `onPressIn` activa
+// el drag de DraggableFlatList — mismo patrón que tourDetails/tourPointList.
 
 import React, { memo } from 'react';
 import {
@@ -14,6 +14,11 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
+// TouchableOpacity de gesture-handler (no de RN): es la que se integra
+// bien con react-native-draggable-flatlist. La aplicamos en el grip de
+// arrastrar; el contenedor principal sigue siendo Pressable porque no
+// participa en el gesto.
+import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS } from '@/utils/theme';
 import type { TourPoint } from '@/types/tour';
@@ -25,11 +30,12 @@ interface PointCardProps {
   index: number;
   onPress: () => void;
   onDelete: () => void;
-  /** Modo "Modificar" activo: cambia el handler derecho a un grip y
-   *  habilita el long-press para arrastrar (gestionado por el padre). */
+  /** Modo "Modificar" activo: cambia el handler derecho a un grip que
+   *  dispara el drag al pulsarlo (no hace falta long-press). */
   editing?: boolean;
-  /** Listeners para drag&drop, los inyecta DraggableFlatList. */
-  onLongPress?: () => void;
+  /** Función `drag` inyectada por DraggableFlatList. Se enlaza al
+   *  `onPressIn` del grip. */
+  onDrag?: () => void;
   isActive?: boolean;
 }
 
@@ -39,7 +45,7 @@ export const PointCard = memo(function PointCard({
   onPress,
   onDelete,
   editing = false,
-  onLongPress,
+  onDrag,
   isActive = false,
 }: PointCardProps) {
   const hasImage = !!point.imageUrl;
@@ -48,19 +54,15 @@ export const PointCard = memo(function PointCard({
   const subtitle = point.description?.trim()
     ? point.description
     : 'Información';
-  // En la primera parada el badge es morado; en las siguientes, gris.
-  // Esto coincide con el Figma: la primera "destaca" como punto inicial.
-  const badgeColor = index === 1 ? COLORS.primary : '#9E9E9E';
 
   return (
     <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
-      disabled={isActive}
+      onPress={editing ? undefined : onPress}
+      disabled={isActive || editing}
       style={({ pressed }) => [
         styles.card,
         isActive && styles.cardActive,
-        pressed && !isActive && { opacity: 0.85 },
+        pressed && !editing && { opacity: 0.85 },
       ]}
     >
       <View style={styles.imageWrapper}>
@@ -71,7 +73,7 @@ export const PointCard = memo(function PointCard({
             <Ionicons name="image-outline" size={22} color={COLORS.placeholder} />
           </View>
         )}
-        <View style={[styles.badge, { backgroundColor: badgeColor }]}>
+        <View style={styles.badge}>
           <Text style={styles.badgeText}>{index}</Text>
         </View>
       </View>
@@ -89,9 +91,18 @@ export const PointCard = memo(function PointCard({
       </View>
 
       {editing ? (
-        <View style={styles.gripBtn}>
-          <Ionicons name="reorder-three" size={26} color={COLORS.primary} />
-        </View>
+        <GHTouchableOpacity
+          onPressIn={onDrag}
+          disabled={isActive}
+          activeOpacity={1}
+          style={styles.gripBtn}
+        >
+          <Ionicons
+            name="reorder-three"
+            size={28}
+            color={isActive ? COLORS.primary : COLORS.primary}
+          />
+        </GHTouchableOpacity>
       ) : (
         <Pressable
           onPress={onDelete}
@@ -153,6 +164,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: COLORS.white,
+    backgroundColor: COLORS.primary,
   },
   badgeText: {
     color: COLORS.white,

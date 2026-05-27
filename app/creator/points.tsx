@@ -110,15 +110,13 @@ export default function CreatorPointsScreen() {
   );
 
   const handlePreview = useCallback(() => {
-    // La vista previa real (mapa + paradas) llegará cuando exista el
-    // editor de punto y haya coordenadas que dibujar.
-    Alert.alert('Preview', 'Vista previa próximamente.');
-  }, []);
+    router.push('/creator/preview' as any);
+  }, [router]);
 
   const handleNext = useCallback(() => {
     if (points.length < MIN_POINTS_TO_CONTINUE) return;
-    Alert.alert('Siguiente', 'El siguiente paso del wizard llegará en la próxima tanda.');
-  }, [points.length]);
+    router.push('/creator/publish' as any);
+  }, [points.length, router]);
 
   // ───── Estados de carga / error ─────
   if (loading) {
@@ -160,7 +158,7 @@ export default function CreatorPointsScreen() {
           isActive={isActive}
           onPress={() => handleOpenPoint(item.id)}
           onDelete={() => handleDelete(item)}
-          onLongPress={editing ? drag : undefined}
+          onDrag={editing ? drag : undefined}
         />
       </ScaleDecorator>
     );
@@ -189,7 +187,7 @@ export default function CreatorPointsScreen() {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         onDragEnd={handleDragEnd}
-        activationDistance={editing ? 0 : 1000}
+        activationDistance={editing ? 5 : 1000}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <Text style={styles.emptyHint}>

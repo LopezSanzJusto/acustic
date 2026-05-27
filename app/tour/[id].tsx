@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Alert, Dimensions, TouchableOpacity, Image } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, onSnapshot } from '@react-native-firebase/firestore';
-import { db, firestoreReady } from '../../services/firebaseConfig';
+import { db, auth, firestoreReady } from '../../services/firebaseConfig';
 import NetInfo from '@react-native-community/netinfo';
 import { readManifest } from '../../services/offlineManifest';
 import { COLORS, COMMON_STYLES } from '../../utils/theme';
@@ -33,9 +33,10 @@ import { ImageSlider } from '../../components/imageSlider';
 const { width } = Dimensions.get('window');
 
 export default function TourDetailScreen() {
-  const { id, fromTrips } = useLocalSearchParams();
+  const { id, fromTrips, preview } = useLocalSearchParams();
   const router = useRouter();
-  
+  const previewRequested = preview === '1';
+
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [calculatedDistance, setCalculatedDistance] = useState<string>("Calculando...");
@@ -133,7 +134,20 @@ export default function TourDetailScreen() {
 
   const isFree = tour?.price === 0 || tour?.price === "0" || String(tour?.price).toLowerCase() === 'gratis';
   const isPurchased = purchasedTours.some((t: any) => t.id === id);
-  const hasAccess = isFree || isPurchased;
+
+  // El parámetro `?preview=1` por sí solo NO desbloquea nada: solo
+  // funciona si el usuario autenticado es el creador real de este tour
+  // (comparado contra `creatorId` ya cargado de Firestore). Así un
+  // atacante no puede pintar `?preview=1` en una URL de un tour de pago
+  // y verlo gratis. Las reglas de Storage/audio premium deben hacer la
+  // misma comprobación server-side; aquí sólo controlamos la UI.
+  const currentUid = auth.currentUser?.uid ?? null;
+  const isCreatorOfThisTour = !!(
+    currentUid && tour?.creatorId && tour.creatorId === currentUid
+  );
+  const isPreview = previewRequested && isCreatorOfThisTour;
+
+  const hasAccess = isPreview || isFree || isPurchased;
 
   const handleStartRoute = async () => {
     if (!tour) return;
@@ -206,22 +220,44 @@ export default function TourDetailScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-        
+
         <TourHeader title={tour.title} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} onBack={() => router.back()} />
 
-        {/* ✅ AÑADIDO: Envolvemos la lista en un View con flex: 1. 
+        {isPreview && (
+          <View style={styles.previewBanner}>
+            <Ionicons name="eye-outline" size={16} color={COLORS.white} />
+            <Text style={styles.previewBannerText}>
+              Vista previa — así verán los usuarios tu audioguía
+            </Text>
+          </View>
+        )}
+
+        {/* ✅ AÑADIDO: Envolvemos la lista en un View con flex: 1.
             Esto obliga a la lista a quedarse en el centro y respetar el espacio del footer */}
         <View style={{ flex: 1 }}>
           <TourPointList
             tourId={id as string}
             points={resolvedPoints}
             hasAccess={hasAccess}
-            headerComponent={renderHeader()} 
-            footerComponent={renderFooter()} 
+            headerComponent={renderHeader()}
+            footerComponent={renderFooter()}
           />
         </View>
 
-        <TourFooter price={tour.price} hasAccess={hasAccess} onStart={handleStartRoute} isLoading={isProcessing} />
+        {isPreview ? (
+          <View style={styles.previewFooter}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.back()}
+              style={styles.previewFooterBtn}
+            >
+              <Ionicons name="arrow-back" size={18} color={COLORS.white} />
+              <Text style={styles.previewFooterBtnText}>Volver al editor</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TourFooter price={tour.price} hasAccess={hasAccess} onStart={handleStartRoute} isLoading={isProcessing} />
+        )}
       </View>
     </>
   );
@@ -231,4 +267,42 @@ export default function TourDetailScreen() {
 const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 10 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 12 },
+
+  previewBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  previewBannerText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  previewFooter: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 20,
+    backgroundColor: COLORS.background,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  previewFooterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  previewFooterBtnText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: '700',
+  },
 });
