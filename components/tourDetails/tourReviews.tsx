@@ -19,6 +19,9 @@ import { useReviews, ReviewWithId } from '../../hooks/useReviews';
 interface TourReviewsProps {
   tourId: string;
   hasAccess?: boolean;
+  /** En modo preview (vista del creador antes de publicar) ocultamos el
+   *  botón para valorar y mostramos un texto explicativo en su lugar. */
+  previewMode?: boolean;
 }
 
 function overallAvg(r: ReviewWithId): number {
@@ -116,7 +119,7 @@ function ReviewCard({ review, isOwn }: { review: ReviewWithId; isOwn: boolean })
   );
 }
 
-export const TourReviews = ({ tourId, hasAccess = true }: TourReviewsProps) => {
+export const TourReviews = ({ tourId, hasAccess = true, previewMode = false }: TourReviewsProps) => {
   const router = useRouter();
   const { reviews, userReview, loading } = useReviews(tourId);
 
@@ -129,6 +132,9 @@ export const TourReviews = ({ tourId, hasAccess = true }: TourReviewsProps) => {
   };
 
   const hasReviews = reviews.length > 0;
+  const emptyText = previewMode
+    ? 'Aquí aparecerán las valoraciones de los usuarios.'
+    : 'Aún no hay valoraciones. ¡Sé el primero!';
 
   return (
     <View style={styles.container}>
@@ -143,10 +149,10 @@ export const TourReviews = ({ tourId, hasAccess = true }: TourReviewsProps) => {
           ))}
         </>
       ) : (
-        <Text style={styles.empty}>Aún no hay valoraciones. ¡Sé el primero!</Text>
+        <Text style={styles.empty}>{emptyText}</Text>
       )}
 
-      {hasAccess && (
+      {hasAccess && !previewMode && (
         <TouchableOpacity style={styles.button} onPress={handlePress}>
           <Ionicons name="star-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
           <Text style={styles.btnText}>

@@ -16,12 +16,15 @@ interface TourInfoProps {
 }
 
 export const TourInfo = ({ city, country, duration, distance, points }: TourInfoProps) => {
+  const locationLabel = [city, country].filter((s) => !!s && String(s).trim().length > 0).join(', ');
   return (
     <View style={styles.metaRow}>
-      <View style={styles.metaItem}>
-        <Image source={require('../../assets/images/icons/Ubicacion_Ciudad.png')} style={{ width: 12, height: 12 }} resizeMode="contain" />
-        <Text style={styles.metaText}>{city}, {country}</Text>
-      </View>
+      {locationLabel.length > 0 && (
+        <View style={styles.metaItem}>
+          <Image source={require('../../assets/images/icons/Ubicacion_Ciudad.png')} style={{ width: 12, height: 12 }} resizeMode="contain" />
+          <Text style={styles.metaText}>{locationLabel}</Text>
+        </View>
+      )}
       <View style={styles.metaItem}>
         <Image source={require('../../assets/images/icons/Tiempo_Audioguia.png')} style={{ width: 13, height: 13 }} resizeMode="contain" />
         <Text style={styles.metaText}>{duration}</Text>

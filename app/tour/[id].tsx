@@ -28,17 +28,20 @@ import { TourPointList } from '../../components/tourDetails/tourPointList';
 import { TourReviews } from '../../components/tourDetails/tourReviews';
 import { TourMapPreview } from '../../components/tourDetails/tourMapPreview';
 import { TourAudioPreview } from '../../components/tourDetails/tourAudioPreview';
-import { ImageSlider } from '../../components/imageSlider'; 
+import { ImageSlider } from '../../components/imageSlider';
+import { publishTour } from '../../services/creatorService';
 
 const { width } = Dimensions.get('window');
 
 export default function TourDetailScreen() {
-  const { id, fromTrips, preview } = useLocalSearchParams();
+  const { id, fromTrips, preview, publishMode } = useLocalSearchParams();
   const router = useRouter();
   const previewRequested = preview === '1';
+  const publishModeRequested = publishMode === '1';
 
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
   const [calculatedDistance, setCalculatedDistance] = useState<string>("Calculando...");
   const [calculatedDuration, setCalculatedDuration] = useState<string>('');
 
@@ -59,11 +62,21 @@ export default function TourDetailScreen() {
   const { purchasedTours } = useMyTours();
   const tourImages = useMemo(() => {
     if (!tour) return [];
+    const cover: string | null = tour.coverImageUrl ?? tour.image ?? null;
+    // El carrusel se compone de la portada (primero) + la imagen de cada
+    // parada en el orden definido por el creador. `points` ya viene
+    // ordenado por `order` desde el hook.
+    const pointImages: string[] = (points ?? [])
+      .map((p: any) => p.image)
+      .filter((u: any): u is string => typeof u === 'string' && u.length > 0);
+    const ordered = cover ? [cover, ...pointImages.filter((u) => u !== cover)] : pointImages;
+    if (ordered.length > 0) return ordered;
+    // Fallback final para tours antiguos sin nada de lo anterior.
     if (tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0) {
       return tour.imageUrls;
     }
-    return tour.image ? [tour.image] : [];
-  }, [tour]);
+    return [];
+  }, [tour, points]);
 
   useEffect(() => {
     if (!id) return;
@@ -146,8 +159,26 @@ export default function TourDetailScreen() {
     currentUid && tour?.creatorId && tour.creatorId === currentUid
   );
   const isPreview = previewRequested && isCreatorOfThisTour;
+  const isPublishPreview = isPreview && publishModeRequested;
 
   const hasAccess = isPreview || isFree || isPurchased;
+
+  const handlePublish = async () => {
+    if (publishing) return;
+    setPublishing(true);
+    try {
+      await publishTour(id as string);
+      router.replace('/(tabs)/trips' as any);
+      Alert.alert('¡Publicado!', 'Tu audioguía ya está disponible.');
+    } catch (e: any) {
+      Alert.alert(
+        'No se puede publicar todavía',
+        e?.message ?? 'Inténtalo de nuevo en unos minutos.',
+      );
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const handleStartRoute = async () => {
     if (!tour) return;
@@ -184,16 +215,27 @@ export default function TourDetailScreen() {
     </View>
   );
 
+  // El modelo nuevo guarda un único `destination`; el viejo, `city`+`country`.
+  // TourInfo pinta "{city}, {country}", así que partimos `destination` por la
+  // primera coma para que la cabecera siga teniendo el mismo formato.
+  let tourCityLabel: string = tour.city ?? '';
+  let tourCountryLabel: string = tour.country ?? '';
+  if (!tourCityLabel && !tourCountryLabel && typeof tour.destination === 'string') {
+    const parts = tour.destination.split(',').map((s: string) => s.trim()).filter(Boolean);
+    tourCityLabel = parts[0] ?? '';
+    tourCountryLabel = parts.slice(1).join(', ');
+  }
+
   // ✅ 1. Extraemos todo el contenido SUPERIOR a una función
   const renderHeader = () => (
     <>
-      <ImageSlider images={resolvedCoverImages.length > 0 ? resolvedCoverImages : tourImages} height={280} width={width} />
+      <ImageSlider images={tourImages.length > 0 ? tourImages : resolvedCoverImages} height={280} width={width} />
       <View style={styles.content}>
-        <TourInfo title={tour.title} city={tour.city} country={tour.country} duration={calculatedDuration || tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
+        <TourInfo title={tour.title} city={tourCityLabel} country={tourCountryLabel} duration={calculatedDuration || tour.duration} distance={calculatedDistance !== "Calculando..." ? calculatedDistance : (tour.distance || "Calculando...")} points={points} isFavorite={isFavorite} onToggleFavorite={toggleFavorite} />
         {isFree && <TourStats listens={tour.listens || 0} rating={tour.rating || 0} reviews={tour.reviews || 0} />}
         <TourIntroAudio
             title={tour.title}
-            image={resolvedCoverImages[0] ?? tourImages[0]}
+            image={tourImages[0] ?? resolvedCoverImages[0]}
             audioUrl={resolvedIntroAudioUrl}
           />
 
@@ -212,7 +254,7 @@ export default function TourDetailScreen() {
   // ✅ 2. Extraemos todo el contenido INFERIOR a otra función
   const renderFooter = () => (
     <View style={styles.content}>
-      {isFree && <TourReviews tourId={id as string} hasAccess={hasAccess} />}
+      {isFree && <TourReviews tourId={id as string} hasAccess={hasAccess} previewMode={isPreview} />}
     </View>
   );
 
@@ -227,7 +269,9 @@ export default function TourDetailScreen() {
           <View style={styles.previewBanner}>
             <Ionicons name="eye-outline" size={16} color={COLORS.white} />
             <Text style={styles.previewBannerText}>
-              Vista previa — así verán los usuarios tu audioguía
+              {isPublishPreview
+                ? 'Estás a un paso — así verán los usuarios tu audioguía'
+                : 'Vista previa — así verán los usuarios tu audioguía'}
             </Text>
           </View>
         )}
@@ -244,7 +288,25 @@ export default function TourDetailScreen() {
           />
         </View>
 
-        {isPreview ? (
+        {isPublishPreview ? (
+          <View style={styles.previewFooter}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={handlePublish}
+              disabled={publishing}
+              style={[styles.previewFooterBtn, publishing && { opacity: 0.6 }]}
+            >
+              {publishing ? (
+                <ActivityIndicator color={COLORS.white} />
+              ) : (
+                <>
+                  <Ionicons name="rocket-outline" size={18} color={COLORS.white} />
+                  <Text style={styles.previewFooterBtnText}>Publicar audioguía</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : isPreview ? (
           <View style={styles.previewFooter}>
             <TouchableOpacity
               activeOpacity={0.85}
