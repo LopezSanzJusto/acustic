@@ -10,9 +10,9 @@ export const FONTS = {
 
 export const COLORS = {
   // Brand
-  primary: '#4E4FA5E5',        // Púrpura principal
-  primaryLight: 'rgba(75, 0, 130, 0.15)', // Para radios en mapas
-  primaryBorder: 'rgba(75, 0, 130, 0.5)', // Para bordes en mapas
+  primary: '#7678ED',          // Púrpura principal
+  primaryLight: 'rgba(118, 120, 237, 0.15)', // Para radios en mapas
+  primaryBorder: 'rgba(118, 120, 237, 0.5)', // Para bordes en mapas
   
   // UI Basics
   background: '#FFFFFF',     // Fondo general (Antes a veces #F8F9FA, unificado a blanco o gris muy claro)

@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#8874F780',
+    borderColor: '#7678ED80',
     paddingVertical: 8,
     paddingLeft: 8,
     paddingRight: 14,
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontFamily: FONTS.regular,
     fontSize: 12,
-    color: '#4E4FA580',
+    color: '#7678ED80',
     fontStyle: 'italic',
     marginTop: 1,
   },

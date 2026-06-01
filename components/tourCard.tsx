@@ -25,6 +25,7 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
   const [realPointsCount, setRealPointsCount] = useState(0);
   const [preciseDistance, setPreciseDistance] = useState<string>('0.00');
   const [calculatedTime, setCalculatedTime] = useState<string>('0h 0m');
+  const [pointImages, setPointImages] = useState<string[]>([]);
 
   useEffect(() => {
     async function getRealData() {
@@ -37,6 +38,11 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
         const pointsArray = snapshot.docs.map((doc: any) => doc.data());
 
         setRealPointsCount(pointsArray.length);
+
+        const imgs = pointsArray
+          .map((p: any) => p.imageUrl ?? p.image)
+          .filter((u: any): u is string => typeof u === 'string' && u.length > 0);
+        setPointImages(imgs);
 
         if (pointsArray.length > 1) {
           const progressData = calculateRealTimeProgress(pointsArray, pointsArray.length - 1, null);
@@ -57,12 +63,19 @@ export const TourCard = ({ tour, onPress }: TourCardProps) => {
     getRealData();
   }, [tour.id]);
 
+  const cover: string | null = tour.coverImageUrl ?? tour.image ?? null;
+  const combined = cover
+    ? [cover, ...pointImages.filter((u) => u !== cover)]
+    : pointImages;
   const images =
-    tour.imageUrls && Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0
+    combined.length > 0
+      ? combined
+      : Array.isArray(tour.imageUrls) && tour.imageUrls.length > 0
       ? tour.imageUrls
-      : [tour.image];
+      : [];
 
-  const location = [tour.city, tour.country].filter(Boolean).join(', ');
+  const location =
+    [tour.city, tour.country].filter(Boolean).join(', ') || tour.destination || '';
   const priceLabel = tour.price === 0 || tour.price == null ? 'Gratis' : `${tour.price}€`;
 
   return (
