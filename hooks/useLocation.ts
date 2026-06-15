@@ -1,6 +1,6 @@
 // hooks/useLocation.ts
-import { useState, useEffect } from "react";
 import * as Location from "expo-location";
+import { useEffect, useState } from "react";
 
 // Definimos el tipo aquí para no depender de otros archivos
 type Coords = {
@@ -35,7 +35,7 @@ export const useLocation = (simulate = false) => {
       const interval = setInterval(() => {
         index = (index + 1) % SIMULATED_PATH.length;
         setLocation(SIMULATED_PATH[index]);
-      }, 15000);
+      }, 10000);
 
       return () => clearInterval(interval);
     }

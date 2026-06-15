@@ -51,7 +51,7 @@ export const useSocialAuth = () => {
     setError(null);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      await GoogleSignin.signOut();
+      try { await GoogleSignin.signOut(); } catch (_) {}
       const userInfo: any = await GoogleSignin.signIn();
       const idToken = userInfo?.data?.idToken ?? userInfo?.idToken;
       if (!idToken) throw new Error('No se obtuvo el idToken de Google');
@@ -72,6 +72,7 @@ export const useSocialAuth = () => {
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         setError('Google Play Services no está disponible.');
       } else {
+        console.error('[GoogleSignIn] code:', err.code, '| message:', err.message, '| full:', err);
         setError('Error al iniciar sesión con Google.');
       }
       return null;

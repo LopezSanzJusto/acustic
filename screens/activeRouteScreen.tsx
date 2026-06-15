@@ -46,7 +46,7 @@ export default function ActiveRouteScreen({ tourId }: ActiveRouteScreenProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
-  const { location } = useLocation(true);
+  const { location } = useLocation(__DEV__);
   const { points, loading: pointsLoading } = useFirebasePoints(tourId);
   const { activeRoutePoints, setInitialPoints } = useCustomRoute(tourId);
 

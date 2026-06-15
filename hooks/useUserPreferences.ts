@@ -14,8 +14,8 @@ export interface UserPreferences {
 }
 
 const DEFAULTS: UserPreferences = {
-  popupNearPoi: false,
-  autoPlayNearPoi: false,
+  popupNearPoi: true,
+  autoPlayNearPoi: true,
   autoDownload: true,
   bgNotifications: true,
   newsletter: false,
