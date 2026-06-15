@@ -1,108 +1,46 @@
-# CLAUDE.md — Acustic App
+# CLAUDE.md - Directrices de Redacción Académica para el PFG (UFV)
 
-## Rol
+Este documento define las reglas estrictas de redacción, formato y estilo para el Proyecto Fin de Grado (PFG), garantizando el cumplimiento de los estándares académicos y técnicos requeridos. Tiene que ser todo en INGLÉS.
 
-Actúa como un desarrollador senior experto en React Native con experiencia profesional en aplicaciones móviles complejas y escalables.
-En la respuesta habla como un troglodita.
+## 1. Estilo de Redacción y Tono Académico
 
-Tienes amplios conocimientos en:
-- React Native CLI y Expo
-- JavaScript y TypeScript
-- Hooks avanzados (useEffect, useMemo, useCallback, custom hooks)
-- Gestión de estado (Context API, Redux Toolkit, Zustand)
-- Navegación (React Navigation / Expo Router)
-- Optimización de rendimiento
-- Arquitectura limpia y modular
-- Integración con APIs REST
-- Firebase
-- Notificaciones push
-- Manejo de permisos
-- Publicación en App Store y Play Store
+*   **Estilo Impersonal:** Redacta en todo momento de forma impersonal o en voz pasiva[cite: 2]. Nunca utilices la primera persona del singular ("yo")[cite: 2]. *Ejemplo correcto: "Se desarrolló un módulo de geolocalización..." en lugar de "Desarrollé un módulo..."*[cite: 2].
+*   **Tiempos Verbales:** Utiliza el tiempo pasado para describir el trabajo realizado y los pasos ejecutados durante el proyecto[cite: 2]. Utiliza el tiempo presente para referirte al trabajo de otros autores y al Estado del Arte[cite: 2].
+*   **Claridad y Precisión:** Evita frases excesivamente largas; divídelas en oraciones más cortas entrelazadas con puntos y seguido[cite: 1]. Cada párrafo debe contener y desarrollar una única idea principal[cite: 1].
+*   **Estructura Gramatical:** Prioriza el orden natural de las oraciones: sujeto + verbo + complementos[cite: 1]. Utiliza el pronombre "que" en lugar de construcciones más pesadas como "el cual" o "la cual" para dar mayor fluidez a la lectura[cite: 1].
+*   **Terminología Extranjera:** Los términos en otros idiomas (inglés, latín) deben escribirse en *cursiva* y sin comillas, salvo que la normativa de citación indique lo contrario[cite: 1].
+*   **Acrónimos:** La primera vez que se utilice un acrónimo, debe escribirse su significado completo seguido de las siglas entre paréntesis[cite: 2]. Todos los acrónimos deben registrarse en la "Lista de Acrónimos" en orden alfabético[cite: 2].
 
-## Tareas
+## 2. Formato General del Documento
 
-- Analizar el código proporcionado antes de sugerir cambios.
-- Explicar cómo funciona algo si es necesario.
-- Detectar posibles mejoras de arquitectura o rendimiento.
-- Indicar paso a paso cómo implementar nuevas funcionalidades.
-- Proponer la mejor solución siguiendo buenas prácticas.
-- Mostrar ejemplos de código completos listos para copiar y pegar.
-- No dar respuestas genéricas — adaptar siempre las soluciones exactamente al código existente.
-- Pedir más contexto antes de responder si es necesario.
-- Explicar siempre el porqué técnico de las decisiones.
+*   **Alineación:** Todo el texto principal del documento debe estar justificado a ambos lados (izquierda y derecha)[cite: 1, 3].
+*   **Interlineado y Espaciado:** No añadas líneas en blanco gratuitas o saltos de línea adicionales para inflar artificialmente el número de páginas[cite: 3].
+*   **Paginación de Capítulos:** Todos los capítulos principales deben comenzar obligatoriamente en una página impar[cite: 2, 3].
+*   **Formato Numérico y Monetario:** Utiliza el punto (.) para separar los millares y la coma (,) para los decimales[cite: 3]. Si se refieren a cantidades económicas, incluye siempre el símbolo de la moneda (ej. 2.000,45€)[cite: 3].
 
-## Idioma
+## 3. Elementos Gráficos y Visuales
 
-Responder siempre en español, independientemente del idioma en que se haga la pregunta.
+*   **Figuras (Imágenes, Diagramas):** 
+    *   Deben estar centradas[cite: 3].
+    *   El título/pie de figura debe colocarse **debajo** de la imagen utilizando la nomenclatura "Figura X - [Descripción]"[cite: 2].
+    *   Si el pie de figura ocupa una línea, debe ir centrado; si ocupa más, debe ir justificado[cite: 2].
+    *   Siempre debe incluir la fuente (ej. "Fuente: Elaboración propia" o la cita correspondiente)[cite: 2, 3].
+*   **Tablas:**
+    *   Deben estar centradas[cite: 3].
+    *   El título debe colocarse **encima** de la tabla utilizando la nomenclatura "Tabla X - [Descripción]"[cite: 2].
+    *   Asegúrate de incluir una breve explicación de la tabla en el texto principal[cite: 3].
+    *   Si una tabla ocupa más de una página, las filas de título deben repetirse en la siguiente página[cite: 2, 3].
+*   **Ecuaciones:** Para fórmulas complejas, alinea la ecuación al centro y coloca su número secuencial entre paréntesis pegado al margen derecho[cite: 2].
 
-## Regla crítica — Commits
+## 4. Citación y Bibliografía
 
-**Nunca ejecutar `git commit` ni ningún comando que genere un commit.** Cuando haya cambios listos para commitear, proporcionar el comando exacto para que el usuario lo ejecute él mismo. Esto es para que los commits queden a nombre del usuario, no del asistente.
+*   **Estilo Requerido:** Utiliza estrictamente el formato IEEE[cite: 2, 4].
+*   **Citas en el Texto:** Las referencias deben estar indicadas mediante números secuenciales entre corchetes (ej. [1], [2]) colocados en la misma línea que el texto, antes de cualquier signo de puntuación y con un espacio previo[cite: 4].
+*   **Citas Múltiples:** Para citar varias fuentes simultáneamente, utiliza corchetes individuales separados por comas o guiones (ej. [1], [3] o [1]-[5])[cite: 4].
+*   **Prevención de Plagio:** Toda idea, figura o dato que no sea de creación propia debe estar explícitamente referenciado para cumplir con la normativa anti-plagio de la universidad[cite: 2]. El uso de IA generativa sin cita aclaratoria se considera plagio[cite: 2].
 
----
+## 5. Revisión Ortográfica y Gramatical
 
-## Proyecto: Acustic
-
-**Acustic** es una aplicación móvil de audioguías turísticas. Permite a los usuarios descubrir rutas, escuchar audios en puntos de interés y seguir recorridos en un mapa interactivo.
-
-### Stack tecnológico
-
-| Categoría | Tecnología |
-|---|---|
-| Framework | Expo SDK ~55 |
-| Runtime | React Native 0.83.4 + React 19.2.0 |
-| Lenguaje | TypeScript |
-| Routing | Expo Router (file-based) |
-| Navegación | React Navigation — Bottom Tabs |
-| Mapas | react-native-maps + react-native-maps-directions |
-| Audio | expo-audio |
-| Localización | expo-location |
-| Auth | Firebase + Google Sign-In + Apple Authentication |
-| Backend/DB | Firebase (@react-native-firebase/app, analytics) |
-| Animaciones | react-native-reanimated + react-native-gesture-handler |
-| Bottom Sheet | @gorhom/bottom-sheet |
-| Listas drag | react-native-draggable-flatlist |
-| Storage local | @react-native-async-storage/async-storage |
-| Haptics | expo-haptics |
-
-### Estructura de carpetas
-
-```
-acustic/
-├── app/                  # Rutas Expo Router
-│   ├── (tabs)/           # Tabs principales (_layout.tsx)
-│   ├── active-tour/      # Pantalla de tour activo
-│   ├── auth/             # Flujo de autenticación
-│   ├── tour/             # Detalle de tour
-│   └── modal.tsx
-├── screens/              # Pantallas principales
-│   ├── activeRouteScreen.tsx
-│   ├── exploreScreen.tsx
-│   └── homeScreen.tsx
-├── components/           # Componentes reutilizables
-│   ├── StopCard.tsx
-│   ├── audioMiniPlayer.tsx
-│   ├── mapDisplay.tsx
-│   ├── tourCard.tsx
-│   ├── tourDetails/
-│   └── ...
-├── hooks/                # Custom hooks
-├── services/             # Lógica de negocio / APIs
-├── utils/                # Utilidades
-├── constants/            # Constantes globales
-└── data/                 # Datos estáticos / mocks
-```
-
-### Comandos útiles
-
-```bash
-# Iniciar en Expo Go
-npx expo start
-
-# Builds nativos
-npx expo run:android
-npx expo run:ios
-
-# Lint
-npx expo lint
-```
+*   **Signos de Puntuación:** Los elementos de una lista (viñetas) deben terminar en punto[cite: 1]. Coloca una coma antes de conjunciones como *pero, porque, ya que, pues, mientras que*[cite: 1].
+*   **Tildes y Ortografía:** Revisa exhaustivamente la acentuación de pronombres interrogativos/exclamativos (*qué, cómo, cuándo*) frente a sus pares átonos, así como la diferenciación de monosílabos (*dé/de, sé/se*)[cite: 1].
+*   **Límite de Errores:** Bajo ninguna circunstancia el documento final puede contener más de 3 faltas de ortografía graves; superar este límite es motivo de rechazo en la evaluación[cite: 3].
