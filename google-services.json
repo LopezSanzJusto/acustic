@@ -58,6 +58,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "230109414866-7mvuivvd5cjran4h73uo1nbpp1vooord.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.alvaroperez.acustic",
+            "certificate_hash": "1808eefc76d06191b5dd9082ea70ac695953dc7b"
+          }
+        },
+        {
           "client_id": "230109414866-lijk60tb9r6cs7s3e92onmepegjf4v23.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
