@@ -8,12 +8,23 @@ interface OsrmPoint {
   longitude: number;
 }
 
+function isValidCoord(value: number): boolean {
+  return typeof value === 'number' && isFinite(value);
+}
+
 // Calcula un segmento (A → B) en modo peatonal.
 async function fetchSegment(
   from: OsrmPoint,
   to: OsrmPoint,
   signal?: AbortSignal,
 ): Promise<Coord[]> {
+  if (
+    !isValidCoord(from.latitude) || !isValidCoord(from.longitude) ||
+    !isValidCoord(to.latitude) || !isValidCoord(to.longitude)
+  ) {
+    throw new Error('Invalid coordinates');
+  }
+
   const url =
     `https://router.project-osrm.org/route/v1/foot/` +
     `${from.longitude},${from.latitude};${to.longitude},${to.latitude}` +

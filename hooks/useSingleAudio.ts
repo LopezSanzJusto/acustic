@@ -7,7 +7,7 @@ let activeInstanceId: string | null = null;
 
 export function useSingleAudio(audioUrl?: string) {
   // ID único por instancia del hook (persiste entre renders del mismo componente)
-  const instanceId = useRef<string>(Math.random().toString(36).slice(2)).current;
+  const instanceId = useRef<string>(crypto.randomUUID()).current;
 
   const activeTrack = useActiveTrack();
   const playbackState = usePlaybackState();

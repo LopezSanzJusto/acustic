@@ -55,7 +55,11 @@ const moveDirectories = async (userInput) => {
 
     // Move old directories to new app-example directory or delete them
     for (const dir of oldDirs) {
-      const oldDirPath = path.join(root, dir);
+      const oldDirPath = path.normalize(path.join(root, dir));
+      if (!oldDirPath.startsWith(path.normalize(root))) {
+        console.error(`❌ Skipping unsafe path: ${dir}`);
+        continue;
+      }
       if (fs.existsSync(oldDirPath)) {
         if (userInput === "y") {
           const newDirPath = path.join(root, exampleDir, dir);

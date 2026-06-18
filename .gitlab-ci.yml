@@ -1,29 +1,14 @@
 stages:
   - test
+  - security
 
 # --- VARIABLES GLOBALES ---
 variables:
-  # 1. Habilitamos Advanced SAST para el código fuente (Ultimate)
   GITLAB_ADVANCED_SAST_ENABLED: "true"
-  
-  # 2. Podemos poner el escaneo histórico de secretos aquí arriba
-  SECRET_DETECTION_HISTORIC_SCAN: "true"
+
 
 include:
-  # 1. SAST (Static Application Security Testing para el código)
-  - component: gitlab.com/components/sast/sast@main
-    inputs:
-      excluded_paths: "docs, **/*.md, test, spec, tmp"
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.v2.gitlab-ci.yml
 
-  # 2. IaC SAST (Para escanear Dockerfiles, Terraform, etc.)
-  - component: gitlab.com/components/sast/iac-sast@main
-    # Si este escáner de infraestructura también necesita ignorar esas rutas, 
-    # le pasamos SOLO los inputs que reconoce:
-    inputs:
-      excluded_paths: "docs, **/*.md, test, spec, tmp"
-
-  # 3. Secret Detection
-  - component: gitlab.com/components/secret-detection/secret-detection@main
-
-  # 4. SCA (Dependency Scanning - Este sigue usando template, está perfecto)
-  - template: Jobs/Dependency-Scanning.gitlab-ci.yml

@@ -51,9 +51,9 @@ export const StoragePaths = {
     `tours/${creatorId}/${tourId}/points/${pointId}/image.${ext}`,
 };
 
-/** Genera un id corto sin dependencias externas. Suficiente para nombres de blob. */
+/** Genera un id único para nombres de blob. */
 export function randomBlobId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  return Date.now().toString(36) + crypto.randomUUID().replace(/-/g, '');
 }
 
 /** Extrae extensión de una URI local (`file:///...jpg`, `content://...`, etc.).
